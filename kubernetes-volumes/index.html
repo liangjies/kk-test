@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - Kubernetes 存储卷</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-volumes/#bei-jing" class="toc-link">背景</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-volumes/#volume-de-lei-xing" class="toc-link">Volume 的类型</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-volumes/#cephfs" class="toc-link">Cephfs</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-volumes/#configmap" class="toc-link">ConfigMap</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-volumes/#csi" class="toc-link">CSI</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-volumes/#downwardapi" class="toc-link">DownwardAPI</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-volumes/#emptydir" class="toc-link">EmptyDir</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-volumes/#hostpath" class="toc-link">HostPath</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-volumes/#local" class="toc-link">Local</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-volumes/#nfs" class="toc-link">Nfs</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-volumes/#persistentvolumeclaim" class="toc-link">PersistentVolumeClaim</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-volumes/#projected" class="toc-link">Projected</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-volumes/#secret" class="toc-link">Secret</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-volumes/#can-kao-wen-dang" class="toc-link">参考文档</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-volumes&#x2F;">Kubernetes 存储卷</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-10-07</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <h2 id="bei-jing">背景</h2>
+<p>在 <strong>Docker</strong> 中，<strong><a href="https://docs.docker.com/storage/">Volume</a></strong> 概念表示磁盘上或者另外一个容器内的一个目录。 直到最近，Docker 才支持对基于本地磁盘的 Volume 的生存期进行管理。 虽然 Docker 现在也能提供 Volume 驱动程序，但是目前功能还非常有限 （例如，截至 Docker 1.7，每个容器只允许有一个 Volume 驱动程序，并且无法将参数传递给 Volume）。</p>
+<p>而在 <strong>Kubernetes</strong> 中，<strong>Volume</strong> 具有明确的生命周期——与其所属 <strong>Pod</strong> 相同。 因此，<strong>Volume 比 Pod 中运行的任何容器的存活期都长</strong>，在容器重新启动时数据也会得到保留。 当然，<strong>当一个 Pod 不再存在时，卷也将不再存在</strong>。 更重要的是，<strong>Kubernetes 可以支持许多类型的卷，Pod 也能同时使用任意数量的卷</strong>。</p>
+<p><strong>Volume</strong> 的核心是包含一些数据的目录，Pod 中的容器可以访问该目录。 特定的卷类型可以决定这个目录是如何形成的，并能决定它支持何种介质，以及目录中存放什么内容。</p>
+<p>使用 <strong>Volume</strong> 时, Pod 声明中需要提供卷的类型 (<strong>.spec.volumes</strong> 字段) 和 <strong>Volume</strong> 挂载的位置 (<strong>.spec.containers.volumeMounts</strong> 字段).</p>
+<p>容器中的进程能看到由它们的 Docker 镜像和卷组成的文件系统视图。 <a href="https://docs.docker.com/userguide/dockerimages/">Docker 镜像</a> 位于文件系统层次结构的根部，并且任何 Volume 都挂载在镜像内的指定路径上。 卷不能挂载到其他卷，也不能与其他卷有硬链接。 Pod 中的每个容器必须独立地指定每个卷的挂载位置(<strong>Volumes</strong> 之间的挂载点应该相互独立)。</p>
+<h2 id="volume-de-lei-xing">Volume 的类型</h2>
+<p>Kubernetes 支持下列类型的卷:</p>
+<ul>
+<li><a href="https://blog.kiyoko.io/kubernetes-volumes/#Cephfs">cephfs</a></li>
+<li><a href="https://blog.kiyoko.io/kubernetes-volumes/#ConfigMap">configMap</a></li>
+<li><a href="https://blog.kiyoko.io/kubernetes-volumes/#CSI">csi</a></li>
+<li><a href="https://blog.kiyoko.io/kubernetes-volumes/#DownwardAPI">downwardAPI</a></li>
+<li><a href="https://blog.kiyoko.io/kubernetes-volumes/#EmptyDir">emptyDir</a></li>
+<li><a href="https://blog.kiyoko.io/kubernetes-volumes/#HostPath">hostPath</a></li>
+<li><a href="https://blog.kiyoko.io/kubernetes-volumes/#Local">local</a></li>
+<li><a href="https://blog.kiyoko.io/kubernetes-volumes/#Nfs">nfs</a></li>
+<li><a href="https://blog.kiyoko.io/kubernetes-volumes/#PersistentVolumeClaim">persistentVolumeClaim</a></li>
+<li><a href="https://blog.kiyoko.io/kubernetes-volumes/#Projected">projected</a></li>
+<li><a href="https://blog.kiyoko.io/kubernetes-volumes/#Secret">secret</a></li>
+</ul>
+<h3 id="cephfs">Cephfs</h3>
+<p><strong>cephfs</strong> 允许用户将现存的 <strong>CephFS</strong> 卷挂载到 <strong>Pod</strong> 中。 与 <strong><a href="https://blog.kiyoko.io/kubernetes-volumes/#EmptyDir">emptyDir</a></strong> 不同的是，<strong>emptyDir</strong> 会在删除 Pod 的同时<strong>一并被删除</strong>，<strong>cephfs</strong> 卷的内容在删除 Pod 时会被保留，卷只是被卸载掉了。 这意味着 <strong>CephFS 卷可以被预先填充数据，并且这些数据可以在 Pod 之间&quot;传递&quot;</strong>。CephFS 卷可同时被多个写者挂载。</p>
+<blockquote>
+<p>注意： 在您使用 Ceph 卷之前，您的 Ceph 服务器必须正常运行并且要使用的 share 被导出（exported）。</p>
+</blockquote>
+<p>更多信息请参考 <a href="https://github.com/kubernetes/examples/tree/master/volumes/cephfs/">CephFS 示例</a>。</p>
+<h3 id="configmap">ConfigMap</h3>
+<p><strong>configMap</strong> 资源提供了向 Pod <strong>注入配置数据</strong>的方法。 ConfigMap 对象中存储的数据可以被 configMap 类型的卷引用，然后被应用到 Pod 中运行的容器化应用。</p>
+<p>当引用 configMap 对象时，你可以简单的在 Volume 中通过它名称来引用。 还可以自定义 ConfigMap 中特定条目所要使用的路径。 例如，要将名为 log-config 的 ConfigMap 挂载到名为 configmap-pod 的 Pod 中，您可以使用下面的 YAML:</p>
+<pre data-lang="yaml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yaml "><code class="language-yaml" data-lang="yaml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Pod
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">configmap-pod
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>    - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">test
+</span><span>      </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">busybox
+</span><span>      </span><span style="color:#bf616a;">volumeMounts</span><span>:
+</span><span>        - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">config-vol
+</span><span>          </span><span style="color:#bf616a;">mountPath</span><span>: </span><span style="color:#a3be8c;">/etc/config
+</span><span>  </span><span style="color:#bf616a;">volumes</span><span>:
+</span><span>    - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">config-vol
+</span><span>      </span><span style="color:#bf616a;">configMap</span><span>:
+</span><span>        </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">log-config
+</span><span>        </span><span style="color:#bf616a;">items</span><span>:
+</span><span>          - </span><span style="color:#bf616a;">key</span><span>: </span><span style="color:#a3be8c;">log_level
+</span><span>            </span><span style="color:#bf616a;">path</span><span>: </span><span style="color:#a3be8c;">log_level
+</span></code></pre>
+<h3 id="csi">CSI</h3>
+<p><a href="https://github.com/container-storage-interface/spec/blob/master/spec.md">容器存储接口 (CSI)</a> 为容器编排系统（如 Kubernetes）定义标准接口，以将任意存储系统暴露给它们的容器工作负载。</p>
+<p>更多详情请阅读 <a href="https://github.com/kubernetes/community/blob/master/contributors/design-proposals/storage/container-storage-interface.md">CSI 设计方案</a>。</p>
+<p>CSI 的支持在 Kubernetes v1.9 中作为 alpha 特性引入，在 Kubernetes v1.10 中转为 beta 特性，并在 Kubernetes v1.13 正式 GA。</p>
+<blockquote>
+<p><strong>说明:</strong> CSI驱动程序可能并非在所有Kubernetes版本中都兼容。 请查看特定CSI驱动程序的文档，以获取每个 Kubernetes 版本所支持的部署步骤以及兼容性列表。</p>
+</blockquote>
+<p>一旦在 <strong>Kubernetes</strong> 集群上部署了 CSI 兼容卷驱动程序，用户就可以使用 <strong>csi</strong> 作为卷类型来关联、挂载 <strong>CSI Driver</strong> 暴露出来的卷。</p>
+<p>允许如下三种方式，在 Pod 中使用 <strong>csi</strong> 类型的卷:</p>
+<ul>
+<li>通过 <strong>PersistentVolumeClaim</strong></li>
+<li>通过 <strong><a href="https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/#generic-ephemeral-volumes">Generic ephemeral volumes</a></strong></li>
+<li>通过 <strong><a href="https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/#csi-ephemeral-volumes">CSI ephemeral volumes</a></strong></li>
+</ul>
+<p>存储管理员可以使用以下字段来配置 CSI 持久卷(CSI persistent volume):</p>
+<ul>
+<li>
+<p><strong>driver</strong>：指定要使用的卷 驱动程序(CSI Driver) 名称的字符串值。 这个值必须与 <strong>CSI Driver</strong> 的 <strong><a href="(https://github.com/container-storage-interface/spec/blob/master/spec.md#getplugininfo)">GetPluginInfoResponse</a></strong> 的 <strong>name</strong> 字段相同。 <strong>Kubernetes</strong> 使用所给的值来标识要调用的 <strong>CSI Driver</strong>；<strong>CSI Driver</strong> 也使用该值来<strong>辨识哪些 PV 对象属于该 CSI Driver</strong>。</p>
+</li>
+<li>
+<p><strong>volumeHandle</strong>：唯一标识卷的字符串值。 该值必须与 <strong>CSI Driver</strong> 的 <strong><a href="https://github.com/container-storage-interface/spec/blob/master/spec.md#createvolume">CreateVolumeResponse</a></strong> 的 <strong>volume.id</strong> 字段相同。 在所有对 <strong>CSI Driver</strong> 的调用中，引用该 <strong>Volume</strong> 时都使用此值作为 <strong>volume_id</strong> 参数。</p>
+</li>
+<li>
+<p><strong>readOnly</strong>：一个可选的布尔值，指示通过 <strong>ControllerPublished</strong> 关联该卷时是否设置该卷为只读。 <strong>默认值是 false</strong>。 该值通过 <strong><a href="https://github.com/container-storage-interface/spec/blob/master/spec.md#controllerpublishvolume">ControllerPublishVolumeRequest</a></strong> 中的 <strong>readonly</strong> 字段传递给 <strong>CSI Driver</strong>。</p>
+</li>
+<li>
+<p><strong>fsType</strong>：如果 <strong>PV</strong> 的 <strong>VolumeMode</strong> 为 <strong>Filesystem</strong>，则该字段指定挂载卷时应该使用的文件系统。 倘若 <strong>Volume</strong> 尚未完成格式化，且支持格式化，则该值将被用于格式化。 可以通过 <strong><a href="https://github.com/container-storage-interface/spec/blob/master/spec.md#controllerpublishvolume">ControllerPublishVolumeRequest</a></strong>、<strong><a href="https://github.com/container-storage-interface/spec/blob/master/spec.md#nodestagevolume">NodeStageVolumeRequest</a></strong> 和 <strong><a href="https://github.com/container-storage-interface/spec/blob/master/spec.md#nodepublishvolume">NodePublishVolumeRequest</a></strong> 的 <strong>volume_capability</strong> 字段将该值传递给 <strong>CSI Driver</strong>。</p>
+</li>
+<li>
+<p><strong>volumeAttributes</strong>：一个 <strong>map[string]string</strong> 类型的映射表，用来设置 <strong>Volume</strong> 的静态属性。 该映射表必须与 <strong>CSI Driver</strong> 返回的 <strong><a href="https://github.com/container-storage-interface/spec/blob/master/spec.md#createvolume">CreateVolumeResponse</a></strong> 中的 volume.attributes 字段的映射相对应。 该映射表通过 <strong><a href="https://github.com/container-storage-interface/spec/blob/master/spec.md#controllerpublishvolume">ControllerPublishVolumeRequest</a></strong>、<strong><a href="https://github.com/container-storage-interface/spec/blob/master/spec.md#nodestagevolume">NodeStageVolumeRequest</a></strong>、和 <strong><a href="https://github.com/container-storage-interface/spec/blob/master/spec.md#nodepublishvolume">NodePublishVolumeRequest</a></strong> 中的 <strong>volume_attributes</strong> 字段传递给 <strong>CSI Driver</strong>。</p>
+<ul>
+<li><strong>注意</strong>: 在 <a href="https://github.com/container-storage-interface/spec/blob/master/spec.md">spec</a> 中只看到了 <strong>volume_context</strong>，并没有 <strong>attributes</strong>，根据注释与数据类型来分析，或许是指这个字段？</li>
+</ul>
+</li>
+<li>
+<p><strong>controllerPublishSecretRef</strong>：对包含敏感信息的 secret 对象的引用；该敏感信息会被传递给 <strong>CSI Driver</strong> 来完成 <strong><a href="https://github.com/container-storage-interface/spec/blob/master/spec.md#controllerpublishvolume">ControllerPublishVolume</a></strong> 和 <strong><a href="https://github.com/container-storage-interface/spec/blob/master/spec.md#controllerunpublishvolume">ControllerUnpublishVolume</a></strong> 调用。 该字段为可选字段；为空表示不需要 secret。 如果 secret 对象包含多个 secret，则所有的 secret 都会被传递。</p>
+</li>
+<li>
+<p><strong>nodeStageSecretRef</strong>：对包含敏感信息的 secret 对象的引用，以传递给 <strong>CSI Driver</strong> 来完成 <strong><a href="https://github.com/container-storage-interface/spec/blob/master/spec.md#nodestagevolume">NodeStageVolume</a></strong> 调用。 该字段为可选字段；为空表示不需要 secret。 如果 secret 对象包含多个 secret，则所有的 secret 都会被传递。</p>
+</li>
+<li>
+<p><strong>nodePublishSecretRef</strong>：对包含敏感信息的 secret 对象的引用，以传递给 <strong>CSI Driver</strong> 来完成 <strong><a href="https://github.com/container-storage-interface/spec/blob/master/spec.md#nodepublishvolume">NodePublishVolume</a></strong> 调用。 该字段为可选字段；为空表示不需要 secret。 如果 secret 对象包含多个 secret，则所有的 secret 都会被传递。</p>
+</li>
+</ul>
+<h3 id="downwardapi">DownwardAPI</h3>
+<p><strong>downwardAPI</strong> 类型的 <strong>Volume</strong> 被用于使 <strong>downward API</strong> 数据对应用程序可见。其表现形式为，挂载一个目录，并将请求的数据写入到纯文本文件中。</p>
+<h3 id="emptydir">EmptyDir</h3>
+<p>当 <strong>Pod</strong> 被指定到某个节点上时，首先创建的是一个 <strong>emptyDir</strong> 类型的 <strong>Volume</strong>，并且只要 <strong>Pod</strong> 保持在该节点上运行，<strong>Volume</strong> 就一直存在。正如名字所说的那样，<strong>Volume</strong> 的初始状态为空。虽然 <strong>Pod</strong> 中的容器挂载 <strong>emptyDir</strong> 类型 <strong>Volume</strong> 的路径可能不尽相同，但这都不重要，重要的是，这些容器都可以读写 <strong>emptyDir</strong> 类型 <strong>Volume</strong> 中的相同的文件。 无论因何种原因，只要 <strong>Pod</strong> 从节点上被删除，<strong>emptyDir</strong> 类型的 <strong>Volume</strong> 中的数据也会被永久删除。</p>
+<blockquote>
+<p><strong>说明</strong>: 容器崩溃并不会导致 <strong>Pod</strong> 从节点上被移除，因此容器崩溃时 <strong>emptyDir</strong> 类型 <strong>Volume</strong> 中的数据是安全的。</p>
+</blockquote>
+<p>有如下需求可以考虑使用 <strong>emptyDir</strong> 类型 <strong>Volume</strong>:</p>
+<ul>
+<li>缓存空间，例如基于磁盘的归并排序。</li>
+<li>为耗时较长的计算任务提供检查点，以便任务能方便地从崩溃前状态恢复执行。</li>
+<li>在 Web 服务器容器服务数据时，保存内容管理器容器获取的文件。</li>
+</ul>
+<p>默认情况下， <strong>emptyDir volume</strong> 所使用的的实际存储介质由节点使用何种存储介质决定: 可以是 <strong>HDD</strong> 或 <strong>SSD</strong> 或 <strong>NFS</strong> 等。但是，可以令 <strong>emptyDir.medium = Memory</strong> 使 <strong>Kubernetes</strong> 安装 <strong>tmpfs</strong>。但需要考虑到，<strong>tmpfs</strong> 的优势与劣势都很突出:</p>
+<ul>
+<li>优势: 基于 <strong>RAM</strong> 的文件系统，速度非常快</li>
+<li>劣势: 随节点重启被清除，且写入的所有文件都会计入容器的内存消耗，受容器内存限制约束</li>
+</ul>
+<h4 id="emptydir-shi-li">EmptyDir 示例</h4>
+<pre data-lang="yaml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yaml "><code class="language-yaml" data-lang="yaml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Pod
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">test-pd
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">k8s.gcr.io/test-webserver
+</span><span>    </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">test-container
+</span><span>    </span><span style="color:#bf616a;">volumeMounts</span><span>:
+</span><span>    - </span><span style="color:#bf616a;">mountPath</span><span>: </span><span style="color:#a3be8c;">/cache
+</span><span>      </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">cache-volume
+</span><span>  </span><span style="color:#bf616a;">volumes</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">cache-volume
+</span><span>    </span><span style="color:#bf616a;">emptyDir</span><span>: {}
+</span></code></pre>
+<h3 id="hostpath">HostPath</h3>
+<p>A hostPath volume mounts a file or directory from the host node's filesystem into your Pod. This is not something that most Pods will need, but it offers a powerful escape hatch for some applications.</p>
+<p><strong>hostPath</strong> 类型的 <strong>Volume</strong> 会将宿主机节点的路径挂载到</p>
+<p>For example, some uses for a hostPath are:</p>
+<p>running a Container that needs access to Docker internals; use a hostPath of /var/lib/docker
+running cAdvisor in a Container; use a hostPath of /sys
+allowing a Pod to specify whether a given hostPath should exist prior to the Pod running, whether it should be created, and what it should exist as
+In addition to the required path property, user can optionally specify a type for a hostPath volume.</p>
+<p>The supported values for field type are:</p>
+<p>Value Behavior  Empty string (default) is for backward compatibility, which means that no checks will be performed before mounting the hostPath volume. DirectoryOrCreate If nothing exists at the given path, an empty directory will be created there as needed with permission set to 0755, having the same group and ownership with Kubelet. Directory A directory must exist at the given path FileOrCreate If nothing exists at the given path, an empty file will be created there as needed with permission set to 0644, having the same group and ownership with Kubelet. File A file must exist at the given path Socket A UNIX socket must exist at the given path CharDevice A character device must exist at the given path BlockDevice A block device must exist at the given path
+Watch out when using this type of volume, because:</p>
+<p>Pods with identical configuration (such as created from a podTemplate) may behave differently on different nodes due to different files on the nodes
+when Kubernetes adds resource-aware scheduling, as is planned, it will not be able to account for resources used by a hostPath
+the files or directories created on the underlying hosts are only writable by root. You either need to run your process as root in a privileged Container or modify the file permissions on the host to be able to write to a hostPath volume</p>
+<h3 id="local">Local</h3>
+<h3 id="nfs">Nfs</h3>
+<h3 id="persistentvolumeclaim">PersistentVolumeClaim</h3>
+<h3 id="projected">Projected</h3>
+<h3 id="secret">Secret</h3>
+<h2 id="can-kao-wen-dang">参考文档</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/storage/volumes/">Volumes</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/kubernetes/">#kubernetes</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/storage/">#storage</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-persistent-volume&#x2F;">‹ Kubernetes 持久卷</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;readings-about-training-system&#x2F;">训练系统相关读物 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

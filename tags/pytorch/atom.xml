@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - pytorch</title>
+	<link href="https://blog.kiyoko.io/tags/pytorch/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2021-03-05T10:01:27+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/pytorch/atom.xml</id>
+	<entry xml:lang="en">
+		<title>未设置 shm 导致 PyTorch 任务失败</title>
+		<published>2021-03-05T10:01:27+00:00</published>
+		<updated>2021-03-05T10:01:27+00:00</updated>
+		<link href="https://blog.kiyoko.io/pytorch-fails-without-shm/" type="text/html"/>
+		<id>https://blog.kiyoko.io/pytorch-fails-without-shm/</id>
+		<content type="html">&lt;p&gt;最近，配合研发同学将原来在老集群上直接用 &lt;code&gt;docker&lt;&#x2F;code&gt; 运行的 &lt;code&gt;pytorch&lt;&#x2F;code&gt; 算法迁移到使用 &lt;code&gt;k8s&lt;&#x2F;code&gt; 的新集群上运行。结果，很不幸，研发同学说无法运行。错误日志如下:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-Traceback&lt;&#x2F;span&gt;&lt;span&gt; (most recent call last)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;miniconda3&#x2F;envs&#x2F;pyasr&#x2F;lib&#x2F;python3.7&#x2F;runpy.py&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, line 193, in _run_module_as_main
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;__main__&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span&gt; mod_spec)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;miniconda3&#x2F;envs&#x2F;pyasr&#x2F;lib&#x2F;python3.7&#x2F;runpy.py&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, line 85, in _run_code
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-exec&lt;&#x2F;span&gt;&lt;span&gt;(code, run_globals)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;pytorch-asr&#x2F;egs&#x2F;chn_40h&#x2F;extend_code&#x2F;launch.py&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, line 29, in &amp;lt;module&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-main&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;pytorch-asr&#x2F;asr&#x2F;launch.py&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, line 10, in main
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-launch&lt;&#x2F;span&gt;&lt;span&gt;(args)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;pytorch-asr&#x2F;asr&#x2F;cli&#x2F;launch.py&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, line 148, in launch
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-trainer.train_on&lt;&#x2F;span&gt;&lt;span&gt;(data)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;pytorch-asr&#x2F;asr&#x2F;trainer&#x2F;trainer.py&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, line 77, in train_on
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-self.train_epoch&lt;&#x2F;span&gt;&lt;span&gt;(data&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;tr&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;]&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;pytorch-asr&#x2F;asr&#x2F;trainer&#x2F;trainer.py&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, line 41, in train_epoch
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-return&lt;&#x2F;span&gt;&lt;span&gt; self._one_epoch(data_queue, is_training=True)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;pytorch-asr&#x2F;asr&#x2F;trainer&#x2F;trainer.py&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, line 63, in _one_epoch
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-return&lt;&#x2F;span&gt;&lt;span&gt; self.one_epoch(data_queue, is_training)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;pytorch-asr&#x2F;asr&#x2F;trainer&#x2F;naive_trainer.py&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, line 115, in one_epoch
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-for&lt;&#x2F;span&gt;&lt;span&gt; batch_idx, batch in enumerate(self.timer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;io&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;]&lt;&#x2F;span&gt;&lt;span&gt;.profile(data_queue))&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;pytorch-asr&#x2F;asr&#x2F;trainer&#x2F;common.py&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, line 102, in profile
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-value&lt;&#x2F;span&gt;&lt;span&gt; = next(iterator)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&amp;lt;string&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, line 2, in get
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;miniconda3&#x2F;envs&#x2F;pyasr&#x2F;lib&#x2F;python3.7&#x2F;multiprocessing&#x2F;managers.py&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, line 834, in _callmethod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-raise&lt;&#x2F;span&gt;&lt;span&gt; convert_to_error(kind, result)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-_queue
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-Empty
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;11:12:55[asr.utils.bootstrap]-WARNING-Version&lt;&#x2F;span&gt;&lt;span&gt; 0.3.1.dev28
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;看到这个错误，就挺迷茫的。&lt;&#x2F;p&gt;
+&lt;p&gt;根据错误信息:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;pytorch-asr&#x2F;asr&#x2F;trainer&#x2F;naive_trainer.py&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, line 115, in one_epoch
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-for&lt;&#x2F;span&gt;&lt;span&gt; batch_idx, batch in enumerate(self.timer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;io&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;]&lt;&#x2F;span&gt;&lt;span&gt;.profile(data_queue))&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-&lt;&#x2F;span&gt;&lt;span&gt;  File &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;pytorch-asr&#x2F;asr&#x2F;trainer&#x2F;common.py&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, line 102, in profile
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10:59:01[asr.utils.bootstrap]-ERROR-value&lt;&#x2F;span&gt;&lt;span&gt; = next(iterator)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;推断是读数据的时候出现了问题。虽然看起来与 &lt;code&gt;GPU&lt;&#x2F;code&gt; 没有关系，但是，为了保险起见，依然对比了前后环境的 &lt;code&gt;NVIDIA Driver&lt;&#x2F;code&gt;，&lt;code&gt;CUDA&lt;&#x2F;code&gt; 等版本信息，结果是一致的。而且，&lt;code&gt;NCCL&lt;&#x2F;code&gt; 是在镜像中安装的，不太可能有问题。&lt;&#x2F;p&gt;
+&lt;p&gt;之后，尝试在容器中安装 &lt;code&gt;perf&lt;&#x2F;code&gt;，但是失败了，尝试在容器中使用 &lt;code&gt;strace&lt;&#x2F;code&gt;，提示没有权限。&lt;&#x2F;p&gt;
+&lt;p&gt;正在我继续死磕的时候，研发提供了另一段错误日志:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pytorch-956sg:9319:9379 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;]&lt;&#x2F;span&gt;&lt;span&gt; include&#x2F;shm.h:48 NCCL WARN Error while creating shared memory segment nccl-shm-recv-183375136c5888b6-0-2-3 (size 9637888)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;这个错误就很有价值啊，创建共享内存失败。&lt;&#x2F;p&gt;
+&lt;p&gt;此前，反复与研发同学确认过，是否只依赖于外部的 &lt;code&gt;NVIDIA Driver&lt;&#x2F;code&gt; 与 &lt;code&gt;CUDA&lt;&#x2F;code&gt;，得到了肯定的答复。因此，就一直以此为前提进行排查。但现在我产生了怀疑，问研发要来启动命令，隐藏敏感数据后如下:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;docker&lt;&#x2F;span&gt;&lt;span&gt; run&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -dit&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;data:&#x2F;data&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --name&lt;&#x2F;span&gt;&lt;span&gt; asr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --ipc&lt;&#x2F;span&gt;&lt;span&gt;=host image:latest &#x2F;bin&#x2F;bash
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;果然就发现了隐藏信息: &lt;strong&gt;--ipc=host&lt;&#x2F;strong&gt; 。&lt;&#x2F;p&gt;
+&lt;p&gt;因此，修改在原有创建任务的 &lt;code&gt;yaml&lt;&#x2F;code&gt; 文件中增加 &lt;code&gt;volume&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span&gt;   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;     &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;       - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;asr
+&lt;&#x2F;span&gt;&lt;span&gt;         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;image:latest
+&lt;&#x2F;span&gt;&lt;span&gt;         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumeMounts&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;           - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mountPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;dev&#x2F;shm
+&lt;&#x2F;span&gt;&lt;span&gt;             &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;shm
+&lt;&#x2F;span&gt;&lt;span&gt;     &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumes&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;       - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;shm
+&lt;&#x2F;span&gt;&lt;span&gt;         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;emptyDir&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;medium&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Memory
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;在容器内，挂载一个 &lt;code&gt;tmpfs&lt;&#x2F;code&gt; 到 &lt;code&gt;&#x2F;dev&#x2F;shm&lt;&#x2F;code&gt;。成功解决上述两个问题。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;zong-jie&quot;&gt;总结&lt;&#x2F;h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;虽然成功解决了两个问题，但是对于第一个问题还是感到迷惑。虽然，根据答案反推原因，可以查到 &lt;code&gt;DataLoader&lt;&#x2F;code&gt; 在工作的时候会依赖于 &lt;code&gt;shm&lt;&#x2F;code&gt;。但是，查到的错误却不同于第一份错误日志。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;这次是运气好，遇到了第二个错误明显的提示。否则，可能就需要继续跟 &lt;code&gt;perf&lt;&#x2F;code&gt;，&lt;code&gt;strace&lt;&#x2F;code&gt; 作斗争了，甚至于调试 &lt;code&gt;coredump&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;在遇到错误二之前，已经决定自己在新集群上使用 &lt;code&gt;docker&lt;&#x2F;code&gt; 运行看看了，其实，这样的话也能发现被隐藏的 &lt;code&gt;--ipc=host&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;最终要的一点，不要轻易相信他人给定的条件。即使对方不是有意隐瞒，也可能会由于遗忘，或本来就不清楚等各种原因，导致丢失已知条件。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+</content>
+	</entry>
+</feed>

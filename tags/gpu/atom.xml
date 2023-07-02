@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - gpu</title>
+	<link href="https://blog.kiyoko.io/tags/gpu/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-11-14T18:21:01+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/gpu/atom.xml</id>
+	<entry xml:lang="en">
+		<title>Nvidia Docker</title>
+		<published>2020-11-14T18:21:01+00:00</published>
+		<updated>2020-11-14T18:21:01+00:00</updated>
+		<link href="https://blog.kiyoko.io/nvidia-docker/" type="text/html"/>
+		<id>https://blog.kiyoko.io/nvidia-docker/</id>
+		<content type="html">&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;nvidia-docker&#x2F;nvidia-container-toolkit.png&quot; alt=&quot;nvidia-container-toolkit.png&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Nvidia Container Toolkit 包含容器运行时库和一些工具，用于自动配置容器使用 GPU 资源。并且，支持多种不同的容器引擎，如 Docker、LXC、Podman 等。用户根据需要可以自行选择使用哪种引擎。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-architecture-overview-of-nvidia-container-toolkit&quot;&gt;The Architecture Overview of Nvidia Container Toolkit&lt;&#x2F;h2&gt;
+&lt;p&gt;Nvidia Container Toolkit 的架构允许其支持任何容器运行时。若以 Docker 为例，其由以下组件，以从上到下的层次结构组成:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;nvidia-docker2&lt;&#x2F;li&gt;
+&lt;li&gt;nvidia-container-runtime&lt;&#x2F;li&gt;
+&lt;li&gt;nvidia-container-toolkit&lt;&#x2F;li&gt;
+&lt;li&gt;libnvidia-container&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;下图为各个组件的关系:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;nvidia-docker&#x2F;nvidia-docker-arch.png&quot; alt=&quot;nvidia-docker-arch.png&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;components-and-packages&quot;&gt;Components and Packages&lt;&#x2F;h3&gt;
+&lt;h4 id=&quot;libnvidia-container&quot;&gt;libnvidia-container&lt;&#x2F;h4&gt;
+&lt;p&gt;提供库与 CLI 程序，实现自动化配置 GNU&#x2F;Linux 容器使用 NVIDIA GPU 资源，其实现依赖于内核基础功能，且在设计上与容器运行时解耦。&lt;&#x2F;p&gt;
+&lt;p&gt;libnvidia-container 提供了一个定义良好的 API 和一个封装好的 CLI 程序(nvidia-container-cli)，任何容器运行时都可以调用它来支持 NVIDIA GPU。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;nvidia-container-toolkit&quot;&gt;nvidia-container-toolkit&lt;&#x2F;h4&gt;
+&lt;p&gt;实现了 runC prestart hook 需要的接口的脚本。该脚本在容器被创建之后，启动之前被 runC 调用，且被赋予访问与容器相关联的 config.json 的权限。脚本根据 config.json 中的信息作为合适的命令行参数 (an appropriate set of flags) 来调用 libnvidia-container CLI。其中，“指定哪些 GPU 设备在容器中使用” 是最重要的参数。&lt;&#x2F;p&gt;
+&lt;p&gt;该组件之前的名字是 nvidia-container-runtime-hook，现在系统上的 nvidia-container-runtime-hook 是 nvidia-container-toolkit 的符号链接。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;nvidia-container-runtime&quot;&gt;nvidia-container-runtime&lt;&#x2F;h4&gt;
+&lt;p&gt;曾经，nvidia-container-runtime 以 runC 作为基础，添加了 NVIDIA 特定的代码。2019 年，更改为对宿主机上原生 runC 做简单的封装。nvidia-container-runtime 将 runC spec 作为输入，将 nvidia-container-toolkit 脚本作为 prestart hook 注入到 runC spec 中。然后，将修改后的带有该 hook set 的 runC spec 传递给原生 runC 并调用 runC。需要注意的是，该组件不一定是针对 docker 的(但它是针对runC的)。&lt;&#x2F;p&gt;
+&lt;p&gt;当该 package 完成安装后，Docker 的 daemon.json 文件会被更新为指向这个二进制文件:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cat &#x2F;etc&#x2F;docker&#x2F;daemon.json
+&lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;  &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;exec-opts&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;native.cgroupdriver=systemd&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;]&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;  &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;default-runtime&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nvidia&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;  &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;runtimes&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nvidia&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: {
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;usr&#x2F;bin&#x2F;nvidia-container-runtime&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;runtimeArgs&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;[]
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;  }
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;nvidia-docker2&quot;&gt;nvidia-docker2&lt;&#x2F;h4&gt;
+&lt;p&gt;这个 package 是架构中唯一的 docker 专用包。它采用与 nvidia-container-runtime 相关的脚本，并将其安装到 docker 的 &#x2F;etc&#x2F;docker&#x2F;daemon.json 文件中。这样，使用者就可以运行 &lt;strong&gt;docker run --runtime=nvidia ...&lt;&#x2F;strong&gt; 来自动为容器添加对 GPU 的支持。这个 package 还安装了一个封装了原生 docker CLI 的脚本，名为 nvidia-docker，避免每次都指定 --runtime=nvidia 来调用 docker。它还允许用户在宿主机上设置环境变量 NV_GPU 来指定将哪些 GPU 注入到容器中。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;installation&quot;&gt;Installation&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;pre-requisites&quot;&gt;Pre-Requisites&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.nvidia.com&#x2F;Download&#x2F;index.aspx?lang=en-us&quot;&gt;NVIDIA Drivers&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;Platform Requirements:
+&lt;ol&gt;
+&lt;li&gt;GNU&#x2F;Linux x86_64 with kernel version &amp;gt; 3.10&lt;&#x2F;li&gt;
+&lt;li&gt;Docker &amp;gt;= 19.03 (recommended, but some distributions may include older versions of Docker. The minimum supported version is 1.12)&lt;&#x2F;li&gt;
+&lt;li&gt;NVIDIA GPU with Architecture &amp;gt; Fermi (or compute capability 2.1)&lt;&#x2F;li&gt;
+&lt;li&gt;NVIDIA drivers ~= 361.93 (untested on older versions)&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;Docker CE&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;setting-up-nvidia-container-toolkit&quot;&gt;Setting up NVIDIA Container Toolkit&lt;&#x2F;h3&gt;
+&lt;p&gt;安装软件源与 GPG key:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; distribution=$(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;etc&#x2F;os-release;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;echo &lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ID&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;VERSION_ID&lt;&#x2F;span&gt;&lt;span&gt;) \
+&lt;&#x2F;span&gt;&lt;span&gt;   &amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;curl -s -L&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;nvidia.github.io&#x2F;nvidia-docker&#x2F;gpgkey | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; apt-key add - \
+&lt;&#x2F;span&gt;&lt;span&gt;   &amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;curl -s -L&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;nvidia.github.io&#x2F;nvidia-docker&#x2F;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;distribution&lt;&#x2F;span&gt;&lt;span&gt;&#x2F;nvidia-docker.list | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; tee &#x2F;etc&#x2F;apt&#x2F;sources.list.d&#x2F;nvidia-docker.list
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;安装 nvidia-docker2 并重启 Docker Daemon:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; sudo apt-get update \
+&lt;&#x2F;span&gt;&lt;span&gt;   &amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; apt-get install&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -y&lt;&#x2F;span&gt;&lt;span&gt; nvidia-docker2 \
+&lt;&#x2F;span&gt;&lt;span&gt;   &amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; systemctl restart docker
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;启动容器测试，如果得到类似如下的输出则安装成功:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; sudo docker run&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --rm --gpus&lt;&#x2F;span&gt;&lt;span&gt; all nvidia&#x2F;cuda:11.0-base nvidia-smi
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;+-----------------------------------------------------------------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;NVIDIA-SMI&lt;&#x2F;span&gt;&lt;span&gt; 450.51.06    Driver Version: 450.51.06    CUDA Version: 11.0     |
+&lt;&#x2F;span&gt;&lt;span&gt;|&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;-------------------------------+----------------------+----------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;GPU&lt;&#x2F;span&gt;&lt;span&gt;  Name        Persistence-M| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Bus-Id&lt;&#x2F;span&gt;&lt;span&gt;        Disp.A | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Volatile&lt;&#x2F;span&gt;&lt;span&gt; Uncorr. ECC |
+&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Fan&lt;&#x2F;span&gt;&lt;span&gt;  Temp  Perf  Pwr:Usage&#x2F;Cap|         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Memory-Usage &lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;GPU-Util&lt;&#x2F;span&gt;&lt;span&gt;  Compute M. |
+&lt;&#x2F;span&gt;&lt;span&gt;|                               |                      |               &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;MIG&lt;&#x2F;span&gt;&lt;span&gt; M. |
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;|===============================+======================+======================&lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;|   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;  Tesla T4            On   | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;00000000:00:1E.0&lt;&#x2F;span&gt;&lt;span&gt; Off |                    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;N&#x2F;A&lt;&#x2F;span&gt;&lt;span&gt;   34C    P8     9W &#x2F;  70W |      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;0MiB&lt;&#x2F;span&gt;&lt;span&gt; &#x2F; 15109MiB |      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;%      Default |
+&lt;&#x2F;span&gt;&lt;span&gt;|                               |                      |                  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;N&#x2F;A &lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;+-------------------------------+----------------------+----------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;+-----------------------------------------------------------------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Processes:                                                                  &lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;|  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;GPU&lt;&#x2F;span&gt;&lt;span&gt;   GI   CI        PID   Type   Process name                  GPU Memory |
+&lt;&#x2F;span&gt;&lt;span&gt;|        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ID&lt;&#x2F;span&gt;&lt;span&gt;   ID                                                   Usage      |
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;|=============================================================================&lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;|  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;No&lt;&#x2F;span&gt;&lt;span&gt; running processes found                                                 |
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;+-----------------------------------------------------------------------------+
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;can-kao-wen-dang&quot;&gt;参考文档&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.nvidia.com&#x2F;datacenter&#x2F;cloud-native&#x2F;index.html&quot;&gt;NVIDIA Cloud Native Technologies&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.nvidia.com&#x2F;datacenter&#x2F;cloud-native&#x2F;container-toolkit&#x2F;install-guide.html&quot;&gt;Container Toolkit Installation Guide&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>GPU 101 - Architecture</title>
+		<published>2020-10-15T19:50:58+00:00</published>
+		<updated>2020-10-15T19:50:58+00:00</updated>
+		<link href="https://blog.kiyoko.io/gpu-101-architecture/" type="text/html"/>
+		<id>https://blog.kiyoko.io/gpu-101-architecture/</id>
+		<content type="html">&lt;p&gt;&lt;strong&gt;图形处理器单元(GPU)&lt;&#x2F;strong&gt; 主要是指运行高度图形化应用时使用的硬件设备，比如 &lt;strong&gt;3D建模软件&lt;&#x2F;strong&gt; 或 &lt;strong&gt;VDI基础设施&lt;&#x2F;strong&gt;。在消费市场上，GPU多用于加速游戏图形。如今，GPGPU(General Purpose GPU) 是现代高性能计算 (HPC) 场景中加速计算的普遍硬件选择。&lt;&#x2F;p&gt;
+&lt;p&gt;会用到 GPU 的领域除了我们熟悉的 HPC，比如会用到图像识别的机器学习方向，也常用在医疗、保险和金融行业相关的垂直领域中使用的 &lt;a href=&quot;https:&#x2F;&#x2F;www.w3.org&#x2F;TR&#x2F;tabular-data-model&#x2F;&quot;&gt;表格数据 (Tabular Data)&lt;&#x2F;a&gt; 的计算。&lt;&#x2F;p&gt;
+&lt;p&gt;因此，就引出一个问题: 为什么需要使用 GPU 而不是 CPU?&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;yan-chi-yu-tun-tu-liang&quot;&gt;延迟与吞吐量&lt;&#x2F;h2&gt;
+&lt;p&gt;首先，来看看 CPU 和 GPU 的主要区别。&lt;&#x2F;p&gt;
+&lt;p&gt;CPU 对速度与延迟方面进行了优化，在保持操作之间快速切换的能力的前提下，以尽可能低的延迟完成任务。它的本质就是以序列化的方式处理任务。&lt;&#x2F;p&gt;
+&lt;p&gt;GPU 对吞吐量方面进行了优化，它允许一次推尽可能多的任务到内部，并通过并行方式处理每个任务。&lt;&#x2F;p&gt;
+&lt;p&gt;下面的示例图显示了 CPU 和 GPU &lt;strong&gt;核心&lt;&#x2F;strong&gt; 的数量。显而易见地，GPU 具有更多的核心来处理一个任务。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;GPU-101-Architecture&#x2F;01-cpu-vs-gpu-cores.png&quot; alt=&quot;cpu-vs-gpu-cores&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;yi-tong-dian&quot;&gt;异同点&lt;&#x2F;h2&gt;
+&lt;p&gt;然而，这不仅仅是核心数量的问题。而当我们说到NVIDIA GPU中的核心时，我们指的是由ALU（算术逻辑单元）组成的CUDA核心。不同厂商的术语可能会有所不同。&lt;&#x2F;p&gt;
+&lt;p&gt;从CPU和GPU的整体架构来看，我们可以看到两者之间有很多相似之处。两者都使用了缓存层、内存控制器和全局内存的内存构造。对现代CPU架构的高层概述表明，它都是通过使用重要的缓存内存层来实现低延迟的内存访问。让我们先看一张图，它显示了一个通用的、以内存为中心的现代CPU封装（注意：精确的布局强烈地取决于供应商&#x2F;型号）。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;GPU-101-Architecture&#x2F;02-cpu-hl-architecture.png&quot; alt=&quot;cpu-hl-architecture&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;一个CPU包由核心组成，包含独立的数据层和指令层-1缓存，由层-2缓存支持。第3层高速缓存，也就是最后一层高速缓存，由多个核心共享。如果数据没有驻留在缓存层中，它将从全局DDR-4内存中获取数据。每个CPU的核心数量可以达到28个或32个，根据品牌和型号的不同，在Turbo模式下可以运行到2.5GHz或3.8GHz。缓存大小范围为每个核心最高2MB二级缓存。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;tan-suo-gpujia-gou&quot;&gt;探索GPU架构&lt;&#x2F;h2&gt;
+&lt;p&gt;如果我们检查GPU的高层架构概述（同样，强烈依赖make&#x2F;model），看起来GPU的本质就是把可用的核心投入工作，它不太注重低延迟的缓存内存访问。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;GPU-101-Architecture&#x2F;03-gpu-architecture.png&quot; alt=&quot;gpu-architecture&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;单个GPU设备由多个处理器集群（PC）组成，其中包含多个流式多处理器（SM）。每个SM容纳一个第1层指令缓存层与其相关的核心。通常情况下，一个SM在从全局GDDR-5内存中提取数据之前，会使用一个专用的第1层缓存和一个共享的第2层缓存。其架构对内存延迟的容忍度很高。&lt;&#x2F;p&gt;
+&lt;p&gt;与CPU相比，GPU工作的内存缓存层数较少，而且相对较小。原因是GPU有更多的晶体管用于计算，这意味着它不太在乎从内存中检索数据所需的时间。只要GPU手头有足够的计算量，潜在的内存访问 &amp;quot;延迟 &amp;quot;就会被掩盖，使其保持忙碌。&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A GPU is optimized for data parallel throughput computations.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;从核心数量来看，它很快就能让你看到它在并行方面的可能性。 当检查当前NVIDIA的旗舰产品Tesla V100时，一台设备包含80个SM，每个SM包含64个核心，总共有5120个核心！任务不是安排给单个核心，而是安排给处理器集群和SM。任务不是安排给单个核心，而是安排给处理器集群和SM。这就是它能够并行处理的原因。现在把这个强大的硬件设备和编程框架结合起来，应用就可以充分发挥GPU的计算能力。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;can-kao-zi-liao&quot;&gt;参考资料&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;nielshagoort.com&#x2F;2019&#x2F;03&#x2F;12&#x2F;exploring-the-gpu-architecture&#x2F;&quot;&gt;Exploring the GPU Architecture&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>训练系统相关读物</title>
+		<published>2020-10-11T11:44:32+00:00</published>
+		<updated>2020-10-11T11:44:32+00:00</updated>
+		<link href="https://blog.kiyoko.io/readings-about-training-system/" type="text/html"/>
+		<id>https://blog.kiyoko.io/readings-about-training-system/</id>
+		<content type="html">&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;images.nvidia.com&#x2F;events&#x2F;sc15&#x2F;pdfs&#x2F;NCCL-Woolley.pdf&quot;&gt;NCCL: ACCELERATED MULTI-GPU COLLECTIVE COMMUNICATIONS&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;http:&#x2F;&#x2F;citeseerx.ist.psu.edu&#x2F;viewdoc&#x2F;download?doi=10.1.1.95.2490&amp;amp;rep=rep1&amp;amp;type=pdf&quot;&gt;Message Passing, Remote Procedure Calls and Distributed Shared Memory as Communication Paradigms for Distributed Systems&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;50116885&quot;&gt;分布式训练的方案和效率对比&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;http:&#x2F;&#x2F;gaocegege.com&#x2F;Blog&#x2F;mpi-1&quot;&gt;MPI，OpenMPI 与深度学习&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;mpitutorial.com&#x2F;tutorials&#x2F;mpi-introduction&#x2F;zh_cn&#x2F;&quot;&gt;MPI 教程介绍&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.mpi-forum.org&#x2F;&quot;&gt;MPI Forum&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;149771261&quot;&gt;2020 Rethinking GPU 集群上的分布式训练&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;40578792&quot;&gt;Horovod-基于TensorFlow分布式深度学习框架&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;horovod&#x2F;horovod&quot;&gt;Github: Horovod&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;tasks&#x2F;manage-gpus&#x2F;scheduling-gpus&#x2F;&quot;&gt;Schedule GPUs&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;extend-kubernetes&#x2F;compute-storage-net&#x2F;device-plugins&#x2F;&quot;&gt;Device Plugins&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;towardsdatascience.com&#x2F;distributed-deep-learning-training-with-horovod-on-kubernetes-6b28ac1d6b5d&quot;&gt;Distributed Deep Learning Training with Horovod on Kubernetes&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;developer.nvidia.com&#x2F;kubernetes-gpu&quot;&gt;Kubernetes on NVIDIA GPUs&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+</feed>

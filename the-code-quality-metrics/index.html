@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 代码质量衡量标准</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-code-quality-metrics/#ke-wei-hu-xing-maintainability" class="toc-link">可维护性 (maintainability)</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-code-quality-metrics/#ke-du-xing-readability" class="toc-link">可读性 (readability)</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-code-quality-metrics/#ke-kuo-zhan-xing-extensibility" class="toc-link">可扩展性 (extensibility)</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-code-quality-metrics/#ling-huo-xing-flexibility" class="toc-link">灵活性 (flexibility)</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-code-quality-metrics/#jian-ji-xing-simplicity" class="toc-link">简洁性 (simplicity)</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-code-quality-metrics/#ke-fu-yong-xing-reusability" class="toc-link">可复用性 (reusability)</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-code-quality-metrics/#ke-ce-shi-xing-testability" class="toc-link">可测试性 (testability)</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;the-code-quality-metrics&#x2F;">代码质量衡量标准</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-02-06</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <h2 id="ke-wei-hu-xing-maintainability">可维护性 (maintainability)</h2>
+<p>常见的代码维护工作，大体上包括: 修复 Bug，修改已有的代码，添加新的代码。可维护性就是用来衡量上述工作的难度。</p>
+<p>显而易见地，修改配置的难度小于修改编译参数，小于增加代码，小于改动已有代码。改动一处代码的难度小于改动多出代码，更小于改动不知道多少处代码。</p>
+<p>易于维护就要求，在不破坏原有代码设计、引入新 Bug 低风险的情况下，能够快速修改或者添加代码。反之，则是不易于维护。</p>
+<p>易于维护代码应该在兼具 <strong>可读性</strong> 的前提下，具有良好的模块化设计，做到高内聚低耦合，遵从面向接口而非实现的程序设计原则。</p>
+<p>但是，可维护性是一个偏主观的衡量标准。一段代码的可维护性依赖于代码量、业务复杂度、知识背景、文档完善度还有开发开发者水平等诸多方面的因素。</p>
+<p>同一段代码对于不同的开发者会具有不同的可维护性。</p>
+<h2 id="ke-du-xing-readability">可读性 (readability)</h2>
+<blockquote>
+<p>Martin Fowler:&quot;Any fool can write code that a computer can understand. Good programmers write code that humans can understand.&quot;</p>
+</blockquote>
+<p>代码被阅读的次数远超过被编写的次数，无论是学习编程、修改代码、添加代码还是进行 Code Review 时，都需要对代码进行阅读。</p>
+<p>很多人都听说过 <strong>可读性</strong>，知道 <strong>可读性</strong> 很重要，但却并不重视。在实际写代码的时候，会为了 <strong>编写上舒服</strong>，为了 <strong>自以为的高效</strong>，为了 <strong>炫技</strong> 或者是其他什么原因，写出让其他人难以理解，甚至无法理解的代码。更有甚者，<strong>看不懂若干月之前自己写的代码</strong>。</p>
+<p>个人认为，可读性应被看做最重要的衡量标准。因为，无论是修复 Bug 还是开发新功能，只有先读懂代码，才能得到自己需要的信息去完成接下来的工作。若是读都读不懂，那么轻则工作效率事倍功半，加班成为常态；重则引入 Bug 影响绩效。</p>
+<p>衡量可读性可以从编码规范、命名、函数长度、模块划分、注释等方面切入。</p>
+<p>检测可读性可以通过 Code Review，如果同事读你的代码有很多疑问就表示需要提高可读性了。</p>
+<h2 id="ke-kuo-zhan-xing-extensibility">可扩展性 (extensibility)</h2>
+<p>代码的可扩展性表示代码应对未来需求变化的能力。</p>
+<p>在添加新功能时，扩展性的高低反比与对已有代码修改的数量。修改的内容越少，则表示扩展性越好。如果能做到只通过扩展的方式添加新代码，而无需修改已有代码时，则表示代码具有非常好的可扩展性。</p>
+<h2 id="ling-huo-xing-flexibility">灵活性 (flexibility)</h2>
+<p>灵活性也是一个比较主观的衡量标准。例如:</p>
+<ul>
+<li>代码具有非常好的可扩展性</li>
+<li>底层模块抽象度高，封装良好，已于复用代码</li>
+<li>接口可以应对各种使用场景，满足各种不同的需求</li>
+</ul>
+<h2 id="jian-ji-xing-simplicity">简洁性 (simplicity)</h2>
+<blockquote>
+<p>KISS 原则: Kepp It Simple, Stupid.</p>
+</blockquote>
+<p>保持代码简单、结构简洁、逻辑清晰。因为，越简单的代码，越易于理解。避免在代码中引入不必要的设计模式，或其他炫技的写法。</p>
+<h2 id="ke-fu-yong-xing-reusability">可复用性 (reusability)</h2>
+<p>大部分开发者一定听过可复用性，也一定听过 <strong>Don't Repeat Yourself</strong>，也明白同样的代码只写一次，但却很少有人能真正做到，或者说是不知道如何做:</p>
+<ul>
+<li>面向对象的封装、继承、多态</li>
+<li>单一职责原则</li>
+<li>解耦，高内聚低耦合</li>
+</ul>
+<h2 id="ke-ce-shi-xing-testability">可测试性 (testability)</h2>
+<p>编写易于单元测试的代码，如果为你的代码编写单元测试很困难，那你可能需要思考，你的一个函数或模块是不是做了太多的事情。</p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/programming/">#programming</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;git-delete-merged-branches&#x2F;">‹ 删除已合并的分支</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;programming-program-to-an-interface&#x2F;">针对接口编程 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

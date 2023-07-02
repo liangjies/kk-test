@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - wsl</title>
+	<link href="https://blog.kiyoko.io/tags/wsl/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2022-01-17T21:27:28+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/wsl/atom.xml</id>
+	<entry xml:lang="en">
+		<title>&#x27;ldconfig: &#x2F;usr&#x2F;lib&#x2F;wsl&#x2F;lib&#x2F;libcuda.so.1 is not a symbolic link&#x27;</title>
+		<published>2022-01-17T21:27:28+00:00</published>
+		<updated>2022-01-17T21:27:28+00:00</updated>
+		<link href="https://blog.kiyoko.io/ldconfig-usr-lib-wsl-lib-libcuda-so-1-is-not-a-symbolic-link/" type="text/html"/>
+		<id>https://blog.kiyoko.io/ldconfig-usr-lib-wsl-lib-libcuda-so-1-is-not-a-symbolic-link/</id>
+		<content type="html">&lt;h3 id=&quot;huan-jing&quot;&gt;环境&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;版本          Windows 11 专业版
+&lt;&#x2F;span&gt;&lt;span&gt;版本          21H2
+&lt;&#x2F;span&gt;&lt;span&gt;安装日期       2022&#x2F;1&#x2F;13
+&lt;&#x2F;span&gt;&lt;span&gt;操作系统版本   22000.466
+&lt;&#x2F;span&gt;&lt;span&gt;体验          Windows 功能体验包 1000.22000.466.0
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; uname&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -a
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Linux&lt;&#x2F;span&gt;&lt;span&gt; xeon 5.10.16.3-microsoft-standard-WSL2 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;#1 SMP Fri Apr 2 22:23:49 UTC 2021 x86_64 GNU&#x2F;Linux
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; nvidia-smi
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Mon&lt;&#x2F;span&gt;&lt;span&gt; Jan 17 21:32:44 2022
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;+-----------------------------------------------------------------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;NVIDIA-SMI&lt;&#x2F;span&gt;&lt;span&gt; 495.53       Driver Version: 497.29       CUDA Version: 11.5     |
+&lt;&#x2F;span&gt;&lt;span&gt;|&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;-------------------------------+----------------------+----------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;GPU&lt;&#x2F;span&gt;&lt;span&gt;  Name        Persistence-M| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Bus-Id&lt;&#x2F;span&gt;&lt;span&gt;        Disp.A | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Volatile&lt;&#x2F;span&gt;&lt;span&gt; Uncorr. ECC |
+&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Fan&lt;&#x2F;span&gt;&lt;span&gt;  Temp  Perf  Pwr:Usage&#x2F;Cap|         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Memory-Usage &lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;GPU-Util&lt;&#x2F;span&gt;&lt;span&gt;  Compute M. |
+&lt;&#x2F;span&gt;&lt;span&gt;|                               |                      |               &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;MIG&lt;&#x2F;span&gt;&lt;span&gt; M. |
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;|===============================+======================+======================&lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;|   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;  NVIDIA GeForce ...  On   | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;00000000:01:00.0&lt;&#x2F;span&gt;&lt;span&gt;  On |                  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;N&#x2F;A &lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;|  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;%   51C    P0    76W &#x2F; 310W |   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;2225MiB&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;  8192MiB |     &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;N&#x2F;A&lt;&#x2F;span&gt;&lt;span&gt;      Default |
+&lt;&#x2F;span&gt;&lt;span&gt;|                               |                      |                  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;N&#x2F;A &lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;+-------------------------------+----------------------+----------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;+-----------------------------------------------------------------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Processes:                                                                  &lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;|  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;GPU&lt;&#x2F;span&gt;&lt;span&gt;   GI   CI        PID   Type   Process name                  GPU Memory |
+&lt;&#x2F;span&gt;&lt;span&gt;|        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ID&lt;&#x2F;span&gt;&lt;span&gt;   ID                                                   Usage      |
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;|=============================================================================&lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;|  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;No&lt;&#x2F;span&gt;&lt;span&gt; running processes found                                                 |
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;+-----------------------------------------------------------------------------+
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;wen-ti&quot;&gt;问题&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; sudo ldconfig
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ldconfig:&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;usr&#x2F;lib&#x2F;wsl&#x2F;lib&#x2F;libcuda.so.1 is not a symbolic link
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;jie-jue-fang-fa&quot;&gt;解决方法&lt;&#x2F;h3&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;使用管理员权限执行 &lt;code&gt;cmd&lt;&#x2F;code&gt; 命令:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;cmd&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-cmd &quot;&gt;&lt;code class=&quot;language-cmd&quot; data-lang=&quot;cmd&quot;&gt;&lt;span&gt;c:\Users\david&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span&gt; c:\Windows\System32\lxss\lib
+&lt;&#x2F;span&gt;&lt;span&gt;c:\Windows\System32\lxss\lib&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;del&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;s &#x2F;q &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;libcuda.so&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;c:\Windows\System32\lxss\lib&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;del&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;s &#x2F;q &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;libcuda.so.1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;c:\Windows\System32\lxss\lib&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;mklink&lt;&#x2F;span&gt;&lt;span&gt; libcuda.so libcuda.so.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span&gt;c:\Windows\System32\lxss\lib&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;mklink&lt;&#x2F;span&gt;&lt;span&gt; libcuda.so.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt; libcuda.so.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;在 &lt;code&gt;wsl&lt;&#x2F;code&gt; 中执行:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; ldconfig
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h3 id=&quot;yuan-yin&quot;&gt;原因&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;code&gt;nvidia&lt;&#x2F;code&gt; 的驱动程序没有将 &lt;code&gt;so&lt;&#x2F;code&gt; 文件以软连接的形式创建，而通过 &lt;code&gt;man ldconfig&lt;&#x2F;code&gt; 命令可知:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;    Note that ldconfig  will only look at files that are named lib*.so* (for regular shared objects) or ld-*.so* (for the dynamic loader itself).  Other files will be ignored. Also, ldconfig expects a certain pattern to how the symlinks are set up, like this example, where the middle file (libfoo.so.1 here) is the SONAME for the library:
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    libfoo.so -&amp;gt; libfoo.so.1 -&amp;gt; libfoo.so.1.12
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;ldconfig&lt;&#x2F;code&gt; 期望的文件是符合一定格式的 &lt;code&gt;symlinks&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;can-kao&quot;&gt;参考&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;issueexplorer.com&#x2F;issue&#x2F;yuk7&#x2F;ArchWSL&#x2F;248&quot;&gt;https:&#x2F;&#x2F;issueexplorer.com&#x2F;issue&#x2F;yuk7&#x2F;ArchWSL&#x2F;248&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+</feed>

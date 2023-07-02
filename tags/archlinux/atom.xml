@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - archlinux</title>
+	<link href="https://blog.kiyoko.io/tags/archlinux/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-12-16T14:59:09+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/archlinux/atom.xml</id>
+	<entry xml:lang="en">
+		<title>在 Archlinux 使用 diff cmp</title>
+		<published>2020-12-16T14:59:09+00:00</published>
+		<updated>2020-12-16T14:59:09+00:00</updated>
+		<link href="https://blog.kiyoko.io/archlinux-diffutils/" type="text/html"/>
+		<id>https://blog.kiyoko.io/archlinux-diffutils/</id>
+		<content type="html">&lt;p&gt;在 &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;kubernetes&#x2F;kubernetes&quot;&gt;kubernetes&lt;&#x2F;a&gt; 仓库中的脚本依赖于 &lt;code&gt;cmp &amp;amp; diff&lt;&#x2F;code&gt; 命令。&lt;&#x2F;p&gt;
+&lt;p&gt;这些命令在 &lt;a href=&quot;https:&#x2F;&#x2F;www.archlinux.org&#x2F;packages&#x2F;core&#x2F;x86_64&#x2F;diffutils&#x2F;files&#x2F;&quot;&gt;diffutils&lt;&#x2F;a&gt; 中。&lt;&#x2F;p&gt;
+&lt;p&gt;使用如下方式安装:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; pacman&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -S&lt;&#x2F;span&gt;&lt;span&gt; diffutils
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+	</entry>
+</feed>

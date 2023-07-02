@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 使用 GPG 签名认证 git 提交</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/signing-git-commits-with-gpg/#install-gpg" class="toc-link">Install GPG</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/signing-git-commits-with-gpg/#macos" class="toc-link">MacOS</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/signing-git-commits-with-gpg/#archlinux" class="toc-link">Archlinux</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/signing-git-commits-with-gpg/#configure" class="toc-link">Configure</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/signing-git-commits-with-gpg/#generate-key" class="toc-link">Generate key</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/signing-git-commits-with-gpg/#list-keys" class="toc-link">List keys</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/signing-git-commits-with-gpg/#export-public-key" class="toc-link">Export public key</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/signing-git-commits-with-gpg/#register-public-key" class="toc-link">Register public key</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/signing-git-commits-with-gpg/#associating-your-gpg-key-with-git" class="toc-link">Associating your GPG key with Git</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/signing-git-commits-with-gpg/#set-gpg-key" class="toc-link">Set gpg key</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/signing-git-commits-with-gpg/#signing-commits" class="toc-link">Signing commits</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/signing-git-commits-with-gpg/#fqa" class="toc-link">FQA</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;signing-git-commits-with-gpg&#x2F;">使用 GPG 签名认证 git 提交</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-07-26</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <h2 id="install-gpg">Install GPG</h2>
+<h3 id="macos">MacOS</h3>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">brew</span><span> install pinentry-mac gpg2
+</span><span style="color:#bf616a;">touch  ~</span><span>/.gnupg/gpg-agent.conf
+</span><span style="color:#96b5b4;">echo </span><span>&quot;</span><span style="color:#a3be8c;">pinentry-program /usr/local/bin/pinentry-mac</span><span>&quot; &gt;&gt; </span><span style="color:#bf616a;">~</span><span>/.gnupg/gpg-agent.conf
+</span></code></pre>
+<h3 id="archlinux">Archlinux</h3>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">yay -S</span><span> gunpg
+</span></code></pre>
+<h2 id="configure">Configure</h2>
+<h3 id="generate-key">Generate key</h3>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">gpg --full-gen-key
+</span></code></pre>
+<h3 id="list-keys">List keys</h3>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">gpg --list-secret-keys --keyid-format</span><span> LONG
+</span><span>
+</span><span style="color:#65737e;"># /home/username/.gnupg/pubring.kbx
+</span><span style="color:#65737e;"># -------------------------------------
+</span><span style="color:#65737e;"># sec   rsa4096/1111111111111111 2019-08-07 [SC]
+</span><span style="color:#65737e;">#       2222222222222222222222221111111111111111
+</span><span style="color:#65737e;"># uid                 [ultimate] realname (comment) &lt;example@gmail.com&gt;
+</span><span style="color:#65737e;"># ssb   rsa4096/3333333333333333 2019-08-07 [E]
+</span></code></pre>
+<h3 id="export-public-key">Export public key</h3>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">gpg --armor --export</span><span> 1111111111111111
+</span><span>
+</span><span style="color:#65737e;"># -----BEGIN PGP PUBLIC KEY BLOCK-----
+</span><span>
+</span><span style="color:#65737e;"># CONTENT
+</span><span style="color:#65737e;"># -----END PGP PUBLIC KEY BLOCK-----
+</span></code></pre>
+<h3 id="register-public-key">Register public key</h3>
+<p>将上面的 <code>public key</code> 拷贝到 <a href="https://github.com/settings/keys">github settings</a></p>
+<h2 id="associating-your-gpg-key-with-git">Associating your GPG key with Git</h2>
+<h3 id="set-gpg-key">Set gpg key</h3>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">git</span><span> config</span><span style="color:#bf616a;"> --local</span><span> user.signingKey 1111111111111111
+</span></code></pre>
+<h3 id="signing-commits">Signing commits</h3>
+<p>在提交时，使用 <code>-S</code> 标志</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">git</span><span> commit</span><span style="color:#bf616a;"> -S -m </span><span>&#39;</span><span style="color:#a3be8c;">commit message</span><span>&#39;
+</span></code></pre>
+<p>或者通过配置避免每次都要输入 <code>-S</code></p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">git</span><span> config</span><span style="color:#bf616a;"> --global</span><span> commit.gpgsign true
+</span></code></pre>
+<h2 id="fqa">FQA</h2>
+<ol>
+<li>
+<p>gpg: signing failed: Inappropriate ioctl for device</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#96b5b4;">echo </span><span>&quot;</span><span style="color:#a3be8c;">export GPG_TTY=</span><span>$</span><span style="color:#a3be8c;">(</span><span style="color:#bf616a;">tty</span><span style="color:#a3be8c;">)</span><span>&quot; &gt;&gt; </span><span style="color:#bf616a;">~</span><span>/.bashrc
+</span></code></pre>
+</li>
+<li>
+<p>GPG Hangs When Private Keys are Accessed</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">gpgconf --kill</span><span> gpg-agent
+</span></code></pre>
+</li>
+<li>
+<p><code>secret key not available</code> or <code>gpg: signing failed: secret key not available</code></p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">git</span><span> config</span><span style="color:#bf616a;"> --global</span><span> gpg.program gpg2
+</span></code></pre>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/git/">#git</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/gpg/">#gpg</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;mysql-optimization-overview&#x2F;">MySQL 性能优化概述 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

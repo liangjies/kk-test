@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - unionfs</title>
+	<link href="https://blog.kiyoko.io/tags/unionfs/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-08-20T09:50:18+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/unionfs/atom.xml</id>
+	<entry xml:lang="en">
+		<title>容器 - 深入理解镜像</title>
+		<published>2020-08-20T09:50:18+00:00</published>
+		<updated>2020-08-20T09:50:18+00:00</updated>
+		<link href="https://blog.kiyoko.io/docker-image/" type="text/html"/>
+		<id>https://blog.kiyoko.io/docker-image/</id>
+		<content type="html">&lt;p&gt;&lt;code&gt;Namespace&lt;&#x2F;code&gt; 与 &lt;code&gt;Cgroup&lt;&#x2F;code&gt; 技术是容器技术的核心点，但 &lt;code&gt;Docker&lt;&#x2F;code&gt; 项目的成功关键点却要归功于 &lt;code&gt;Docker Image&lt;&#x2F;code&gt; 的发明。在 &lt;code&gt;Cloud Foundry&lt;&#x2F;code&gt; 时代，&lt;strong&gt;上云&lt;&#x2F;strong&gt; 的过程需要经过多次 &lt;strong&gt;玄学调参&lt;&#x2F;strong&gt; 才能解决由于本地环境与云主机的差异性所导致的问题。&lt;code&gt;Docker&lt;&#x2F;code&gt; 则通过 &lt;code&gt;Mount Namespace&lt;&#x2F;code&gt; 与 &lt;code&gt;UnionFS&lt;&#x2F;code&gt; 技术，成功的解决了这个问题。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;mount-namespace&quot;&gt;Mount Namespace&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; man mount_namespace
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;MOUNT_NAMESPACES&lt;&#x2F;span&gt;&lt;span&gt;(7)                 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Linux&lt;&#x2F;span&gt;&lt;span&gt; Programmer&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;s Manual                 MOUNT_NAMESPACES(7)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;NAME
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       mount_namespaces - overview of Linux mount namespaces
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;DESCRIPTION
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       For an overview of namespaces, see namespaces(7).
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       Mount namespaces provide isolation of the list of mount points seen by the processes in each
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       namespace instance. Thus, the processes in each of the mount namespace instances will see
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       distinct single-directory hierarchies.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       The views provided by the &#x2F;proc&#x2F;[pid]&#x2F;mounts, &#x2F;proc&#x2F;[pid]&#x2F;mountinfo, and &#x2F;proc&#x2F;[pid]&#x2F;mountstats
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       files (all described in proc(5)) correspond to the mount namespace in which the process with
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       the PID [pid] resides. (All of the processes that reside in the same mount namespace will see
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       the same view in these files.)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       A new mount namespace is created using either clone(2) or unshare(2) with the CLONE_NEWNS flag.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       When a new mount namespace is created, its mount point list is initialized as follows:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       * If the namespace is created using clone(2), the mount point list of the child&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;s namespace is
+&lt;&#x2F;span&gt;&lt;span&gt;         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt; copy of the mount point list in the parent&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;s namespace.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       * If the namespace is created using unshare(2), the mount point list of the new namespace is a
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;         copy of the mount point list in the caller&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;s previous mount namespace.
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;       &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Subsequent&lt;&#x2F;span&gt;&lt;span&gt; modifications to the mount point list (mount(2) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;and&lt;&#x2F;span&gt;&lt;span&gt; umount(2)) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;in&lt;&#x2F;span&gt;&lt;span&gt; either mount
+&lt;&#x2F;span&gt;&lt;span&gt;       &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;namespace&lt;&#x2F;span&gt;&lt;span&gt; will not (by default) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;affect&lt;&#x2F;span&gt;&lt;span&gt; the mount point list seen in the other namespace (but
+&lt;&#x2F;span&gt;&lt;span&gt;       &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;see&lt;&#x2F;span&gt;&lt;span&gt; the following discussion of shared subtrees)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;.
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;简单来说，&lt;code&gt;Mount Namepace&lt;&#x2F;code&gt; 为进程提供独立的文件系统视图，即可以将进程的文件系统挂载到指定挂载点，从而是进程只能看到 &lt;code&gt;Mount Namespace&lt;&#x2F;code&gt; 中的文件系统。&lt;&#x2F;p&gt;
+&lt;p&gt;接下来，还是通过代码展示。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;mount-namespace-kai-fa&quot;&gt;Mount Namespace 开发&lt;&#x2F;h3&gt;
+&lt;p&gt;下面的代码，使用 &lt;code&gt;Mount Namespace&lt;&#x2F;code&gt; 的方式通过 &lt;code&gt;clone(2)&lt;&#x2F;code&gt; 系统调用，创建一个新的进程。在该进程中执行 &lt;code&gt;&#x2F;bin&#x2F;bash&lt;&#x2F;code&gt; 程序。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#define &lt;&#x2F;span&gt;&lt;span&gt;_GNU_SOURCE
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#include &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sys&#x2F;mount.h&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#include &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sys&#x2F;types.h&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#include &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sys&#x2F;wait.h&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#include &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;stdio.h&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#include &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sched.h&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#include &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;signal.h&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#include &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;unistd.h&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#define &lt;&#x2F;span&gt;&lt;span&gt;STACK_SIZE (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1024 &lt;&#x2F;span&gt;&lt;span&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1024&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;static char&lt;&#x2F;span&gt;&lt;span&gt; container_stack[STACK_SIZE];
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;char &lt;&#x2F;span&gt;&lt;span&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span&gt; container_args[] = {
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;bash&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;        NULL
+&lt;&#x2F;span&gt;&lt;span&gt;};
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;container_main&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;arg&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;printf&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Container - inside the container!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;execv&lt;&#x2F;span&gt;&lt;span&gt;(container_args[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;], container_args);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;printf&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Something&amp;#39;s wrong!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;printf&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Parent - start a container!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int&lt;&#x2F;span&gt;&lt;span&gt; container_pid = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;(container_main, container_stack + STACK_SIZE, CLONE_NEWNS | SIGCHLD, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(container_pid &amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;perror&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;failed to create a new process&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;waitpid&lt;&#x2F;span&gt;&lt;span&gt;(container_pid, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;printf&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Parent - container stopped!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;编译并运行程序:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; gcc main.c&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -o&lt;&#x2F;span&gt;&lt;span&gt; mn; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; .&#x2F;mn
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Parent&lt;&#x2F;span&gt;&lt;span&gt; - start a container!
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Container&lt;&#x2F;span&gt;&lt;span&gt; - inside the container!
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;[root@zephyrus&lt;&#x2F;span&gt;&lt;span&gt; 01-mount-namespace]#
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;如此，就成功的进入到了容器环境内。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;em&gt;注意&lt;&#x2F;em&gt;: 是要使用 &lt;code&gt;root&lt;&#x2F;code&gt; 权限执行这个程序。&lt;&#x2F;p&gt;
+&lt;p&gt;然后，在容器内执行 &lt;code&gt;df -h&lt;&#x2F;code&gt; 指令:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;[root@zephyrus&lt;&#x2F;span&gt;&lt;span&gt; 01-mount-namespace]# df&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -h
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Filesystem&lt;&#x2F;span&gt;&lt;span&gt;      Size  Used Avail Use% Mounted on
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F;dev&#x2F;sdd&lt;&#x2F;span&gt;&lt;span&gt;        251G   39G  200G  17% &#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tools&lt;&#x2F;span&gt;&lt;span&gt;           931G  362G  570G  39% &#x2F;init
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;none&lt;&#x2F;span&gt;&lt;span&gt;            2.0G     0  2.0G   0% &#x2F;dev
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tmpfs&lt;&#x2F;span&gt;&lt;span&gt;           2.0G     0  2.0G   0% &#x2F;sys&#x2F;fs&#x2F;cgroup
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;none&lt;&#x2F;span&gt;&lt;span&gt;            2.0G  8.0K  2.0G   1% &#x2F;run
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;none&lt;&#x2F;span&gt;&lt;span&gt;            2.0G     0  2.0G   0% &#x2F;run&#x2F;lock
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;none&lt;&#x2F;span&gt;&lt;span&gt;            2.0G     0  2.0G   0% &#x2F;run&#x2F;shm
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;none&lt;&#x2F;span&gt;&lt;span&gt;            2.0G     0  2.0G   0% &#x2F;run&#x2F;user
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tmpfs&lt;&#x2F;span&gt;&lt;span&gt;           2.0G     0  2.0G   0% &#x2F;mnt&#x2F;wsl
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F;dev&#x2F;sdc&lt;&#x2F;span&gt;&lt;span&gt;        251G   11G  228G   5% &#x2F;mnt&#x2F;wsl&#x2F;docker-desktop-data&#x2F;isocache
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;none&lt;&#x2F;span&gt;&lt;span&gt;            2.0G   12K  2.0G   1% &#x2F;mnt&#x2F;wsl&#x2F;docker-desktop&#x2F;shared-sockets&#x2F;host-services
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F;dev&#x2F;sdb&lt;&#x2F;span&gt;&lt;span&gt;        251G  117M  239G   1% &#x2F;mnt&#x2F;wsl&#x2F;docker-desktop&#x2F;docker-desktop-proxy
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F;dev&#x2F;loop0&lt;&#x2F;span&gt;&lt;span&gt;      231M  231M     0 100% &#x2F;mnt&#x2F;wsl&#x2F;docker-desktop&#x2F;cli-tools
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;C:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\ &lt;&#x2F;span&gt;&lt;span&gt;            931G  362G  570G  39% &#x2F;mnt&#x2F;c
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;会发现，解决与在宿主机上执行该命令的结果是相同的。这个结果很不好，甚至可以说很危险。因为，不但容器可以看到宿主机上的文件，甚至于还拥有 &lt;code&gt;root&lt;&#x2F;code&gt; 权限。接下来，尝试通过在容器中设置挂载点的方式解决这个问题。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;mount-namespace-zhi-ding-gua-zai-dian&quot;&gt;Mount Namespace 指定挂载点&lt;&#x2F;h3&gt;
+&lt;p&gt;修改 &lt;code&gt;container_main&lt;&#x2F;code&gt; 函数:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;container_main&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;arg&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;printf&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Container - inside the container!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mount&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;none&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;tmp&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;tmpfs&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;, &amp;quot;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;execv&lt;&#x2F;span&gt;&lt;span&gt;(container_args[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;], container_args);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;printf&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Something&amp;#39;s wrong!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;使用 &lt;code&gt;mount(2)&lt;&#x2F;code&gt; 系统调用，在容器进程中，增加一个挂载点。&lt;&#x2F;p&gt;
+&lt;p&gt;使用 &lt;code&gt;ls&lt;&#x2F;code&gt; 指令确认 &lt;code&gt;&#x2F;tmp&lt;&#x2F;code&gt; 目录为空目录，说明挂载成功:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ls&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;tmp
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;之后，在确认一下系统的文件系统:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 在原来的文件系统基础之上会多出一个
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;[root@zephyrus&lt;&#x2F;span&gt;&lt;span&gt; 01-mount-namespace]# df&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -h
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Filesystem&lt;&#x2F;span&gt;&lt;span&gt;      Size  Used Avail Use% Mounted on
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;none&lt;&#x2F;span&gt;&lt;span&gt;            2.0G     0  2.0G   0% &#x2F;tmp
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;[root@zephyrus&lt;&#x2F;span&gt;&lt;span&gt; 01-mount-namespace]# mount&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -l &lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;grep&lt;&#x2F;span&gt;&lt;span&gt; tmpfs
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;none&lt;&#x2F;span&gt;&lt;span&gt; on &#x2F;tmp type tmpfs (rw,relatime)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;这些都可以说明，已经成功在容器内挂载了一个文件系统。而且，在宿主机上是无法看到这个挂载点的。到目前为止，一切都是按照预期发展的。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;mount-namespace-gua-zai-gen-mu-lu&quot;&gt;Mount Namespace 挂载根目录&lt;&#x2F;h3&gt;
+&lt;p&gt;既然可以在容器内部挂载 &lt;code&gt;&#x2F;tmp&lt;&#x2F;code&gt;，那么现在来尝试挂载 &lt;code&gt;&#x2F;&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;首先，准备一下必要的环境:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;bash&lt;&#x2F;strong&gt;: 作为容器的第一个进程，允许在容器执行其他指令&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;ls&lt;&#x2F;strong&gt;: 观察容器内的文件系统是否符合预期&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;lib&lt;&#x2F;strong&gt;: 存放 &lt;code&gt;bash&lt;&#x2F;code&gt; 与 &lt;code&gt;ls&lt;&#x2F;code&gt; 必须的动态链接库&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;#&#x2F;bin&#x2F;bash
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;T&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;root
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mkdir -p &lt;&#x2F;span&gt;&lt;span&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;T&lt;&#x2F;span&gt;&lt;span&gt;}&#x2F;{bin,etc,lib,usr}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cp -v&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;bin&#x2F;{bash,ls} ${&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;T&lt;&#x2F;span&gt;&lt;span&gt;}&#x2F;bin
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cp -v&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;etc&#x2F;profile ${&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;T&lt;&#x2F;span&gt;&lt;span&gt;}&#x2F;etc&#x2F;profile
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;list&lt;&#x2F;span&gt;&lt;span&gt;=$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ldd&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; &#x2F;bin&#x2F;ls &lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;egrep -o &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;lib.*\.[0-9]&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span&gt; i &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span&gt;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;echo &lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;list &lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;awk -F &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;{print $1}&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;); &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;do
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mkdir -p &lt;&#x2F;span&gt;&lt;span&gt;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;dirname &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;T&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;i&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;) &amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cp -v &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;i&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;T&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;i&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;done
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;list&lt;&#x2F;span&gt;&lt;span&gt;=$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ldd&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; &#x2F;bin&#x2F;bash &lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;egrep -o &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;lib.*\.[0-9]&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span&gt; i &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span&gt;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;echo &lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;list &lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;awk -F &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;{print $1}&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;); &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;do
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mkdir -p &lt;&#x2F;span&gt;&lt;span&gt;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;dirname &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;T&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;i&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;) &amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cp -v &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;i&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &amp;quot;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;T&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;i&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;done
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;与上一个实验不同的是，现在期望容器内的文件系统与宿主机独立。即，使用不同的根目录。因此，在代码层面需要将之前的 &lt;code&gt;mount(2)&lt;&#x2F;code&gt; 系统调用，改变为 &lt;code&gt;chroot(2)&lt;&#x2F;code&gt; 系统调用。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; man 2 chroot
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;CHROOT&lt;&#x2F;span&gt;&lt;span&gt;(2)                           &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Linux&lt;&#x2F;span&gt;&lt;span&gt; Programmer&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;s Manual                           CHROOT(2)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;NAME
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       chroot - change root directory
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;SYNOPSIS
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       #include &amp;lt;unistd.h&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       int chroot(const char *path);
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;DESCRIPTION
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       chroot() changes the root directory of the calling process to that specified in path. This
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       directory will be used for pathnames beginning with &#x2F;. The root directory is inherited by
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       all children of the calling process.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       Only a privileged process (Linux: one with the CAP_SYS_CHROOT capability in its user namespace)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;       may call chroot().
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;最终，函数 &lt;code&gt;container_main&lt;&#x2F;code&gt; 的代码为:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;container_main&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;arg&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;printf&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Container - inside the container!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int&lt;&#x2F;span&gt;&lt;span&gt; rev = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;chroot&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;.&#x2F;root&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;!= rev) {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;perror&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;failed to chroot&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;    rev = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;chdir&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;!= rev) {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;perror&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;failed to chdir&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;    rev = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;execv&lt;&#x2F;span&gt;&lt;span&gt;(container_args[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;], container_args);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;!= rev) {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;perror&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;failed to exec&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;printf&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Something&amp;#39;s wrong!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;与之前一样，编译并执行程序，即可进入到容器内部:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; gcc main.c&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -o&lt;&#x2F;span&gt;&lt;span&gt; mn; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; .&#x2F;mn
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Parent&lt;&#x2F;span&gt;&lt;span&gt; - start a container!
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Container&lt;&#x2F;span&gt;&lt;span&gt; - inside the container!
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;bash-4.4#
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;然后，执行 &lt;code&gt;ls&lt;&#x2F;code&gt; 可以看到根目录 &lt;code&gt;&#x2F;&lt;&#x2F;code&gt; 的文件就是之前在 &lt;code&gt;root&lt;&#x2F;code&gt; 目录预先准备好的文件:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;bash-4.4#&lt;&#x2F;span&gt;&lt;span&gt; ls &#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;bin&lt;&#x2F;span&gt;&lt;span&gt;  etc  lib  lib64  usr
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;bash-4.4#&lt;&#x2F;span&gt;&lt;span&gt; ls &#x2F;bin
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;bash&lt;&#x2F;span&gt;&lt;span&gt;  ls
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;bash-4.4#
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;综上所述，如果在 &lt;code&gt;root&lt;&#x2F;code&gt; 目录中保存的是一个完成的操作系统，那么，就可以实现容器内的进程就可以使用内部的 &lt;code&gt;&#x2F;bin&lt;&#x2F;code&gt;，&lt;code&gt;&#x2F;lib&lt;&#x2F;code&gt; 的系统环境，从而与宿主机，与其他容器相互隔离的目的。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;bei-zhu&quot;&gt;备注&lt;&#x2F;h3&gt;
+&lt;p&gt;挂载 &lt;code&gt;tmpfs&lt;&#x2F;code&gt; 实验的运行环境为:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cat &#x2F;etc&#x2F;os-release
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;NAME&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Arch Linux&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;PRETTY_NAME&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Arch Linux&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ID&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;arch
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;BUILD_ID&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;rolling
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ANSI_COLOR&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;38;2;23;147;209&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;HOME_URL&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;https:&#x2F;&#x2F;www.archlinux.org&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;DOCUMENTATION_URL&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;https:&#x2F;&#x2F;wiki.archlinux.org&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;SUPPORT_URL&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;https:&#x2F;&#x2F;bbs.archlinux.org&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;BUG_REPORT_URL&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;https:&#x2F;&#x2F;bugs.archlinux.org&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;LOGO&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;archlinux
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; uname&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -r
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;4.19.104-microsoft-standard
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;chroot&lt;&#x2F;code&gt; 实验的运行环境为:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cat &#x2F;etc&#x2F;os-release
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;NAME&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Ubuntu&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;VERSION&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;18.04.4 LTS (Bionic Beaver)&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ID&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ubuntu
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ID_LIKE&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;debian
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;PRETTY_NAME&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Ubuntu 18.04.4 LTS&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;VERSION_ID&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;18.04&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;HOME_URL&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;https:&#x2F;&#x2F;www.ubuntu.com&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;SUPPORT_URL&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;https:&#x2F;&#x2F;help.ubuntu.com&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;BUG_REPORT_URL&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;https:&#x2F;&#x2F;bugs.launchpad.net&#x2F;ubuntu&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;PRIVACY_POLICY_URL&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;https:&#x2F;&#x2F;www.ubuntu.com&#x2F;legal&#x2F;terms-and-policies&#x2F;privacy-policy&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;VERSION_CODENAME&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;bionic
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;UBUNTU_CODENAME&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;bionic
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; uname&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -r
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;4.15.0-112-generic
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;unionfs&quot;&gt;UnionFS&lt;&#x2F;h2&gt;
+&lt;p&gt;在 &lt;code&gt;Cloud Foundry&lt;&#x2F;code&gt; 时代，上云过程繁琐的根本原因在于: 本地环境与云主机环境不一致。&lt;&#x2F;p&gt;
+&lt;p&gt;在狭义上，软件的依赖指编程时所使用的第三方库；广义上，依赖不止包括编程使用的第三方库，操作系统同样也是软件的依赖。&lt;&#x2F;p&gt;
+&lt;p&gt;通过上面对 &lt;code&gt;Mount Namespace&lt;&#x2F;code&gt; 技术简单的实验，已经验证了在容器内打包一个完整的操作系统作为容器的 &lt;code&gt;rootfs&lt;&#x2F;code&gt; 是可行的。到目前为止，从技术的角度而言，已经解决了容器隔离的问题。但从使用角度，或者说用户体验的角度而言，每次构建一个容器，都要打包一份操作系统文件，似乎实在是不便于使用。&lt;&#x2F;p&gt;
+&lt;p&gt;比如，开发者使用 &lt;code&gt;Ubuntu&lt;&#x2F;code&gt; 操作系统的 &lt;code&gt;ISO&lt;&#x2F;code&gt; 制作了一个 &lt;code&gt;rootfs&lt;&#x2F;code&gt;，并依次为基础，安装 &lt;code&gt;Java&lt;&#x2F;code&gt; 环境，进而部署 &lt;code&gt;Java&lt;&#x2F;code&gt; 应用。如果，另一个开发者也有同样的需求，或者同一开发者需要部署另一个 &lt;code&gt;Java&lt;&#x2F;code&gt; 应用，显然，最理想情况是能够复用之前已经安装了 &lt;code&gt;Java&lt;&#x2F;code&gt; 的 &lt;code&gt;rootfs&lt;&#x2F;code&gt; 环境，而不是重复一遍流程。&lt;&#x2F;p&gt;
+&lt;p&gt;直观的解决办法，构建 &lt;code&gt;rootfs&lt;&#x2F;code&gt; 时，每执行一个有意义的操作之后，都生成一个新的 &lt;code&gt;rootfs&lt;&#x2F;code&gt;。之后，就可以选择一个合适的 &lt;code&gt;rootfs&lt;&#x2F;code&gt; 作为基础，添加新的操作构建目标 &lt;code&gt;rootfs&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;但这个方案并不完美，如果每次构建过程都产生一个新的 &lt;code&gt;rootfs&lt;&#x2F;code&gt;，最后将会导致系统内有极其多的 &lt;code&gt;rootfs&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;幸运的是，这个问题并不难解决。将问题一般化，基于既有 &lt;code&gt;A&lt;&#x2F;code&gt;，每一种操作 &lt;code&gt;F&lt;&#x2F;code&gt; 都可以产生唯一结果 &lt;code&gt;B&lt;&#x2F;code&gt;。并且，&lt;code&gt;B&lt;&#x2F;code&gt; 可以作为下一轮的输入。结果发现，这像极了 &lt;code&gt;git&lt;&#x2F;code&gt; 和区块链。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;Docker&lt;&#x2F;code&gt; 在设计 &lt;code&gt;Docker&lt;&#x2F;code&gt; 镜像时也是使用了类似的方法。他们引入了层 &lt;code&gt;(layer)&lt;&#x2F;code&gt; 概念。用户制作镜像的每一步操作，都会生成一个层，将 &lt;code&gt;rootfs&lt;&#x2F;code&gt; 从全量保存，改为了增量保存。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;shi-yao-shi-unionfs&quot;&gt;什么是 UnionFS&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;code&gt;Docker&lt;&#x2F;code&gt; 镜像的这种实现方式，依赖于一种叫做 &lt;code&gt;UnionFS&lt;&#x2F;code&gt; 的文件系统。&lt;&#x2F;p&gt;
+&lt;p&gt;简单来讲，&lt;a href=&quot;https:&#x2F;&#x2F;de.wikipedia.org&#x2F;wiki&#x2F;UnionFS&quot;&gt;UnionFS&lt;&#x2F;a&gt; 允许将多个设备文件或目录挂载到同一个目录上，将多个设备的内容作为整体对外展示，或者将一个设备文件挂载到一个已有的目录上。&lt;&#x2F;p&gt;
+&lt;p&gt;比如，在 &lt;code&gt;Ubuntu 18.04&lt;&#x2F;code&gt; 上:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 准备测试目录
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; mkdir&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -p&lt;&#x2F;span&gt;&lt;span&gt; A&#x2F;{a,x}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; mkdir&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -p&lt;&#x2F;span&gt;&lt;span&gt; B&#x2F;{b,x}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; rm&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -rf&lt;&#x2F;span&gt;&lt;span&gt; C &amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mkdir -p&lt;&#x2F;span&gt;&lt;span&gt; C
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;使用联合挂载的方式，将这两个目录挂载到一个公共的目录 &lt;code&gt;C&lt;&#x2F;code&gt; 上:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; mount&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -t&lt;&#x2F;span&gt;&lt;span&gt; aufs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -o&lt;&#x2F;span&gt;&lt;span&gt; dirs=.&#x2F;A:.&#x2F;B none .&#x2F;C
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;这时可以看到目录 &lt;code&gt;A&lt;&#x2F;code&gt; 与目录 &lt;code&gt;B&lt;&#x2F;code&gt; 被合并到了目录 &lt;code&gt;C&lt;&#x2F;code&gt; 中&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; tree C
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;C
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;├──&lt;&#x2F;span&gt;&lt;span&gt; a
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;├──&lt;&#x2F;span&gt;&lt;span&gt; b
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;└──&lt;&#x2F;span&gt;&lt;span&gt; x
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt; directories, 0 files
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;此时，如果修改 &lt;code&gt;C&lt;&#x2F;code&gt; 也会反应到对应的 &lt;code&gt;A&lt;&#x2F;code&gt; 或 &lt;code&gt;B&lt;&#x2F;code&gt; 中。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;Docker&lt;&#x2F;code&gt; 支持多种&lt;a href=&quot;https:&#x2F;&#x2F;docs.docker.com&#x2F;storage&#x2F;storagedriver&#x2F;select-storage-driver&#x2F;&quot;&gt;存储驱动&lt;&#x2F;a&gt;，但目前默认使用的驱动为 &lt;code&gt;overlay2&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;overlay2&quot;&gt;Overlay2&lt;&#x2F;h3&gt;
+&lt;p&gt;接下来通过一个例子来探索 &lt;code&gt;overlay2&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;首先，启动一个容器:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;docker&lt;&#x2F;span&gt;&lt;span&gt; run&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -d&lt;&#x2F;span&gt;&lt;span&gt; ubuntu:latest sleep 3600000
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;这个命令的含义是，使用 &lt;code&gt;ubuntu:latest&lt;&#x2F;code&gt; 这个 &lt;code&gt;Docker&lt;&#x2F;code&gt; 镜像来运行一个容器。然后，使用命令查看镜像的细节:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; docker image inspect ubuntu:latest
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;GraphDriver&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Data&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: {
+&lt;&#x2F;span&gt;&lt;span&gt;                &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;LowerDir&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;f34511250966eebf394cfcd377e3f3b3e226910881a87b14a9a9743bcbd30c05&#x2F;diff:&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;268f8bdf24c70efcb96bcfedbc22458b36d532bd1a9494f8a5989069eb849802&#x2F;diff:&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;286b92fb4ca407b7475db92eec9dccbd7bc279b968e9f7ca61deb13a9eee9c02&#x2F;diff&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;                &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;MergedDir&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;df8d02faf11610c87d3ed7c92b5201902b87c468061bb495597fb2ce8d68d90e&#x2F;merged&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;                &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;UpperDir&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;df8d02faf11610c87d3ed7c92b5201902b87c468061bb495597fb2ce8d68d90e&#x2F;diff&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;                &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;WorkDir&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;df8d02faf11610c87d3ed7c92b5201902b87c468061bb495597fb2ce8d68d90e&#x2F;work&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;            },
+&lt;&#x2F;span&gt;&lt;span&gt;            &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Name&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;overlay2&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;        },
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;RootFS&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Type&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;layers&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;            &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Layers&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: [
+&lt;&#x2F;span&gt;&lt;span&gt;                &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sha256:e1c75a5e0bfa094c407e411eb6cc8a159ee8b060cbd0398f1693978b4af9af10&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;                &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sha256:9e97312b63ff63ad98bb1f3f688fdff0721ce5111e7475b02ab652f10a4ff97d&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;                &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sha256:ec1817c93e7c08d27bfee063f0f1349185a558b87b2d806768af0a8fbbf5bc11&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;                &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sha256:05f3b67ed530c5b55f6140dfcdfb9746cdae7b76600de13275197d009086bb3d&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;            ]
+&lt;&#x2F;span&gt;&lt;span&gt;        },
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;RootFS&lt;&#x2F;code&gt;: 由于 &lt;code&gt;Docker&lt;&#x2F;code&gt; 的镜像为分层结构，制作镜像的每一步，都是一个层。因此，一个完整的 &lt;code&gt;Docker&lt;&#x2F;code&gt; 镜像包括 &lt;code&gt;image&lt;&#x2F;code&gt; 和 &lt;code&gt;layer&lt;&#x2F;code&gt;。为了解决空间，提高效率等目的， &lt;code&gt;Docker&lt;&#x2F;code&gt; 构建镜像时，使用了 &lt;code&gt;COW&lt;&#x2F;code&gt; 技术，即 &lt;code&gt;layer&lt;&#x2F;code&gt; 在 &lt;code&gt;image&lt;&#x2F;code&gt; 之间是被共享的。一个 &lt;code&gt;Image&lt;&#x2F;code&gt; 是由多个有先后逻辑顺序的 &lt;code&gt;Layer&lt;&#x2F;code&gt; 所构成，也就是 &lt;code&gt;RootFS&lt;&#x2F;code&gt; 中的 &lt;code&gt;Layer&lt;&#x2F;code&gt; ，上面是底层，下面是顶层。这个信息保存在 &lt;code&gt;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;image&#x2F;overlay2&#x2F;imagedb&#x2F;content&#x2F;sha256&#x2F;&amp;lt;image_id&amp;gt;&lt;&#x2F;code&gt; 文件中。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; ll &#x2F;var&#x2F;lib&#x2F;docker&#x2F;image&#x2F;overlay2&#x2F;layerdb&#x2F;sha256&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;drwx------&lt;&#x2F;span&gt;&lt;span&gt; 2 root root 4096 Aug 16 13:48 27d46ebb54384edbc8c807984f9eb065321912422b0e6c49d6a9cd8c8b7d8ffc
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;drwx------&lt;&#x2F;span&gt;&lt;span&gt; 2 root root 4096 Aug 16 13:48 8a8d1f0b34041a66f09e49bdc03e75c2190f606b0db7e08b75eb6747f7b49e11
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;drwx------&lt;&#x2F;span&gt;&lt;span&gt; 2 root root 4096 Aug 16 13:48 e1c75a5e0bfa094c407e411eb6cc8a159ee8b060cbd0398f1693978b4af9af10
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;drwx------&lt;&#x2F;span&gt;&lt;span&gt; 2 root root 4096 Aug 16 13:48 f1b8f74eff975ae600be0345aaac8f0a3d16680c2531ffc72f77c5e17cbfeeee
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;结果在 &lt;code&gt;RootFS.Layers&lt;&#x2F;code&gt; 中只找到了 &lt;code&gt;e1c75a5e0bfa094c407e411eb6cc8a159ee8b060cbd0398f1693978b4af9af10&lt;&#x2F;code&gt;。这是为 &lt;code&gt;Docker&lt;&#x2F;code&gt; 使用了 &lt;code&gt;ChainID&lt;&#x2F;code&gt; 的方式去保存其他的 &lt;code&gt;layer&lt;&#x2F;code&gt; 。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; echo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -n &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sha256:e1c75a5e0bfa094c407e411eb6cc8a159ee8b060cbd0398f1693978b4af9af10 sha256:9e97312b63ff63ad98bb1f3f688fdff0721ce5111e7475b02ab652f10a4ff97d&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sha256sum&lt;&#x2F;span&gt;&lt;span&gt; -
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;27d46ebb54384edbc8c807984f9eb065321912422b0e6c49d6a9cd8c8b7d8ffc&lt;&#x2F;span&gt;&lt;span&gt;  -
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; echo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -n &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sha256:27d46ebb54384edbc8c807984f9eb065321912422b0e6c49d6a9cd8c8b7d8ffc sha256:ec1817c93e7c08d27bfee063f0f1349185a558b87b2d806768af0a8fbbf5bc11&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sha256sum&lt;&#x2F;span&gt;&lt;span&gt; -
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f1b8f74eff975ae600be0345aaac8f0a3d16680c2531ffc72f77c5e17cbfeeee&lt;&#x2F;span&gt;&lt;span&gt;  -
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; echo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -n &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sha256:f1b8f74eff975ae600be0345aaac8f0a3d16680c2531ffc72f77c5e17cbfeeee sha256:05f3b67ed530c5b55f6140dfcdfb9746cdae7b76600de13275197d009086bb3d&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sha256sum&lt;&#x2F;span&gt;&lt;span&gt; -
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;8a8d1f0b34041a66f09e49bdc03e75c2190f606b0db7e08b75eb6747f7b49e11&lt;&#x2F;span&gt;&lt;span&gt;  -
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;如此就找到了所有的 &lt;code&gt;layer&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;但是，上面的文件保存的只有元数据 &lt;code&gt;(metadata )&lt;&#x2F;code&gt;，还需要找到真实的 &lt;code&gt;rootfs&lt;&#x2F;code&gt; 保存的位置:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cat &#x2F;var&#x2F;lib&#x2F;docker&#x2F;image&#x2F;overlay2&#x2F;layerdb&#x2F;sha256&#x2F;e1c75a5e0bfa094c407e411eb6cc8a159ee8b060cbd0398f1693978b4af9af10&#x2F;cache-id
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;286b92fb4ca407b7475db92eec9dccbd7bc279b968e9f7ca61deb13a9eee9c02
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;overlay2&lt;&#x2F;code&gt; 的所有 &lt;code&gt;rootfs&lt;&#x2F;code&gt; 都保存在 &lt;code&gt;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&lt;&#x2F;code&gt; 中，具体到上面的 &lt;code&gt;layer: e1c75a5e0bfa094c407e411eb6cc8a159ee8b060cbd0398f1693978b4af9af10&lt;&#x2F;code&gt; 的 &lt;code&gt;rootfs&lt;&#x2F;code&gt; 的位置就是 &lt;code&gt;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;286b92fb4ca407b7475db92eec9dccbd7bc279b968e9f7ca61deb13a9eee9c02&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;以此类推，可以找到上述的四个 &lt;code&gt;layer&lt;&#x2F;code&gt; 的 &lt;code&gt;rootfs&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cat &#x2F;var&#x2F;lib&#x2F;docker&#x2F;image&#x2F;overlay2&#x2F;layerdb&#x2F;sha256&#x2F;27d46ebb54384edbc8c807984f9eb065321912422b0e6c49d6a9cd8c8b7d8ffc&#x2F;cache-id
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;268f8bdf24c70efcb96bcfedbc22458b36d532bd1a9494f8a5989069eb849802
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cat &#x2F;var&#x2F;lib&#x2F;docker&#x2F;image&#x2F;overlay2&#x2F;layerdb&#x2F;sha256&#x2F;f1b8f74eff975ae600be0345aaac8f0a3d16680c2531ffc72f77c5e17cbfeeee&#x2F;cache-id
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f34511250966eebf394cfcd377e3f3b3e226910881a87b14a9a9743bcbd30c05
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cat &#x2F;var&#x2F;lib&#x2F;docker&#x2F;image&#x2F;overlay2&#x2F;layerdb&#x2F;sha256&#x2F;8a8d1f0b34041a66f09e49bdc03e75c2190f606b0db7e08b75eb6747f7b49e11&#x2F;cache-id
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;df8d02faf11610c87d3ed7c92b5201902b87c468061bb495597fb2ce8d68d90e
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;将他们通过 &lt;code&gt;Union mount&lt;&#x2F;code&gt; 的方式挂载到某个目录，就能得到容器完整的 &lt;code&gt;rootfs&lt;&#x2F;code&gt; 了。而且，可以观察出，上面得到的结果就是 &lt;code&gt;GraphDriver&lt;&#x2F;code&gt; 中的结果。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; ls &#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;286b92fb4ca407b7475db92eec9dccbd7bc279b968e9f7ca61deb13a9eee9c02
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;committed&lt;&#x2F;span&gt;&lt;span&gt;  diff  link
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; ls &#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;268f8bdf24c70efcb96bcfedbc22458b36d532bd1a9494f8a5989069eb849802
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;committed&lt;&#x2F;span&gt;&lt;span&gt;  diff  link  lower  work
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; ls &#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;f34511250966eebf394cfcd377e3f3b3e226910881a87b14a9a9743bcbd30c05
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;committed&lt;&#x2F;span&gt;&lt;span&gt;  diff  link  lower  work
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; ls &#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;df8d02faf11610c87d3ed7c92b5201902b87c468061bb495597fb2ce8d68d90e
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;committed&lt;&#x2F;span&gt;&lt;span&gt;  diff  link  lower  work
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;除了最底层 &lt;code&gt;286b92fb4ca407b7475db92eec9dccbd7bc279b968e9f7ca61deb13a9eee9c02&lt;&#x2F;code&gt; 之外，其他各上层的 &lt;code&gt;rootfs&lt;&#x2F;code&gt; 中都存在 &lt;code&gt;lower&lt;&#x2F;code&gt; 目录，这是保存各自的底层 &lt;code&gt;(文档中表述为 parent)&lt;&#x2F;code&gt;。比如对于倒数第二层 &lt;code&gt;268f8bdf24c70efcb96bcfedbc22458b36d532bd1a9494f8a5989069eb849802&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cat &#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;268f8bdf24c70efcb96bcfedbc22458b36d532bd1a9494f8a5989069eb849802&#x2F;lower
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;l&#x2F;QEYZLDRIUA2DNUJIGGVCZYDVRM
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; ls&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -l&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;l&#x2F;QEYZLDRIUA2DNUJIGGVCZYDVRM
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;l&#x2F;QEYZLDRIUA2DNUJIGGVCZYDVRM&lt;&#x2F;span&gt;&lt;span&gt; -&amp;gt; ..&#x2F;286b92fb4ca407b7475db92eec9dccbd7bc279b968e9f7ca61deb13a9eee9c02&#x2F;diff
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;最后，根据当前的 &lt;code&gt;lower&lt;&#x2F;code&gt; 可以得到底层的 &lt;code&gt;diff&lt;&#x2F;code&gt; 。&lt;&#x2F;p&gt;
+&lt;p&gt;通过上述操作，将 &lt;code&gt;lower&lt;&#x2F;code&gt; 与 &lt;code&gt;diff&lt;&#x2F;code&gt; 关联起来了:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;lower&lt;&#x2F;code&gt;: 可理解为当前的镜像层，对于当前层而言，是只读的&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;diff&lt;&#x2F;code&gt;: 是容器可读可写层，初始为空，容器内有文件被修改时，这个文件夹就会有对应的变化，也就是所谓的 &lt;code&gt;COW&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;使用如下方式验证:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; docker ps&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -a
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;CONTAINER&lt;&#x2F;span&gt;&lt;span&gt; ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;7baea70ac0a0&lt;&#x2F;span&gt;&lt;span&gt;        ubuntu:latest       &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sleep 3600000&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;     2 hours ago         Up 2 hours                              vigorous_poitras
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; docker inspect 7baea70ac0a0
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;GraphDriver&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Data&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: {
+&lt;&#x2F;span&gt;&lt;span&gt;                &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;LowerDir&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;9667b87c5a650e82e2a27a6420813fd8b7891a0e37b13558448e6f82a2e7a877-init&#x2F;diff:&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;df8d02faf11610c87d3ed7c92b5201902b87c468061bb495597fb2ce8d68d90e&#x2F;diff:&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;f34511250966eebf394cfcd377e3f3b3e226910881a87b14a9a9743bcbd30c05&#x2F;diff:&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;268f8bdf24c70efcb96bcfedbc22458b36d532bd1a9494f8a5989069eb849802&#x2F;diff:&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;286b92fb4ca407b7475db92eec9dccbd7bc279b968e9f7ca61deb13a9eee9c02&#x2F;diff&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;                &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;MergedDir&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;9667b87c5a650e82e2a27a6420813fd8b7891a0e37b13558448e6f82a2e7a877&#x2F;merged&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;                &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;UpperDir&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;9667b87c5a650e82e2a27a6420813fd8b7891a0e37b13558448e6f82a2e7a877&#x2F;diff&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;                &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;WorkDir&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;9667b87c5a650e82e2a27a6420813fd8b7891a0e37b13558448e6f82a2e7a877&#x2F;work&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;            },
+&lt;&#x2F;span&gt;&lt;span&gt;            &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Name&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;overlay2&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;        },
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; docker exec&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -ti&lt;&#x2F;span&gt;&lt;span&gt; 7baea70ac0a0 bash
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;touch ~&lt;&#x2F;span&gt;&lt;span&gt;&#x2F;a.txt
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;然后在另一个终端:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; tree &#x2F;var&#x2F;lib&#x2F;docker&#x2F;overlay2&#x2F;9667b87c5a650e82e2a27a6420813fd8b7891a0e37b13558448e6f82a2e7a877
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;├──&lt;&#x2F;span&gt;&lt;span&gt; diff
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;│&lt;&#x2F;span&gt;&lt;span&gt;   └── root
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;│&lt;&#x2F;span&gt;&lt;span&gt;       └── a.txt
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;├──&lt;&#x2F;span&gt;&lt;span&gt; link
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;├──&lt;&#x2F;span&gt;&lt;span&gt; lower
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;├──&lt;&#x2F;span&gt;&lt;span&gt; merged
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;└──&lt;&#x2F;span&gt;&lt;span&gt; work
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;└──&lt;&#x2F;span&gt;&lt;span&gt; work
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;在 &lt;code&gt;diff&lt;&#x2F;code&gt; 中多出了文件 &lt;code&gt;root&#x2F;a.txt&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;此外，很容易发现还有一个以 &lt;code&gt;-init&lt;&#x2F;code&gt; 结尾的文件，这同样是一个层，夹在只读层和读写层之间。&lt;code&gt;Init&lt;&#x2F;code&gt; 层是 &lt;code&gt;Docker&lt;&#x2F;code&gt; 项目单独生成的一个内部层，专门用来存放 &lt;code&gt;&#x2F;etc&#x2F;hosts&lt;&#x2F;code&gt;、 &lt;code&gt;&#x2F;etc&#x2F;resolv.conf&lt;&#x2F;code&gt; 等信息。&lt;&#x2F;p&gt;
+&lt;p&gt;需要这样一层的原因是，这些文件本来属于只读的 &lt;code&gt;Ubuntu&lt;&#x2F;code&gt; 镜像的一部分，但是用户往往需要在启动容器时写入一些指定的值比如 &lt;code&gt;hostname&lt;&#x2F;code&gt;，所以就需要在可读写层对它们进行修改。&lt;&#x2F;p&gt;
+&lt;p&gt;可是，这些修改往往只对当前的容器有效，我们并不希望执行 &lt;code&gt;docker commit&lt;&#x2F;code&gt; 时，把这些信息连同可读写层一起提交掉。&lt;&#x2F;p&gt;
+&lt;p&gt;所以， &lt;code&gt;Docker&lt;&#x2F;code&gt; 做法是，在修改了这些文件之后，以一个单独的层挂载了出来。而用户执行 &lt;code&gt;docker commit&lt;&#x2F;code&gt; 只会提交可读写层，所以是不包含这些内容的。&lt;&#x2F;p&gt;
+&lt;p&gt;最终，这几个层都被联合挂载，表现为一个完整的 &lt;code&gt;Ubuntu&lt;&#x2F;code&gt; 操作系统供容器使用。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;zong-jie&quot;&gt;总结&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;code&gt;Mount Namespace&lt;&#x2F;code&gt; 技术为容器提供了独立 &lt;code&gt;rootfs&lt;&#x2F;code&gt; 的能力，使容器在本地环境，测试环境，云环境之间具备了真正的 &lt;strong&gt;一致性&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;UnionFS&lt;&#x2F;code&gt; 为 &lt;code&gt;Docker&lt;&#x2F;code&gt; 镜像提供了快速迭代，分层下载，复用已有镜像等能力。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;can-kao-wen-dang&quot;&gt;参考文档&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;coolshell.cn&#x2F;articles&#x2F;17061.html&quot;&gt;DOCKER基础技术：AUFS&lt;&#x2F;a&gt;
+&lt;a href=&quot;https:&#x2F;&#x2F;blog.csdn.net&#x2F;ra681t58cjxsgckj31&#x2F;article&#x2F;details&#x2F;104707642&quot;&gt;一文读懂容器三大核心技术——Namespace，Cgroup和UnionFS&lt;&#x2F;a&gt;
+&lt;a href=&quot;https:&#x2F;&#x2F;docs.docker.com&#x2F;storage&#x2F;storagedriver&#x2F;select-storage-driver&#x2F;&quot;&gt;Docker storage drivers&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 容器 - 深入理解镜像</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/docker-image/#mount-namespace" class="toc-link">Mount Namespace</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/docker-image/#mount-namespace-kai-fa" class="toc-link">Mount Namespace 开发</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/docker-image/#mount-namespace-zhi-ding-gua-zai-dian" class="toc-link">Mount Namespace 指定挂载点</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/docker-image/#mount-namespace-gua-zai-gen-mu-lu" class="toc-link">Mount Namespace 挂载根目录</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/docker-image/#bei-zhu" class="toc-link">备注</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/docker-image/#unionfs" class="toc-link">UnionFS</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/docker-image/#shi-yao-shi-unionfs" class="toc-link">什么是 UnionFS</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/docker-image/#overlay2" class="toc-link">Overlay2</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/docker-image/#zong-jie" class="toc-link">总结</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/docker-image/#can-kao-wen-dang" class="toc-link">参考文档</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;docker-image&#x2F;">容器 - 深入理解镜像</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-08-20</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p><code>Namespace</code> 与 <code>Cgroup</code> 技术是容器技术的核心点，但 <code>Docker</code> 项目的成功关键点却要归功于 <code>Docker Image</code> 的发明。在 <code>Cloud Foundry</code> 时代，<strong>上云</strong> 的过程需要经过多次 <strong>玄学调参</strong> 才能解决由于本地环境与云主机的差异性所导致的问题。<code>Docker</code> 则通过 <code>Mount Namespace</code> 与 <code>UnionFS</code> 技术，成功的解决了这个问题。</p>
+<h2 id="mount-namespace">Mount Namespace</h2>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> man mount_namespace
+</span><span style="color:#bf616a;">MOUNT_NAMESPACES</span><span>(7)                 </span><span style="color:#bf616a;">Linux</span><span> Programmer&#39;</span><span style="color:#a3be8c;">s Manual                 MOUNT_NAMESPACES(7)
+</span><span style="color:#a3be8c;">
+</span><span style="color:#a3be8c;">NAME
+</span><span style="color:#a3be8c;">       mount_namespaces - overview of Linux mount namespaces
+</span><span style="color:#a3be8c;">
+</span><span style="color:#a3be8c;">DESCRIPTION
+</span><span style="color:#a3be8c;">       For an overview of namespaces, see namespaces(7).
+</span><span style="color:#a3be8c;">
+</span><span style="color:#a3be8c;">       Mount namespaces provide isolation of the list of mount points seen by the processes in each
+</span><span style="color:#a3be8c;">       namespace instance. Thus, the processes in each of the mount namespace instances will see
+</span><span style="color:#a3be8c;">       distinct single-directory hierarchies.
+</span><span style="color:#a3be8c;">
+</span><span style="color:#a3be8c;">       The views provided by the /proc/[pid]/mounts, /proc/[pid]/mountinfo, and /proc/[pid]/mountstats
+</span><span style="color:#a3be8c;">       files (all described in proc(5)) correspond to the mount namespace in which the process with
+</span><span style="color:#a3be8c;">       the PID [pid] resides. (All of the processes that reside in the same mount namespace will see
+</span><span style="color:#a3be8c;">       the same view in these files.)
+</span><span style="color:#a3be8c;">
+</span><span style="color:#a3be8c;">       A new mount namespace is created using either clone(2) or unshare(2) with the CLONE_NEWNS flag.
+</span><span style="color:#a3be8c;">       When a new mount namespace is created, its mount point list is initialized as follows:
+</span><span style="color:#a3be8c;">
+</span><span style="color:#a3be8c;">       * If the namespace is created using clone(2), the mount point list of the child</span><span>&#39;s namespace is
+</span><span>         </span><span style="color:#bf616a;">a</span><span> copy of the mount point list in the parent&#39;</span><span style="color:#a3be8c;">s namespace.
+</span><span style="color:#a3be8c;">
+</span><span style="color:#a3be8c;">       * If the namespace is created using unshare(2), the mount point list of the new namespace is a
+</span><span style="color:#a3be8c;">         copy of the mount point list in the caller</span><span>&#39;s previous mount namespace.
+</span><span>
+</span><span>       </span><span style="color:#bf616a;">Subsequent</span><span> modifications to the mount point list (mount(2) </span><span style="color:#bf616a;">and</span><span> umount(2)) </span><span style="color:#bf616a;">in</span><span> either mount
+</span><span>       </span><span style="color:#bf616a;">namespace</span><span> will not (by default) </span><span style="color:#bf616a;">affect</span><span> the mount point list seen in the other namespace (but
+</span><span>       </span><span style="color:#bf616a;">see</span><span> the following discussion of shared subtrees)</span><span style="color:#96b5b4;">.
+</span></code></pre>
+<p>简单来说，<code>Mount Namepace</code> 为进程提供独立的文件系统视图，即可以将进程的文件系统挂载到指定挂载点，从而是进程只能看到 <code>Mount Namespace</code> 中的文件系统。</p>
+<p>接下来，还是通过代码展示。</p>
+<h3 id="mount-namespace-kai-fa">Mount Namespace 开发</h3>
+<p>下面的代码，使用 <code>Mount Namespace</code> 的方式通过 <code>clone(2)</code> 系统调用，创建一个新的进程。在该进程中执行 <code>/bin/bash</code> 程序。</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#b48ead;">#define </span><span>_GNU_SOURCE
+</span><span>
+</span><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">sys/mount.h</span><span>&gt;
+</span><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">sys/types.h</span><span>&gt;
+</span><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">sys/wait.h</span><span>&gt;
+</span><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">stdio.h</span><span>&gt;
+</span><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">sched.h</span><span>&gt;
+</span><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">signal.h</span><span>&gt;
+</span><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">unistd.h</span><span>&gt;
+</span><span>
+</span><span style="color:#b48ead;">#define </span><span>STACK_SIZE (</span><span style="color:#d08770;">1024 </span><span>* </span><span style="color:#d08770;">1024</span><span>)
+</span><span>
+</span><span style="color:#b48ead;">static char</span><span> container_stack[STACK_SIZE];
+</span><span>
+</span><span style="color:#b48ead;">char </span><span>*</span><span style="color:#b48ead;">const</span><span> container_args[] = {
+</span><span>        &quot;</span><span style="color:#a3be8c;">/bin/bash</span><span>&quot;,
+</span><span>        NULL
+</span><span>};
+</span><span>
+</span><span style="color:#b48ead;">int </span><span style="color:#8fa1b3;">container_main</span><span>(</span><span style="color:#b48ead;">void </span><span>*</span><span style="color:#bf616a;">arg</span><span>) {
+</span><span>    </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">Container - inside the container!</span><span style="color:#96b5b4;">\n</span><span>&quot;);
+</span><span>    </span><span style="color:#bf616a;">execv</span><span>(container_args[</span><span style="color:#d08770;">0</span><span>], container_args);
+</span><span>    </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">Something&#39;s wrong!</span><span style="color:#96b5b4;">\n</span><span>&quot;);
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">1</span><span>;
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">int </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">Parent - start a container!</span><span style="color:#96b5b4;">\n</span><span>&quot;);
+</span><span>    </span><span style="color:#b48ead;">int</span><span> container_pid = </span><span style="color:#bf616a;">clone</span><span>(container_main, container_stack + STACK_SIZE, CLONE_NEWNS | SIGCHLD, </span><span style="color:#d08770;">NULL</span><span>);
+</span><span>    </span><span style="color:#b48ead;">if </span><span>(container_pid &lt; </span><span style="color:#d08770;">0</span><span>) {
+</span><span>        </span><span style="color:#96b5b4;">perror</span><span>(&quot;</span><span style="color:#a3be8c;">failed to create a new process</span><span>&quot;);
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">1</span><span>;
+</span><span>    }
+</span><span>    </span><span style="color:#bf616a;">waitpid</span><span>(container_pid, </span><span style="color:#d08770;">NULL</span><span>, </span><span style="color:#d08770;">0</span><span>);
+</span><span>    </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">Parent - container stopped!</span><span style="color:#96b5b4;">\n</span><span>&quot;);
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">0</span><span>;
+</span><span>}
+</span></code></pre>
+<p>编译并运行程序:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> gcc main.c</span><span style="color:#bf616a;"> -o</span><span> mn; </span><span style="color:#bf616a;">sudo</span><span> ./mn
+</span><span style="color:#bf616a;">Parent</span><span> - start a container!
+</span><span style="color:#bf616a;">Container</span><span> - inside the container!
+</span><span style="color:#bf616a;">[root@zephyrus</span><span> 01-mount-namespace]#
+</span></code></pre>
+<p>如此，就成功的进入到了容器环境内。</p>
+<p><em>注意</em>: 是要使用 <code>root</code> 权限执行这个程序。</p>
+<p>然后，在容器内执行 <code>df -h</code> 指令:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">[root@zephyrus</span><span> 01-mount-namespace]# df</span><span style="color:#bf616a;"> -h
+</span><span style="color:#bf616a;">Filesystem</span><span>      Size  Used Avail Use% Mounted on
+</span><span style="color:#bf616a;">/dev/sdd</span><span>        251G   39G  200G  17% /
+</span><span style="color:#bf616a;">tools</span><span>           931G  362G  570G  39% /init
+</span><span style="color:#bf616a;">none</span><span>            2.0G     0  2.0G   0% /dev
+</span><span style="color:#bf616a;">tmpfs</span><span>           2.0G     0  2.0G   0% /sys/fs/cgroup
+</span><span style="color:#bf616a;">none</span><span>            2.0G  8.0K  2.0G   1% /run
+</span><span style="color:#bf616a;">none</span><span>            2.0G     0  2.0G   0% /run/lock
+</span><span style="color:#bf616a;">none</span><span>            2.0G     0  2.0G   0% /run/shm
+</span><span style="color:#bf616a;">none</span><span>            2.0G     0  2.0G   0% /run/user
+</span><span style="color:#bf616a;">tmpfs</span><span>           2.0G     0  2.0G   0% /mnt/wsl
+</span><span style="color:#bf616a;">/dev/sdc</span><span>        251G   11G  228G   5% /mnt/wsl/docker-desktop-data/isocache
+</span><span style="color:#bf616a;">none</span><span>            2.0G   12K  2.0G   1% /mnt/wsl/docker-desktop/shared-sockets/host-services
+</span><span style="color:#bf616a;">/dev/sdb</span><span>        251G  117M  239G   1% /mnt/wsl/docker-desktop/docker-desktop-proxy
+</span><span style="color:#bf616a;">/dev/loop0</span><span>      231M  231M     0 100% /mnt/wsl/docker-desktop/cli-tools
+</span><span style="color:#bf616a;">C:</span><span style="color:#96b5b4;">\ </span><span>            931G  362G  570G  39% /mnt/c
+</span></code></pre>
+<p>会发现，解决与在宿主机上执行该命令的结果是相同的。这个结果很不好，甚至可以说很危险。因为，不但容器可以看到宿主机上的文件，甚至于还拥有 <code>root</code> 权限。接下来，尝试通过在容器中设置挂载点的方式解决这个问题。</p>
+<h3 id="mount-namespace-zhi-ding-gua-zai-dian">Mount Namespace 指定挂载点</h3>
+<p>修改 <code>container_main</code> 函数:</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#b48ead;">int </span><span style="color:#8fa1b3;">container_main</span><span>(</span><span style="color:#b48ead;">void </span><span>*</span><span style="color:#bf616a;">arg</span><span>) {
+</span><span>    </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">Container - inside the container!</span><span style="color:#96b5b4;">\n</span><span>&quot;);
+</span><span>    </span><span style="color:#bf616a;">mount</span><span>(&quot;</span><span style="color:#a3be8c;">none</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">/tmp</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">tmpfs</span><span>&quot;, </span><span style="color:#d08770;">0</span><span>, &quot;&quot;);
+</span><span>    </span><span style="color:#bf616a;">execv</span><span>(container_args[</span><span style="color:#d08770;">0</span><span>], container_args);
+</span><span>    </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">Something&#39;s wrong!</span><span style="color:#96b5b4;">\n</span><span>&quot;);
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">1</span><span>;
+</span><span>}
+</span></code></pre>
+<p>使用 <code>mount(2)</code> 系统调用，在容器进程中，增加一个挂载点。</p>
+<p>使用 <code>ls</code> 指令确认 <code>/tmp</code> 目录为空目录，说明挂载成功:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">ls</span><span> /tmp
+</span></code></pre>
+<p>之后，在确认一下系统的文件系统:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#65737e;"># 在原来的文件系统基础之上会多出一个
+</span><span style="color:#bf616a;">[root@zephyrus</span><span> 01-mount-namespace]# df</span><span style="color:#bf616a;"> -h
+</span><span style="color:#bf616a;">Filesystem</span><span>      Size  Used Avail Use% Mounted on
+</span><span style="color:#bf616a;">none</span><span>            2.0G     0  2.0G   0% /tmp
+</span><span>
+</span><span style="color:#bf616a;">[root@zephyrus</span><span> 01-mount-namespace]# mount</span><span style="color:#bf616a;"> -l </span><span>| </span><span style="color:#bf616a;">grep</span><span> tmpfs
+</span><span style="color:#bf616a;">none</span><span> on /tmp type tmpfs (rw,relatime)
+</span></code></pre>
+<p>这些都可以说明，已经成功在容器内挂载了一个文件系统。而且，在宿主机上是无法看到这个挂载点的。到目前为止，一切都是按照预期发展的。</p>
+<h3 id="mount-namespace-gua-zai-gen-mu-lu">Mount Namespace 挂载根目录</h3>
+<p>既然可以在容器内部挂载 <code>/tmp</code>，那么现在来尝试挂载 <code>/</code>。</p>
+<p>首先，准备一下必要的环境:</p>
+<ul>
+<li><strong>bash</strong>: 作为容器的第一个进程，允许在容器执行其他指令</li>
+<li><strong>ls</strong>: 观察容器内的文件系统是否符合预期</li>
+<li><strong>lib</strong>: 存放 <code>bash</code> 与 <code>ls</code> 必须的动态链接库</li>
+</ul>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#65737e;">#/bin/bash
+</span><span>
+</span><span style="color:#bf616a;">T</span><span>=</span><span style="color:#a3be8c;">root
+</span><span style="color:#bf616a;">mkdir -p </span><span>${</span><span style="color:#bf616a;">T</span><span>}/{bin,etc,lib,usr}
+</span><span style="color:#bf616a;">cp -v</span><span> /bin/{bash,ls} ${</span><span style="color:#bf616a;">T</span><span>}/bin
+</span><span style="color:#bf616a;">cp -v</span><span> /etc/profile ${</span><span style="color:#bf616a;">T</span><span>}/etc/profile
+</span><span>
+</span><span style="color:#bf616a;">list</span><span>=$</span><span style="color:#a3be8c;">(</span><span style="color:#bf616a;">ldd</span><span style="color:#a3be8c;"> /bin/ls </span><span>| </span><span style="color:#bf616a;">egrep -o </span><span>&#39;</span><span style="color:#a3be8c;">/lib.*\.[0-9]</span><span>&#39;</span><span style="color:#a3be8c;">)
+</span><span style="color:#b48ead;">for</span><span> i </span><span style="color:#b48ead;">in </span><span>$(</span><span style="color:#96b5b4;">echo </span><span>$</span><span style="color:#bf616a;">list </span><span>| </span><span style="color:#bf616a;">awk -F </span><span>&#39;</span><span style="color:#a3be8c;">\n</span><span>&#39; &#39;</span><span style="color:#a3be8c;">{print $1}</span><span>&#39;); </span><span style="color:#b48ead;">do
+</span><span>  </span><span style="color:#bf616a;">mkdir -p </span><span>$(</span><span style="color:#bf616a;">dirname </span><span>&quot;$</span><span style="color:#a3be8c;">{</span><span style="color:#bf616a;">T</span><span style="color:#a3be8c;">}</span><span>$</span><span style="color:#a3be8c;">{</span><span style="color:#bf616a;">i</span><span style="color:#a3be8c;">}</span><span>&quot;) &amp;&amp; </span><span style="color:#bf616a;">cp -v </span><span>&quot;$</span><span style="color:#bf616a;">i</span><span>&quot; &quot;$</span><span style="color:#a3be8c;">{</span><span style="color:#bf616a;">T</span><span style="color:#a3be8c;">}</span><span>$</span><span style="color:#a3be8c;">{</span><span style="color:#bf616a;">i</span><span style="color:#a3be8c;">}</span><span>&quot;;
+</span><span style="color:#b48ead;">done
+</span><span>
+</span><span style="color:#bf616a;">list</span><span>=$</span><span style="color:#a3be8c;">(</span><span style="color:#bf616a;">ldd</span><span style="color:#a3be8c;"> /bin/bash </span><span>| </span><span style="color:#bf616a;">egrep -o </span><span>&#39;</span><span style="color:#a3be8c;">/lib.*\.[0-9]</span><span>&#39;</span><span style="color:#a3be8c;">)
+</span><span style="color:#b48ead;">for</span><span> i </span><span style="color:#b48ead;">in </span><span>$(</span><span style="color:#96b5b4;">echo </span><span>$</span><span style="color:#bf616a;">list </span><span>| </span><span style="color:#bf616a;">awk -F </span><span>&#39;</span><span style="color:#a3be8c;">\n</span><span>&#39; &#39;</span><span style="color:#a3be8c;">{print $1}</span><span>&#39;); </span><span style="color:#b48ead;">do
+</span><span>  </span><span style="color:#bf616a;">mkdir -p </span><span>$(</span><span style="color:#bf616a;">dirname </span><span>&quot;$</span><span style="color:#a3be8c;">{</span><span style="color:#bf616a;">T</span><span style="color:#a3be8c;">}</span><span>$</span><span style="color:#a3be8c;">{</span><span style="color:#bf616a;">i</span><span style="color:#a3be8c;">}</span><span>&quot;) &amp;&amp; </span><span style="color:#bf616a;">cp -v </span><span>&quot;$</span><span style="color:#bf616a;">i</span><span>&quot; &quot;$</span><span style="color:#a3be8c;">{</span><span style="color:#bf616a;">T</span><span style="color:#a3be8c;">}</span><span>$</span><span style="color:#a3be8c;">{</span><span style="color:#bf616a;">i</span><span style="color:#a3be8c;">}</span><span>&quot;;
+</span><span style="color:#b48ead;">done
+</span></code></pre>
+<p>与上一个实验不同的是，现在期望容器内的文件系统与宿主机独立。即，使用不同的根目录。因此，在代码层面需要将之前的 <code>mount(2)</code> 系统调用，改变为 <code>chroot(2)</code> 系统调用。</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> man 2 chroot
+</span><span style="color:#bf616a;">CHROOT</span><span>(2)                           </span><span style="color:#bf616a;">Linux</span><span> Programmer&#39;</span><span style="color:#a3be8c;">s Manual                           CHROOT(2)
+</span><span style="color:#a3be8c;">
+</span><span style="color:#a3be8c;">NAME
+</span><span style="color:#a3be8c;">       chroot - change root directory
+</span><span style="color:#a3be8c;">
+</span><span style="color:#a3be8c;">SYNOPSIS
+</span><span style="color:#a3be8c;">       #include &lt;unistd.h&gt;
+</span><span style="color:#a3be8c;">
+</span><span style="color:#a3be8c;">       int chroot(const char *path);
+</span><span style="color:#a3be8c;">
+</span><span style="color:#a3be8c;">DESCRIPTION
+</span><span style="color:#a3be8c;">       chroot() changes the root directory of the calling process to that specified in path. This
+</span><span style="color:#a3be8c;">       directory will be used for pathnames beginning with /. The root directory is inherited by
+</span><span style="color:#a3be8c;">       all children of the calling process.
+</span><span style="color:#a3be8c;">
+</span><span style="color:#a3be8c;">       Only a privileged process (Linux: one with the CAP_SYS_CHROOT capability in its user namespace)
+</span><span style="color:#a3be8c;">       may call chroot().
+</span></code></pre>
+<p>最终，函数 <code>container_main</code> 的代码为:</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#b48ead;">int </span><span style="color:#8fa1b3;">container_main</span><span>(</span><span style="color:#b48ead;">void </span><span>*</span><span style="color:#bf616a;">arg</span><span>) {
+</span><span>    </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">Container - inside the container!</span><span style="color:#96b5b4;">\n</span><span>&quot;);
+</span><span>    </span><span style="color:#b48ead;">int</span><span> rev = </span><span style="color:#bf616a;">chroot</span><span>(&quot;</span><span style="color:#a3be8c;">./root</span><span>&quot;);
+</span><span>    </span><span style="color:#b48ead;">if </span><span>(</span><span style="color:#d08770;">0 </span><span>!= rev) {
+</span><span>        </span><span style="color:#96b5b4;">perror</span><span>(&quot;</span><span style="color:#a3be8c;">failed to chroot</span><span>&quot;);
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">2</span><span>;
+</span><span>    }
+</span><span>    rev = </span><span style="color:#bf616a;">chdir</span><span>(&quot;</span><span style="color:#a3be8c;">/</span><span>&quot;);
+</span><span>    </span><span style="color:#b48ead;">if </span><span>(</span><span style="color:#d08770;">0 </span><span>!= rev) {
+</span><span>        </span><span style="color:#96b5b4;">perror</span><span>(&quot;</span><span style="color:#a3be8c;">failed to chdir</span><span>&quot;);
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">3</span><span>;
+</span><span>    }
+</span><span>    rev = </span><span style="color:#bf616a;">execv</span><span>(container_args[</span><span style="color:#d08770;">0</span><span>], container_args);
+</span><span>    </span><span style="color:#b48ead;">if </span><span>(</span><span style="color:#d08770;">0 </span><span>!= rev) {
+</span><span>        </span><span style="color:#96b5b4;">perror</span><span>(&quot;</span><span style="color:#a3be8c;">failed to exec</span><span>&quot;);
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">5</span><span>;
+</span><span>    }
+</span><span>    </span><span style="color:#96b5b4;">printf</span><span>(&quot;</span><span style="color:#a3be8c;">Something&#39;s wrong!</span><span style="color:#96b5b4;">\n</span><span>&quot;);
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">1</span><span>;
+</span><span>}
+</span></code></pre>
+<p>与之前一样，编译并执行程序，即可进入到容器内部:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> gcc main.c</span><span style="color:#bf616a;"> -o</span><span> mn; </span><span style="color:#bf616a;">sudo</span><span> ./mn
+</span><span style="color:#bf616a;">Parent</span><span> - start a container!
+</span><span style="color:#bf616a;">Container</span><span> - inside the container!
+</span><span style="color:#bf616a;">bash-4.4#
+</span></code></pre>
+<p>然后，执行 <code>ls</code> 可以看到根目录 <code>/</code> 的文件就是之前在 <code>root</code> 目录预先准备好的文件:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">bash-4.4#</span><span> ls /
+</span><span style="color:#bf616a;">bin</span><span>  etc  lib  lib64  usr
+</span><span style="color:#bf616a;">bash-4.4#</span><span> ls /bin
+</span><span style="color:#bf616a;">bash</span><span>  ls
+</span><span style="color:#bf616a;">bash-4.4#
+</span></code></pre>
+<p>综上所述，如果在 <code>root</code> 目录中保存的是一个完成的操作系统，那么，就可以实现容器内的进程就可以使用内部的 <code>/bin</code>，<code>/lib</code> 的系统环境，从而与宿主机，与其他容器相互隔离的目的。</p>
+<h3 id="bei-zhu">备注</h3>
+<p>挂载 <code>tmpfs</code> 实验的运行环境为:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cat /etc/os-release
+</span><span style="color:#bf616a;">NAME</span><span>=&quot;</span><span style="color:#a3be8c;">Arch Linux</span><span>&quot;
+</span><span style="color:#bf616a;">PRETTY_NAME</span><span>=&quot;</span><span style="color:#a3be8c;">Arch Linux</span><span>&quot;
+</span><span style="color:#bf616a;">ID</span><span>=</span><span style="color:#a3be8c;">arch
+</span><span style="color:#bf616a;">BUILD_ID</span><span>=</span><span style="color:#a3be8c;">rolling
+</span><span style="color:#bf616a;">ANSI_COLOR</span><span>=&quot;</span><span style="color:#a3be8c;">38;2;23;147;209</span><span>&quot;
+</span><span style="color:#bf616a;">HOME_URL</span><span>=&quot;</span><span style="color:#a3be8c;">https://www.archlinux.org/</span><span>&quot;
+</span><span style="color:#bf616a;">DOCUMENTATION_URL</span><span>=&quot;</span><span style="color:#a3be8c;">https://wiki.archlinux.org/</span><span>&quot;
+</span><span style="color:#bf616a;">SUPPORT_URL</span><span>=&quot;</span><span style="color:#a3be8c;">https://bbs.archlinux.org/</span><span>&quot;
+</span><span style="color:#bf616a;">BUG_REPORT_URL</span><span>=&quot;</span><span style="color:#a3be8c;">https://bugs.archlinux.org/</span><span>&quot;
+</span><span style="color:#bf616a;">LOGO</span><span>=</span><span style="color:#a3be8c;">archlinux
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> uname</span><span style="color:#bf616a;"> -r
+</span><span style="color:#bf616a;">4.19.104-microsoft-standard
+</span></code></pre>
+<p><code>chroot</code> 实验的运行环境为:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cat /etc/os-release
+</span><span style="color:#bf616a;">NAME</span><span>=&quot;</span><span style="color:#a3be8c;">Ubuntu</span><span>&quot;
+</span><span style="color:#bf616a;">VERSION</span><span>=&quot;</span><span style="color:#a3be8c;">18.04.4 LTS (Bionic Beaver)</span><span>&quot;
+</span><span style="color:#bf616a;">ID</span><span>=</span><span style="color:#a3be8c;">ubuntu
+</span><span style="color:#bf616a;">ID_LIKE</span><span>=</span><span style="color:#a3be8c;">debian
+</span><span style="color:#bf616a;">PRETTY_NAME</span><span>=&quot;</span><span style="color:#a3be8c;">Ubuntu 18.04.4 LTS</span><span>&quot;
+</span><span style="color:#bf616a;">VERSION_ID</span><span>=&quot;</span><span style="color:#a3be8c;">18.04</span><span>&quot;
+</span><span style="color:#bf616a;">HOME_URL</span><span>=&quot;</span><span style="color:#a3be8c;">https://www.ubuntu.com/</span><span>&quot;
+</span><span style="color:#bf616a;">SUPPORT_URL</span><span>=&quot;</span><span style="color:#a3be8c;">https://help.ubuntu.com/</span><span>&quot;
+</span><span style="color:#bf616a;">BUG_REPORT_URL</span><span>=&quot;</span><span style="color:#a3be8c;">https://bugs.launchpad.net/ubuntu/</span><span>&quot;
+</span><span style="color:#bf616a;">PRIVACY_POLICY_URL</span><span>=&quot;</span><span style="color:#a3be8c;">https://www.ubuntu.com/legal/terms-and-policies/privacy-policy</span><span>&quot;
+</span><span style="color:#bf616a;">VERSION_CODENAME</span><span>=</span><span style="color:#a3be8c;">bionic
+</span><span style="color:#bf616a;">UBUNTU_CODENAME</span><span>=</span><span style="color:#a3be8c;">bionic
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> uname</span><span style="color:#bf616a;"> -r
+</span><span style="color:#bf616a;">4.15.0-112-generic
+</span></code></pre>
+<h2 id="unionfs">UnionFS</h2>
+<p>在 <code>Cloud Foundry</code> 时代，上云过程繁琐的根本原因在于: 本地环境与云主机环境不一致。</p>
+<p>在狭义上，软件的依赖指编程时所使用的第三方库；广义上，依赖不止包括编程使用的第三方库，操作系统同样也是软件的依赖。</p>
+<p>通过上面对 <code>Mount Namespace</code> 技术简单的实验，已经验证了在容器内打包一个完整的操作系统作为容器的 <code>rootfs</code> 是可行的。到目前为止，从技术的角度而言，已经解决了容器隔离的问题。但从使用角度，或者说用户体验的角度而言，每次构建一个容器，都要打包一份操作系统文件，似乎实在是不便于使用。</p>
+<p>比如，开发者使用 <code>Ubuntu</code> 操作系统的 <code>ISO</code> 制作了一个 <code>rootfs</code>，并依次为基础，安装 <code>Java</code> 环境，进而部署 <code>Java</code> 应用。如果，另一个开发者也有同样的需求，或者同一开发者需要部署另一个 <code>Java</code> 应用，显然，最理想情况是能够复用之前已经安装了 <code>Java</code> 的 <code>rootfs</code> 环境，而不是重复一遍流程。</p>
+<p>直观的解决办法，构建 <code>rootfs</code> 时，每执行一个有意义的操作之后，都生成一个新的 <code>rootfs</code>。之后，就可以选择一个合适的 <code>rootfs</code> 作为基础，添加新的操作构建目标 <code>rootfs</code>。</p>
+<p>但这个方案并不完美，如果每次构建过程都产生一个新的 <code>rootfs</code>，最后将会导致系统内有极其多的 <code>rootfs</code>。</p>
+<p>幸运的是，这个问题并不难解决。将问题一般化，基于既有 <code>A</code>，每一种操作 <code>F</code> 都可以产生唯一结果 <code>B</code>。并且，<code>B</code> 可以作为下一轮的输入。结果发现，这像极了 <code>git</code> 和区块链。</p>
+<p><code>Docker</code> 在设计 <code>Docker</code> 镜像时也是使用了类似的方法。他们引入了层 <code>(layer)</code> 概念。用户制作镜像的每一步操作，都会生成一个层，将 <code>rootfs</code> 从全量保存，改为了增量保存。</p>
+<h3 id="shi-yao-shi-unionfs">什么是 UnionFS</h3>
+<p><code>Docker</code> 镜像的这种实现方式，依赖于一种叫做 <code>UnionFS</code> 的文件系统。</p>
+<p>简单来讲，<a href="https://de.wikipedia.org/wiki/UnionFS">UnionFS</a> 允许将多个设备文件或目录挂载到同一个目录上，将多个设备的内容作为整体对外展示，或者将一个设备文件挂载到一个已有的目录上。</p>
+<p>比如，在 <code>Ubuntu 18.04</code> 上:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#65737e;"># 准备测试目录
+</span><span style="color:#bf616a;">$</span><span> mkdir</span><span style="color:#bf616a;"> -p</span><span> A/{a,x}
+</span><span style="color:#bf616a;">$</span><span> mkdir</span><span style="color:#bf616a;"> -p</span><span> B/{b,x}
+</span><span style="color:#bf616a;">$</span><span> rm</span><span style="color:#bf616a;"> -rf</span><span> C &amp;&amp; </span><span style="color:#bf616a;">mkdir -p</span><span> C
+</span></code></pre>
+<p>使用联合挂载的方式，将这两个目录挂载到一个公共的目录 <code>C</code> 上:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> mount</span><span style="color:#bf616a;"> -t</span><span> aufs</span><span style="color:#bf616a;"> -o</span><span> dirs=./A:./B none ./C
+</span></code></pre>
+<p>这时可以看到目录 <code>A</code> 与目录 <code>B</code> 被合并到了目录 <code>C</code> 中</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> tree C
+</span><span style="color:#bf616a;">C
+</span><span style="color:#bf616a;">├──</span><span> a
+</span><span style="color:#bf616a;">├──</span><span> b
+</span><span style="color:#bf616a;">└──</span><span> x
+</span><span>
+</span><span style="color:#bf616a;">3</span><span> directories, 0 files
+</span></code></pre>
+<p>此时，如果修改 <code>C</code> 也会反应到对应的 <code>A</code> 或 <code>B</code> 中。</p>
+<p><code>Docker</code> 支持多种<a href="https://docs.docker.com/storage/storagedriver/select-storage-driver/">存储驱动</a>，但目前默认使用的驱动为 <code>overlay2</code>。</p>
+<h3 id="overlay2">Overlay2</h3>
+<p>接下来通过一个例子来探索 <code>overlay2</code>。</p>
+<p>首先，启动一个容器:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">docker</span><span> run</span><span style="color:#bf616a;"> -d</span><span> ubuntu:latest sleep 3600000
+</span></code></pre>
+<p>这个命令的含义是，使用 <code>ubuntu:latest</code> 这个 <code>Docker</code> 镜像来运行一个容器。然后，使用命令查看镜像的细节:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> docker image inspect ubuntu:latest
+</span><span style="color:#bf616a;">...
+</span><span>        &quot;</span><span style="color:#a3be8c;">GraphDriver</span><span>&quot;</span><span style="color:#bf616a;">: </span><span>{
+</span><span>            &quot;</span><span style="color:#a3be8c;">Data</span><span>&quot;: {
+</span><span>                &quot;</span><span style="color:#a3be8c;">LowerDir</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">/var/lib/docker/overlay2/f34511250966eebf394cfcd377e3f3b3e226910881a87b14a9a9743bcbd30c05/diff:/var/lib/docker/overlay2/268f8bdf24c70efcb96bcfedbc22458b36d532bd1a9494f8a5989069eb849802/diff:/var/lib/docker/overlay2/286b92fb4ca407b7475db92eec9dccbd7bc279b968e9f7ca61deb13a9eee9c02/diff</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">MergedDir</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">/var/lib/docker/overlay2/df8d02faf11610c87d3ed7c92b5201902b87c468061bb495597fb2ce8d68d90e/merged</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">UpperDir</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">/var/lib/docker/overlay2/df8d02faf11610c87d3ed7c92b5201902b87c468061bb495597fb2ce8d68d90e/diff</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">WorkDir</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">/var/lib/docker/overlay2/df8d02faf11610c87d3ed7c92b5201902b87c468061bb495597fb2ce8d68d90e/work</span><span>&quot;
+</span><span>            },
+</span><span>            &quot;</span><span style="color:#a3be8c;">Name</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">overlay2</span><span>&quot;
+</span><span>        },
+</span><span>        &quot;</span><span style="color:#a3be8c;">RootFS</span><span>&quot;</span><span style="color:#bf616a;">: </span><span>{
+</span><span>            &quot;</span><span style="color:#a3be8c;">Type</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">layers</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">Layers</span><span>&quot;: [
+</span><span>                &quot;</span><span style="color:#a3be8c;">sha256:e1c75a5e0bfa094c407e411eb6cc8a159ee8b060cbd0398f1693978b4af9af10</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">sha256:9e97312b63ff63ad98bb1f3f688fdff0721ce5111e7475b02ab652f10a4ff97d</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">sha256:ec1817c93e7c08d27bfee063f0f1349185a558b87b2d806768af0a8fbbf5bc11</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">sha256:05f3b67ed530c5b55f6140dfcdfb9746cdae7b76600de13275197d009086bb3d</span><span>&quot;
+</span><span>            ]
+</span><span>        },
+</span><span style="color:#bf616a;">...
+</span></code></pre>
+<ul>
+<li><code>RootFS</code>: 由于 <code>Docker</code> 的镜像为分层结构，制作镜像的每一步，都是一个层。因此，一个完整的 <code>Docker</code> 镜像包括 <code>image</code> 和 <code>layer</code>。为了解决空间，提高效率等目的， <code>Docker</code> 构建镜像时，使用了 <code>COW</code> 技术，即 <code>layer</code> 在 <code>image</code> 之间是被共享的。一个 <code>Image</code> 是由多个有先后逻辑顺序的 <code>Layer</code> 所构成，也就是 <code>RootFS</code> 中的 <code>Layer</code> ，上面是底层，下面是顶层。这个信息保存在 <code>/var/lib/docker/image/overlay2/imagedb/content/sha256/&lt;image_id&gt;</code> 文件中。</li>
+</ul>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> ll /var/lib/docker/image/overlay2/layerdb/sha256/
+</span><span style="color:#bf616a;">drwx------</span><span> 2 root root 4096 Aug 16 13:48 27d46ebb54384edbc8c807984f9eb065321912422b0e6c49d6a9cd8c8b7d8ffc
+</span><span style="color:#bf616a;">drwx------</span><span> 2 root root 4096 Aug 16 13:48 8a8d1f0b34041a66f09e49bdc03e75c2190f606b0db7e08b75eb6747f7b49e11
+</span><span style="color:#bf616a;">drwx------</span><span> 2 root root 4096 Aug 16 13:48 e1c75a5e0bfa094c407e411eb6cc8a159ee8b060cbd0398f1693978b4af9af10
+</span><span style="color:#bf616a;">drwx------</span><span> 2 root root 4096 Aug 16 13:48 f1b8f74eff975ae600be0345aaac8f0a3d16680c2531ffc72f77c5e17cbfeeee
+</span></code></pre>
+<p>结果在 <code>RootFS.Layers</code> 中只找到了 <code>e1c75a5e0bfa094c407e411eb6cc8a159ee8b060cbd0398f1693978b4af9af10</code>。这是为 <code>Docker</code> 使用了 <code>ChainID</code> 的方式去保存其他的 <code>layer</code> 。</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> echo</span><span style="color:#bf616a;"> -n </span><span>&quot;</span><span style="color:#a3be8c;">sha256:e1c75a5e0bfa094c407e411eb6cc8a159ee8b060cbd0398f1693978b4af9af10 sha256:9e97312b63ff63ad98bb1f3f688fdff0721ce5111e7475b02ab652f10a4ff97d</span><span>&quot; | </span><span style="color:#bf616a;">sha256sum</span><span> -
+</span><span style="color:#bf616a;">27d46ebb54384edbc8c807984f9eb065321912422b0e6c49d6a9cd8c8b7d8ffc</span><span>  -
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> echo</span><span style="color:#bf616a;"> -n </span><span>&quot;</span><span style="color:#a3be8c;">sha256:27d46ebb54384edbc8c807984f9eb065321912422b0e6c49d6a9cd8c8b7d8ffc sha256:ec1817c93e7c08d27bfee063f0f1349185a558b87b2d806768af0a8fbbf5bc11</span><span>&quot; | </span><span style="color:#bf616a;">sha256sum</span><span> -
+</span><span style="color:#bf616a;">f1b8f74eff975ae600be0345aaac8f0a3d16680c2531ffc72f77c5e17cbfeeee</span><span>  -
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> echo</span><span style="color:#bf616a;"> -n </span><span>&quot;</span><span style="color:#a3be8c;">sha256:f1b8f74eff975ae600be0345aaac8f0a3d16680c2531ffc72f77c5e17cbfeeee sha256:05f3b67ed530c5b55f6140dfcdfb9746cdae7b76600de13275197d009086bb3d</span><span>&quot; | </span><span style="color:#bf616a;">sha256sum</span><span> -
+</span><span style="color:#bf616a;">8a8d1f0b34041a66f09e49bdc03e75c2190f606b0db7e08b75eb6747f7b49e11</span><span>  -
+</span></code></pre>
+<p>如此就找到了所有的 <code>layer</code>。</p>
+<p>但是，上面的文件保存的只有元数据 <code>(metadata )</code>，还需要找到真实的 <code>rootfs</code> 保存的位置:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cat /var/lib/docker/image/overlay2/layerdb/sha256/e1c75a5e0bfa094c407e411eb6cc8a159ee8b060cbd0398f1693978b4af9af10/cache-id
+</span><span style="color:#bf616a;">286b92fb4ca407b7475db92eec9dccbd7bc279b968e9f7ca61deb13a9eee9c02
+</span></code></pre>
+<p><code>overlay2</code> 的所有 <code>rootfs</code> 都保存在 <code>/var/lib/docker/overlay2</code> 中，具体到上面的 <code>layer: e1c75a5e0bfa094c407e411eb6cc8a159ee8b060cbd0398f1693978b4af9af10</code> 的 <code>rootfs</code> 的位置就是 <code>/var/lib/docker/overlay2/286b92fb4ca407b7475db92eec9dccbd7bc279b968e9f7ca61deb13a9eee9c02</code>。</p>
+<p>以此类推，可以找到上述的四个 <code>layer</code> 的 <code>rootfs</code>:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cat /var/lib/docker/image/overlay2/layerdb/sha256/27d46ebb54384edbc8c807984f9eb065321912422b0e6c49d6a9cd8c8b7d8ffc/cache-id
+</span><span style="color:#bf616a;">268f8bdf24c70efcb96bcfedbc22458b36d532bd1a9494f8a5989069eb849802
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> cat /var/lib/docker/image/overlay2/layerdb/sha256/f1b8f74eff975ae600be0345aaac8f0a3d16680c2531ffc72f77c5e17cbfeeee/cache-id
+</span><span style="color:#bf616a;">f34511250966eebf394cfcd377e3f3b3e226910881a87b14a9a9743bcbd30c05
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> cat /var/lib/docker/image/overlay2/layerdb/sha256/8a8d1f0b34041a66f09e49bdc03e75c2190f606b0db7e08b75eb6747f7b49e11/cache-id
+</span><span style="color:#bf616a;">df8d02faf11610c87d3ed7c92b5201902b87c468061bb495597fb2ce8d68d90e
+</span></code></pre>
+<p>将他们通过 <code>Union mount</code> 的方式挂载到某个目录，就能得到容器完整的 <code>rootfs</code> 了。而且，可以观察出，上面得到的结果就是 <code>GraphDriver</code> 中的结果。</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> ls /var/lib/docker/overlay2/286b92fb4ca407b7475db92eec9dccbd7bc279b968e9f7ca61deb13a9eee9c02
+</span><span style="color:#bf616a;">committed</span><span>  diff  link
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> ls /var/lib/docker/overlay2/268f8bdf24c70efcb96bcfedbc22458b36d532bd1a9494f8a5989069eb849802
+</span><span style="color:#bf616a;">committed</span><span>  diff  link  lower  work
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> ls /var/lib/docker/overlay2/f34511250966eebf394cfcd377e3f3b3e226910881a87b14a9a9743bcbd30c05
+</span><span style="color:#bf616a;">committed</span><span>  diff  link  lower  work
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> ls /var/lib/docker/overlay2/df8d02faf11610c87d3ed7c92b5201902b87c468061bb495597fb2ce8d68d90e
+</span><span style="color:#bf616a;">committed</span><span>  diff  link  lower  work
+</span></code></pre>
+<p>除了最底层 <code>286b92fb4ca407b7475db92eec9dccbd7bc279b968e9f7ca61deb13a9eee9c02</code> 之外，其他各上层的 <code>rootfs</code> 中都存在 <code>lower</code> 目录，这是保存各自的底层 <code>(文档中表述为 parent)</code>。比如对于倒数第二层 <code>268f8bdf24c70efcb96bcfedbc22458b36d532bd1a9494f8a5989069eb849802</code></p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cat /var/lib/docker/overlay2/268f8bdf24c70efcb96bcfedbc22458b36d532bd1a9494f8a5989069eb849802/lower
+</span><span style="color:#bf616a;">l/QEYZLDRIUA2DNUJIGGVCZYDVRM
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> ls</span><span style="color:#bf616a;"> -l</span><span> /var/lib/docker/overlay2/l/QEYZLDRIUA2DNUJIGGVCZYDVRM
+</span><span style="color:#bf616a;">/var/lib/docker/overlay2/l/QEYZLDRIUA2DNUJIGGVCZYDVRM</span><span> -&gt; ../286b92fb4ca407b7475db92eec9dccbd7bc279b968e9f7ca61deb13a9eee9c02/diff
+</span></code></pre>
+<p>最后，根据当前的 <code>lower</code> 可以得到底层的 <code>diff</code> 。</p>
+<p>通过上述操作，将 <code>lower</code> 与 <code>diff</code> 关联起来了:</p>
+<ul>
+<li><code>lower</code>: 可理解为当前的镜像层，对于当前层而言，是只读的</li>
+<li><code>diff</code>: 是容器可读可写层，初始为空，容器内有文件被修改时，这个文件夹就会有对应的变化，也就是所谓的 <code>COW</code></li>
+</ul>
+<p>使用如下方式验证:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> docker ps</span><span style="color:#bf616a;"> -a
+</span><span style="color:#bf616a;">CONTAINER</span><span> ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+</span><span style="color:#bf616a;">7baea70ac0a0</span><span>        ubuntu:latest       &quot;</span><span style="color:#a3be8c;">sleep 3600000</span><span>&quot;     2 hours ago         Up 2 hours                              vigorous_poitras
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> docker inspect 7baea70ac0a0
+</span><span style="color:#bf616a;">...
+</span><span>        &quot;</span><span style="color:#a3be8c;">GraphDriver</span><span>&quot;</span><span style="color:#bf616a;">: </span><span>{
+</span><span>            &quot;</span><span style="color:#a3be8c;">Data</span><span>&quot;: {
+</span><span>                &quot;</span><span style="color:#a3be8c;">LowerDir</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">/var/lib/docker/overlay2/9667b87c5a650e82e2a27a6420813fd8b7891a0e37b13558448e6f82a2e7a877-init/diff:/var/lib/docker/overlay2/df8d02faf11610c87d3ed7c92b5201902b87c468061bb495597fb2ce8d68d90e/diff:/var/lib/docker/overlay2/f34511250966eebf394cfcd377e3f3b3e226910881a87b14a9a9743bcbd30c05/diff:/var/lib/docker/overlay2/268f8bdf24c70efcb96bcfedbc22458b36d532bd1a9494f8a5989069eb849802/diff:/var/lib/docker/overlay2/286b92fb4ca407b7475db92eec9dccbd7bc279b968e9f7ca61deb13a9eee9c02/diff</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">MergedDir</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">/var/lib/docker/overlay2/9667b87c5a650e82e2a27a6420813fd8b7891a0e37b13558448e6f82a2e7a877/merged</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">UpperDir</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">/var/lib/docker/overlay2/9667b87c5a650e82e2a27a6420813fd8b7891a0e37b13558448e6f82a2e7a877/diff</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">WorkDir</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">/var/lib/docker/overlay2/9667b87c5a650e82e2a27a6420813fd8b7891a0e37b13558448e6f82a2e7a877/work</span><span>&quot;
+</span><span>            },
+</span><span>            &quot;</span><span style="color:#a3be8c;">Name</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">overlay2</span><span>&quot;
+</span><span>        },
+</span><span style="color:#bf616a;">...
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> docker exec</span><span style="color:#bf616a;"> -ti</span><span> 7baea70ac0a0 bash
+</span><span style="color:#bf616a;">touch ~</span><span>/a.txt
+</span></code></pre>
+<p>然后在另一个终端:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> tree /var/lib/docker/overlay2/9667b87c5a650e82e2a27a6420813fd8b7891a0e37b13558448e6f82a2e7a877
+</span><span style="color:#bf616a;">├──</span><span> diff
+</span><span style="color:#bf616a;">│</span><span>   └── root
+</span><span style="color:#bf616a;">│</span><span>       └── a.txt
+</span><span style="color:#bf616a;">├──</span><span> link
+</span><span style="color:#bf616a;">├──</span><span> lower
+</span><span style="color:#bf616a;">├──</span><span> merged
+</span><span style="color:#bf616a;">└──</span><span> work
+</span><span>    </span><span style="color:#bf616a;">└──</span><span> work
+</span></code></pre>
+<p>在 <code>diff</code> 中多出了文件 <code>root/a.txt</code>。</p>
+<p>此外，很容易发现还有一个以 <code>-init</code> 结尾的文件，这同样是一个层，夹在只读层和读写层之间。<code>Init</code> 层是 <code>Docker</code> 项目单独生成的一个内部层，专门用来存放 <code>/etc/hosts</code>、 <code>/etc/resolv.conf</code> 等信息。</p>
+<p>需要这样一层的原因是，这些文件本来属于只读的 <code>Ubuntu</code> 镜像的一部分，但是用户往往需要在启动容器时写入一些指定的值比如 <code>hostname</code>，所以就需要在可读写层对它们进行修改。</p>
+<p>可是，这些修改往往只对当前的容器有效，我们并不希望执行 <code>docker commit</code> 时，把这些信息连同可读写层一起提交掉。</p>
+<p>所以， <code>Docker</code> 做法是，在修改了这些文件之后，以一个单独的层挂载了出来。而用户执行 <code>docker commit</code> 只会提交可读写层，所以是不包含这些内容的。</p>
+<p>最终，这几个层都被联合挂载，表现为一个完整的 <code>Ubuntu</code> 操作系统供容器使用。</p>
+<h2 id="zong-jie">总结</h2>
+<p><code>Mount Namespace</code> 技术为容器提供了独立 <code>rootfs</code> 的能力，使容器在本地环境，测试环境，云环境之间具备了真正的 <strong>一致性</strong>。</p>
+<p><code>UnionFS</code> 为 <code>Docker</code> 镜像提供了快速迭代，分层下载，复用已有镜像等能力。</p>
+<h2 id="can-kao-wen-dang">参考文档</h2>
+<p><a href="https://coolshell.cn/articles/17061.html">DOCKER基础技术：AUFS</a>
+<a href="https://blog.csdn.net/ra681t58cjxsgckj31/article/details/104707642">一文读懂容器三大核心技术——Namespace，Cgroup和UnionFS</a>
+<a href="https://docs.docker.com/storage/storagedriver/select-storage-driver/">Docker storage drivers</a></p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/container/">#container</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/docker-image/">#docker image</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/mount-namespace/">#mount namespace</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/unionfs/">#unionfs</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;namespace-and-cgroup&#x2F;">‹ 容器 - 隔离与限制</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;linux-performance-guide&#x2F;">Linux 性能调优指南 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

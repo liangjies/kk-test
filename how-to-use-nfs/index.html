@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 使用 NFS</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/how-to-use-nfs/#reference" class="toc-link">Reference</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;how-to-use-nfs&#x2F;">使用 NFS</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-10-02</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>查看被分享目录的属性:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> stat /public
+</span><span>  </span><span style="color:#bf616a;">File:</span><span> /public
+</span><span>  </span><span style="color:#bf616a;">Size:</span><span> 4096            Blocks: 8          IO Block: 4096   directory
+</span><span style="color:#bf616a;">Device:</span><span> 802h/2050d      Inode: 58982401    Links: 2
+</span><span style="color:#bf616a;">Access:</span><span> (0777/drwxrwxrwx)  </span><span style="color:#bf616a;">Uid:</span><span> (    0/    root)   </span><span style="color:#bf616a;">Gid:</span><span> (    0/    root)
+</span><span style="color:#bf616a;">Access:</span><span> 2020-10-02 16:25:03.129246127 +0800
+</span><span style="color:#bf616a;">Modify:</span><span> 2020-10-02 16:24:56.129203697 +0800
+</span><span style="color:#bf616a;">Change:</span><span> 2020-10-02 16:24:56.129203697 +0800
+</span><span> </span><span style="color:#bf616a;">Birth:</span><span> -
+</span></code></pre>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo exportfs</span><span style="color:#bf616a;"> -avrf
+</span><span style="color:#bf616a;">exporting </span><span>*:/public
+</span></code></pre>
+<p>服务端 <strong>/etc/exports</strong> 配置如下:</p>
+<pre data-lang="text" style="background-color:#2b303b;color:#c0c5ce;" class="language-text "><code class="language-text" data-lang="text"><span>/public *(rw,sync,no_subtree_check)
+</span></code></pre>
+<p>确认被 NFS 导出的本地文件系统:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo exportfs</span><span style="color:#bf616a;"> -avrf
+</span><span style="color:#bf616a;">exporting </span><span>*:/public
+</span></code></pre>
+<p>在客户端查看远端配置:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> showmount</span><span style="color:#bf616a;"> -e</span><span> 192.168.50.5
+</span><span style="color:#bf616a;">Export</span><span> list for 192.168.50.5:
+</span><span style="color:#bf616a;">/public                               </span><span>*
+</span></code></pre>
+<p>客户端挂载 NFS 文件系统:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> mount</span><span style="color:#bf616a;"> -o</span><span> rw,nolock</span><span style="color:#bf616a;"> -t</span><span> nfs 192.168.50.5:/public ./tmp
+</span></code></pre>
+<p>当出现如下报错信息:</p>
+<pre data-lang="text" style="background-color:#2b303b;color:#c0c5ce;" class="language-text "><code class="language-text" data-lang="text"><span>mount.nfs: Operation not permitted
+</span></code></pre>
+<p>请修改 <strong>/etc/exports</strong> 内容为:</p>
+<pre data-lang="text" style="background-color:#2b303b;color:#c0c5ce;" class="language-text "><code class="language-text" data-lang="text"><span>/public *(rw,sync,all_squash,no_subtree_check,insecure)
+</span></code></pre>
+<p>然后重新执行命令挂载。</p>
+<p>如果希望指定 <code>user</code> 与 <code>group</code> 来操作文件，可以通过在 <strong>/etc/exports</strong> 中增加选项: <strong>anonuid=1026,anongid=100</strong>。</p>
+<h2 id="reference">Reference</h2>
+<ul>
+<li><a href="https://unix.stackexchange.com/questions/252812/user-permissions-in-nfs-mounted-directory">User permissions in NFS mounted directory</a></li>
+<li><a href="https://access.redhat.com/solutions/3773891">Mount failed with mount: mount.nfs: access denied by server while mounting error</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/nfs/">#nfs</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/filesystem/">#filesystem</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;understanding-kubernetes-objects&#x2F;">‹ 理解 Kubernetes 对象</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-controllers&#x2F;">Kubernetes 控制器 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

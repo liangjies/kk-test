@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - MongoDB Cheat Sheet</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/mongodb-cheat-sheet/#mongorestore" class="toc-link">MongoRestore</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;mongodb-cheat-sheet&#x2F;">MongoDB Cheat Sheet</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-04-09</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <h2 id="mongorestore">MongoRestore</h2>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> tldr mongorestore
+</span><span style="color:#bf616a;">Local</span><span> data is older than two weeks, use</span><span style="color:#bf616a;"> --update</span><span> to update it.
+</span><span>
+</span><span>
+</span><span style="color:#bf616a;">mongorestore
+</span><span>
+</span><span style="color:#bf616a;">Utility</span><span> to import a collection or database from a binary dump into a MongoDB instance.
+</span><span style="color:#bf616a;">More</span><span> information: &lt;https://docs.mongodb.com/manual/reference/program/mongorestore&gt;.
+</span><span>
+</span><span style="color:#bf616a;">-</span><span> Import a bson data dump from a directory to a MongoDB database:
+</span><span>    </span><span style="color:#bf616a;">mongorestore --db</span><span> database_name path/to/directory
+</span><span>
+</span><span style="color:#bf616a;">-</span><span> Import a bson data dump from a directory to a given database in a MongoDB server host, running at a given port, with user authentication (user will be prompted for password)</span><span style="color:#96b5b4;">:
+</span><span>    </span><span style="color:#bf616a;">mongorestore --host</span><span> database_host:port</span><span style="color:#bf616a;"> --db</span><span> database_name</span><span style="color:#bf616a;"> --username</span><span> username path/to/directory</span><span style="color:#bf616a;"> --password
+</span><span>
+</span><span style="color:#bf616a;">-</span><span> Import a collection from a bson file to a MongoDB database:
+</span><span>    </span><span style="color:#bf616a;">mongorestore --db</span><span> database_name path/to/file
+</span><span>
+</span><span style="color:#bf616a;">-</span><span> Import a collection from a bson file to a given database in a MongoDB server host, running at a given port, with user authentication (user will be prompted for password)</span><span style="color:#96b5b4;">:
+</span><span>    </span><span style="color:#bf616a;">mongorestore --host</span><span> database_host:port</span><span style="color:#bf616a;"> --db</span><span> database_name</span><span style="color:#bf616a;"> --username</span><span> username path/to/file</span><span style="color:#bf616a;"> --password
+</span><span>
+</span></code></pre>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> mongorestore</span><span style="color:#bf616a;"> --host</span><span> localhost:27017</span><span style="color:#bf616a;"> --db</span><span> database</span><span style="color:#bf616a;"> --username</span><span> root</span><span style="color:#bf616a;"> --password</span><span> pass12345 path/to/bson/file
+</span><span style="color:#bf616a;">2021-04-09T13:52:15.562+0800</span><span>    error connecting to host: could not connect to server: connection() </span><span style="color:#96b5b4;">:</span><span> auth error: sasl conversation error: unable to authenticate using mechanism &quot;</span><span style="color:#a3be8c;">SCRAM-SHA-1</span><span>&quot;: (AuthenticationFailed) </span><span style="color:#bf616a;">Authentication</span><span> failed.
+</span></code></pre>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> mongorestore</span><span style="color:#bf616a;"> --host</span><span> localhost:27017</span><span style="color:#bf616a;"> --db</span><span> database</span><span style="color:#bf616a;"> --authenticationDatabase</span><span> admin</span><span style="color:#bf616a;"> --username</span><span> root</span><span style="color:#bf616a;"> --password</span><span> pass12345 path/to/bson/file
+</span><span style="color:#bf616a;">2021-04-09T13:53:45.918+0800</span><span>    checking for collection data in path/to/bson/file
+</span><span style="color:#bf616a;">2021-04-09T13:53:45.937+0800</span><span>    reading metadata for testing.meta from path/to/bson/file.json
+</span><span style="color:#bf616a;">2021-04-09T13:53:45.958+0800</span><span>    restoring testing.meta from path/to/bson/file
+</span><span style="color:#bf616a;">2021-04-09T13:53:48.908+0800    </span><span style="color:#b48ead;">[</span><span>........................</span><span style="color:#b48ead;">]</span><span>  testing.meta  3.40MB/222MB  (1.5%)
+</span><span style="color:#bf616a;">2021-04-09T13:53:51.908+0800    </span><span style="color:#b48ead;">[</span><span>........................</span><span style="color:#b48ead;">]</span><span>  testing.meta  6.95MB/222MB  (3.1%)
+</span><span style="color:#bf616a;">2021-04-09T13:53:54.908+0800    </span><span style="color:#b48ead;">[</span><span>#.......................</span><span style="color:#b48ead;">]</span><span>  testing.meta  10.5MB/222MB  (4.7%)
+</span><span style="color:#bf616a;">2021-04-09T13:53:57.908+0800    </span><span style="color:#b48ead;">[</span><span>#.......................</span><span style="color:#b48ead;">]</span><span>  testing.meta  14.0MB/222MB  (6.3%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:00.908+0800    </span><span style="color:#b48ead;">[</span><span>#.......................</span><span style="color:#b48ead;">]</span><span>  testing.meta  18.1MB/222MB  (8.1%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:03.908+0800    </span><span style="color:#b48ead;">[</span><span>##......................</span><span style="color:#b48ead;">]</span><span>  testing.meta  22.2MB/222MB  (10.0%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:06.908+0800    </span><span style="color:#b48ead;">[</span><span>##......................</span><span style="color:#b48ead;">]</span><span>  testing.meta  26.0MB/222MB  (11.7%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:09.908+0800    </span><span style="color:#b48ead;">[</span><span>###.....................</span><span style="color:#b48ead;">]</span><span>  testing.meta  29.9MB/222MB  (13.5%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:12.908+0800    </span><span style="color:#b48ead;">[</span><span>###.....................</span><span style="color:#b48ead;">]</span><span>  testing.meta  33.9MB/222MB  (15.3%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:15.908+0800    </span><span style="color:#b48ead;">[</span><span>####....................</span><span style="color:#b48ead;">]</span><span>  testing.meta  38.0MB/222MB  (17.1%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:18.908+0800    </span><span style="color:#b48ead;">[</span><span>####....................</span><span style="color:#b48ead;">]</span><span>  testing.meta  42.0MB/222MB  (18.9%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:21.908+0800    </span><span style="color:#b48ead;">[</span><span>####....................</span><span style="color:#b48ead;">]</span><span>  testing.meta  46.1MB/222MB  (20.8%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:24.908+0800    </span><span style="color:#b48ead;">[</span><span>#####...................</span><span style="color:#b48ead;">]</span><span>  testing.meta  50.2MB/222MB  (22.6%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:27.908+0800    </span><span style="color:#b48ead;">[</span><span>#####...................</span><span style="color:#b48ead;">]</span><span>  testing.meta  54.4MB/222MB  (24.5%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:30.908+0800    </span><span style="color:#b48ead;">[</span><span>######..................</span><span style="color:#b48ead;">]</span><span>  testing.meta  61.2MB/222MB  (27.6%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:33.908+0800    </span><span style="color:#b48ead;">[</span><span>#######.................</span><span style="color:#b48ead;">]</span><span>  testing.meta  68.2MB/222MB  (30.7%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:36.908+0800    </span><span style="color:#b48ead;">[</span><span>########................</span><span style="color:#b48ead;">]</span><span>  testing.meta  75.2MB/222MB  (33.9%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:39.908+0800    </span><span style="color:#b48ead;">[</span><span>########................</span><span style="color:#b48ead;">]</span><span>  testing.meta  82.3MB/222MB  (37.1%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:42.908+0800    </span><span style="color:#b48ead;">[</span><span>#########...............</span><span style="color:#b48ead;">]</span><span>  testing.meta  89.3MB/222MB  (40.2%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:45.908+0800    </span><span style="color:#b48ead;">[</span><span>##########..............</span><span style="color:#b48ead;">]</span><span>  testing.meta  96.1MB/222MB  (43.3%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:48.908+0800    </span><span style="color:#b48ead;">[</span><span>###########.............</span><span style="color:#b48ead;">]</span><span>  testing.meta  103MB/222MB  (46.4%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:51.908+0800    </span><span style="color:#b48ead;">[</span><span>###########.............</span><span style="color:#b48ead;">]</span><span>  testing.meta  110MB/222MB  (49.5%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:54.908+0800    </span><span style="color:#b48ead;">[</span><span>############............</span><span style="color:#b48ead;">]</span><span>  testing.meta  117MB/222MB  (52.7%)
+</span><span style="color:#bf616a;">2021-04-09T13:54:57.908+0800    </span><span style="color:#b48ead;">[</span><span>#############...........</span><span style="color:#b48ead;">]</span><span>  testing.meta  124MB/222MB  (55.8%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:00.908+0800    </span><span style="color:#b48ead;">[</span><span>##############..........</span><span style="color:#b48ead;">]</span><span>  testing.meta  131MB/222MB  (58.9%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:03.908+0800    </span><span style="color:#b48ead;">[</span><span>##############..........</span><span style="color:#b48ead;">]</span><span>  testing.meta  138MB/222MB  (62.1%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:06.908+0800    </span><span style="color:#b48ead;">[</span><span>###############.........</span><span style="color:#b48ead;">]</span><span>  testing.meta  145MB/222MB  (65.2%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:09.908+0800    </span><span style="color:#b48ead;">[</span><span>################........</span><span style="color:#b48ead;">]</span><span>  testing.meta  152MB/222MB  (68.3%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:12.908+0800    </span><span style="color:#b48ead;">[</span><span>#################.......</span><span style="color:#b48ead;">]</span><span>  testing.meta  159MB/222MB  (71.5%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:15.908+0800    </span><span style="color:#b48ead;">[</span><span>#################.......</span><span style="color:#b48ead;">]</span><span>  testing.meta  166MB/222MB  (74.7%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:18.908+0800    </span><span style="color:#b48ead;">[</span><span>##################......</span><span style="color:#b48ead;">]</span><span>  testing.meta  173MB/222MB  (77.9%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:21.908+0800    </span><span style="color:#b48ead;">[</span><span>###################.....</span><span style="color:#b48ead;">]</span><span>  testing.meta  180MB/222MB  (81.0%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:24.908+0800    </span><span style="color:#b48ead;">[</span><span>####################....</span><span style="color:#b48ead;">]</span><span>  testing.meta  187MB/222MB  (84.2%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:27.908+0800    </span><span style="color:#b48ead;">[</span><span>####################....</span><span style="color:#b48ead;">]</span><span>  testing.meta  194MB/222MB  (87.3%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:30.908+0800    </span><span style="color:#b48ead;">[</span><span>#####################...</span><span style="color:#b48ead;">]</span><span>  testing.meta  201MB/222MB  (90.5%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:33.908+0800    </span><span style="color:#b48ead;">[</span><span>######################..</span><span style="color:#b48ead;">]</span><span>  testing.meta  208MB/222MB  (93.6%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:36.908+0800    </span><span style="color:#b48ead;">[</span><span>#######################.</span><span style="color:#b48ead;">]</span><span>  testing.meta  215MB/222MB  (96.8%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:39.905+0800    </span><span style="color:#b48ead;">[</span><span>########################</span><span style="color:#b48ead;">]</span><span>  testing.meta  222MB/222MB  (100.0%)
+</span><span style="color:#bf616a;">2021-04-09T13:55:39.905+0800</span><span>    no indexes to restore
+</span><span style="color:#bf616a;">2021-04-09T13:55:39.907+0800</span><span>    finished restoring testing.meta (384247 documents, 0 failures)
+</span><span style="color:#bf616a;">2021-04-09T13:55:39.907+0800</span><span>    384247 document(s) </span><span style="color:#bf616a;">restored</span><span> successfully. 0 document(s) </span><span style="color:#bf616a;">failed</span><span> to restore.
+</span></code></pre>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/mongodb/">#mongodb</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;docker-container-exitcode-137-without-oomkilled-flag-set&#x2F;">‹ Docker container 137 错误码异常退出</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;conda&#x2F;">conda ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

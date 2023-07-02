@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - controllers</title>
+	<link href="https://blog.kiyoko.io/tags/controllers/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-10-28T14:41:29+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/controllers/atom.xml</id>
+	<entry xml:lang="en">
+		<title>Kubernetes DaemonSet</title>
+		<published>2020-10-28T14:41:29+00:00</published>
+		<updated>2020-10-28T14:41:29+00:00</updated>
+		<link href="https://blog.kiyoko.io/kubernetes-daemonset/" type="text/html"/>
+		<id>https://blog.kiyoko.io/kubernetes-daemonset/</id>
+		<content type="html">&lt;p&gt;&lt;strong&gt;DaemonSet&lt;&#x2F;strong&gt; 确保全部 (或者某些) 节点上运行一个 Pod 的副本。 当有节点加入集群时，也会为他们新增一个 Pod 。当有节点从集群移除时，这些 Pod 也会被回收。删除 DaemonSet 将会删除它创建的所有 Pod。&lt;&#x2F;p&gt;
+&lt;p&gt;DaemonSet 的一些典型用法:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;在每个节点上运行集群守护进程
+&lt;ul&gt;
+&lt;li&gt;比如: 网络插件，存储插件&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;在每个节点上运行日志收集守护进程&lt;&#x2F;li&gt;
+&lt;li&gt;在每个节点上运行监控守护进程&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;chuang-jian-daemonset&quot;&gt;创建 DaemonSet&lt;&#x2F;h2&gt;
+&lt;p&gt;下面的 &lt;strong&gt;daemonset.yaml&lt;&#x2F;strong&gt; 文件描述了一个运行 &lt;strong&gt;fluentd-elasticsearch&lt;&#x2F;strong&gt; Docker 镜像的 DaemonSet:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;apps&#x2F;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;DaemonSet
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;fluentd-elasticsearch
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;namespace&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;kube-system
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;labels&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;k8s-app&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;fluentd-logging
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;selector&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;matchLabels&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;fluentd-elasticsearch
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;template&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;labels&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;fluentd-elasticsearch
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tolerations&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# this toleration is to have the daemonset runnable on master nodes
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# remove it if your masters can&amp;#39;t run pods
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;node-role.kubernetes.io&#x2F;master
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;effect&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;NoSchedule
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;fluentd-elasticsearch
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;quay.io&#x2F;fluentd_elasticsearch&#x2F;fluentd:v2.5.2
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resources&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;limits&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;memory&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;200Mi
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;requests&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cpu&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;100m
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;memory&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;200Mi
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumeMounts&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;varlog
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mountPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;var&#x2F;log
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;varlibdockercontainers
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mountPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;containers
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;readOnly&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;terminationGracePeriodSeconds&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;30
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumes&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;varlog
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;hostPath&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;var&#x2F;log
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;varlibdockercontainers
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;hostPath&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;var&#x2F;lib&#x2F;docker&#x2F;containers
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;使用 &lt;strong&gt;yaml&lt;&#x2F;strong&gt; 文件创建 &lt;strong&gt;DaemonSet&lt;&#x2F;strong&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; apply&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -f&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;k8s.io&#x2F;examples&#x2F;controllers&#x2F;daemonset.yaml
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;ru-he-diao-du-daemon-pods&quot;&gt;如何调度 Daemon Pods&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;tong-guo-mo-ren-diao-du-qi-diao-du&quot;&gt;通过默认调度器调度&lt;&#x2F;h3&gt;
+&lt;p&gt;DaemonSet 确保所有符合条件的节点都运行该 Pod 的一个副本。 通常，运行 Pod 的节点由 Kubernetes 调度器选择。不过，DaemonSet pods 由 DaemonSet 控制器创建和调度。这就带来了以下问题:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pod 行为的不一致性: 正常 Pod 在被创建后等待调度时处于 Pending 状态， DaemonSet Pods 创建后不会处于 Pending 状态下。这使用户感到困惑。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;configuration&#x2F;pod-priority-preemption&#x2F;&quot;&gt;Pod 抢占&lt;&#x2F;a&gt; 由默认调度器处理。启用抢占后，DaemonSet 控制器将在不考虑 Pod 优先级和抢占 的情况下制定调度决策。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;&lt;strong&gt;ScheduleDaemonSetPods&lt;&#x2F;strong&gt; 控制 Kubernetes 使用 &lt;strong&gt;默认调度器&lt;&#x2F;strong&gt; 而不是 &lt;strong&gt;DaemonSet 控制器&lt;&#x2F;strong&gt; 来调度 DaemonSets，通过将 &lt;strong&gt;yaml&lt;&#x2F;strong&gt; 配置文件中 &lt;strong&gt;Pod&lt;&#x2F;strong&gt; 部分的 &lt;strong&gt;.spec.nodeName&lt;&#x2F;strong&gt; 替换为 &lt;strong&gt;.spec.affinity.nodeAffinity&lt;&#x2F;strong&gt;。更多内容请点击 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;scheduling-eviction&#x2F;assign-pod-node&#x2F;#affinity-and-anti-affinity&quot;&gt;Assigning Pods to Nodes: Affinity and anti-affinity&lt;&#x2F;a&gt;。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;with-node-affinity
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;affinity&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nodeAffinity&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;requiredDuringSchedulingIgnoredDuringExecution&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nodeSelectorTerms&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;matchExpressions&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;kubernetes.io&#x2F;e2e-az-name
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;operator&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;In
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;values&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;e2e-az1
+&lt;&#x2F;span&gt;&lt;span&gt;            - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;e2e-az2
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;preferredDuringSchedulingIgnoredDuringExecution&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;weight&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;preference&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;matchExpressions&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;another-node-label-key
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;operator&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;In
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;values&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;another-node-label-value
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;with-node-affinity
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;k8s.gcr.io&#x2F;pause:2.0
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;requiredDuringSchedulingIgnoredDuringExecution&lt;&#x2F;strong&gt;: 必须将 Pod 部署到满足条件的节点上，否则不断重试&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;preferredDuringSchedulingIgnoredDuringExecution&lt;&#x2F;strong&gt;: 优先将 Pod 部署到满足条件的节点上，否则忽略该条件&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;此外，系统会自动添加 &lt;strong&gt;node.kubernetes.io&#x2F;unschedulable: NoSchedule&lt;&#x2F;strong&gt; 容忍度到 &lt;strong&gt;DaemonSet Pods&lt;&#x2F;strong&gt;。在调度 DaemonSet Pod 时，默认调度器会忽略 &lt;strong&gt;unschedulable&lt;&#x2F;strong&gt; 节点。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;can-kao-wen-dang&quot;&gt;参考文档&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;controllers&#x2F;daemonset&#x2F;&quot;&gt;Kubernetes DaemonSet&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;configuration&#x2F;pod-priority-preemption&#x2F;&quot;&gt;Pod Priority and Preemption&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;scheduling-eviction&#x2F;assign-pod-node&#x2F;#affinity-and-anti-affinity&quot;&gt;Assigning Pods to Nodes: Affinity and anti-affinity&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Kubernetes StatefulSet</title>
+		<published>2020-10-27T11:58:31+00:00</published>
+		<updated>2020-10-27T11:58:31+00:00</updated>
+		<link href="https://blog.kiyoko.io/kubernetes-statefulset/" type="text/html"/>
+		<id>https://blog.kiyoko.io/kubernetes-statefulset/</id>
+		<content type="html">&lt;p&gt;StatefulSet 是用来管理有状态应用的工作负载 API 对象。&lt;&#x2F;p&gt;
+&lt;p&gt;StatefulSet 用来管理 Deployment 和扩展一组 Pod，并且能为这些 Pod 提供序号和唯一性保证。&lt;&#x2F;p&gt;
+&lt;p&gt;和 Deployment 相同的是，StatefulSet 管理了基于相同容器定义的一组 Pod。但和 Deployment 不同的是，StatefulSet 为它们的每个 Pod 维护了一个固定的 ID。这些 Pod 是基于相同的声明来创建的，但是不能相互替换：无论怎么调度，每个 Pod 都有一个永久不变的 ID。&lt;&#x2F;p&gt;
+&lt;p&gt;StatefulSet 和其他控制器使用相同的工作模式。你在 StatefulSet 对象 中定义你期望的状态，然后 StatefulSet 的 控制器 就会通过各种更新来达到那种你想要的状态。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;shi-yong-statefulsets&quot;&gt;使用 StatefulSets&lt;&#x2F;h2&gt;
+&lt;p&gt;StatefulSets 对于需要满足以下一个或多个需求的应用程序很有价值:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;稳定的、唯一的网络标识符。&lt;&#x2F;li&gt;
+&lt;li&gt;稳定的、持久的存储。&lt;&#x2F;li&gt;
+&lt;li&gt;有序的、优雅的部署和缩放。&lt;&#x2F;li&gt;
+&lt;li&gt;有序的、自动的滚动更新。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;在上面，稳定意味着 Pod 调度或重调度的整个过程是有持久性的。如果应用程序不需要任何稳定的标识符或有序的部署、删除或伸缩，则应该使用由一组无状态的副本控制器提供的工作负载来部署应用程序，比如 Deployment 或者 ReplicaSet 可能更适用于您的无状态应用部署需要。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;xian-zhi&quot;&gt;限制&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;给定 Pod 的存储必须由 &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;kubernetes&#x2F;examples&#x2F;tree&#x2F;master&#x2F;staging&#x2F;persistent-volume-provisioning&#x2F;README.md&quot;&gt;PersistentVolume&lt;&#x2F;a&gt; 驱动 基于所请求的 &lt;strong&gt;storage class&lt;&#x2F;strong&gt; 来提供，或者由管理员预先提供。&lt;&#x2F;li&gt;
+&lt;li&gt;删除或者收缩 StatefulSet 并 &lt;strong&gt;不会删除&lt;&#x2F;strong&gt; 它关联的存储卷。这样做是为了保证数据安全，它通常比自动清除 StatefulSet 所有相关的资源更有价值。&lt;&#x2F;li&gt;
+&lt;li&gt;StatefulSet 当前需要 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;services-networking&#x2F;service&#x2F;#headless-services&quot;&gt;Headless Services&lt;&#x2F;a&gt; 来负责 Pod 的网络标识。用户需要负责创建此服务。&lt;&#x2F;li&gt;
+&lt;li&gt;当删除 StatefulSets 时，StatefulSet 不提供任何终止 Pod 的保证。为了实现 StatefulSet 中的 Pod 可以有序和优雅的终止，可以在删除之前将 StatefulSet 缩放为 0。&lt;&#x2F;li&gt;
+&lt;li&gt;在默认 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;controllers&#x2F;statefulset&#x2F;#pod-management-policies&quot;&gt;Pod 管理策略&lt;&#x2F;a&gt;(&lt;strong&gt;OrderedReady&lt;&#x2F;strong&gt;) 时使用 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;controllers&#x2F;statefulset&#x2F;#rolling-updates&quot;&gt;滚动更新&lt;&#x2F;a&gt;，可能进入需要 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;controllers&#x2F;statefulset&#x2F;#forced-rollback&quot;&gt;人工干预&lt;&#x2F;a&gt; 才能修复的损坏状态。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;zu-jian&quot;&gt;组件&lt;&#x2F;h2&gt;
+&lt;p&gt;下面的示例演示了 StatefulSet 的组件。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Service
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;labels&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;app&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ports&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;port&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;80
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;web
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;clusterIP&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;None
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;selector&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;app&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;+++
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;apps&#x2F;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;StatefulSet
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;web
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;selector&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;matchLabels&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;app&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# has to match .spec.template.metadata.labels
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;serviceName&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;replicas&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;3 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# by default is 1
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;template&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;labels&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;app&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# has to match .spec.selector.matchLabels
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;terminationGracePeriodSeconds&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;10
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;k8s.gcr.io&#x2F;nginx-slim:0.8
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ports&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containerPort&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;80
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;web
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumeMounts&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;www
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mountPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumeClaimTemplates&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;www
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;accessModes&lt;&#x2F;span&gt;&lt;span&gt;: [ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ReadWriteOnce&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; ]
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;storageClassName&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;my-storage-class&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resources&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;requests&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;storage&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;1Gi
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;名为 &lt;strong&gt;nginx&lt;&#x2F;strong&gt; 的 Headless Service 用来控制网络域名。&lt;&#x2F;li&gt;
+&lt;li&gt;名为 &lt;strong&gt;web&lt;&#x2F;strong&gt; 的 StatefulSet 有一个 Spec，它表明将在独立的 3 个 Pod 副本中启动 nginx 容器。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;volumeClaimTemplates&lt;&#x2F;strong&gt; 将通过 PersistentVolumes 驱动提供的 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;storage&#x2F;persistent-volumes&#x2F;&quot;&gt;PersistentVolumes&lt;&#x2F;a&gt; 来提供稳定的存储。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;StatefulSet 对象的 &lt;strong&gt;name&lt;&#x2F;strong&gt; 必须是合法的 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;overview&#x2F;working-with-objects&#x2F;names#dns-subdomain-names&quot;&gt;DNS 域名&lt;&#x2F;a&gt;。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;pod-selector&quot;&gt;Pod Selector&lt;&#x2F;h2&gt;
+&lt;p&gt;必须将 StatefullSet 的 &lt;strong&gt;.spec.selector&lt;&#x2F;strong&gt; 字段与 &lt;strong&gt;.spec.template.metadata.labels&lt;&#x2F;strong&gt; 设置相同的值。&lt;&#x2F;p&gt;
+&lt;p&gt;在 Kubernetes 1.8 版本之前，忽略 &lt;strong&gt;.spec.selector&lt;&#x2F;strong&gt; 字段会获得默认设置值。在 1.8 及以后的版本中，未指定匹配的 Pod Selector 将在创建 StatefulSet 期间导致验证错误。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;can-kao-wen-dang&quot;&gt;参考文档&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;controllers&#x2F;statefulset&#x2F;&quot;&gt;Kubernetes StatefulSet&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Kubernetes Deployment</title>
+		<published>2020-10-27T10:48:23+00:00</published>
+		<updated>2020-10-27T10:48:23+00:00</updated>
+		<link href="https://blog.kiyoko.io/kubernetes-deployment/" type="text/html"/>
+		<id>https://blog.kiyoko.io/kubernetes-deployment/</id>
+		<content type="html">&lt;p&gt;一个 Deployment 控制器为 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;pods&#x2F;&quot;&gt;Pods&lt;&#x2F;a&gt; 和 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;controllers&#x2F;replicaset&#x2F;&quot;&gt;ReplicaSets&lt;&#x2F;a&gt; 提供声明式的更新能力。&lt;&#x2F;p&gt;
+&lt;p&gt;用户负责描述 Deployment 中的 &lt;strong&gt;目标状态&lt;&#x2F;strong&gt;，而 Deployment 控制器以受控速率更改 &lt;strong&gt;实际状态&lt;&#x2F;strong&gt;，使其变为 &lt;strong&gt;期望状态&lt;&#x2F;strong&gt;。用户可以定义 Deployment 以创建新的 ReplicaSet，或删除现有 Deployment， 并通过新的 Deployment 接收(adopt)其资源。&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;说明&lt;&#x2F;strong&gt;： 不要管理 Deployment 所拥有的 ReplicaSet 。 如果存在下面未覆盖的使用场景，请考虑在 Kubernetes 仓库中提出 Issue。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h2 id=&quot;yong-li&quot;&gt;用例&lt;&#x2F;h2&gt;
+&lt;p&gt;以下是 Deployments 的典型用例：&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;controllers&#x2F;deployment&#x2F;#creating-a-deployment&quot;&gt;创建 Deployment 使 ReplicaSet 上线(rollout)&lt;&#x2F;a&gt;。 ReplicaSet 在后台创建 Pods。 检查 ReplicaSet 的上线状态，查看其是否成功。&lt;&#x2F;li&gt;
+&lt;li&gt;通过更新 Deployment 的 PodTemplateSpec，声明 Pod 的新状态 。 新的 ReplicaSet 会被创建，Deployment 以受控速率将 Pod 从旧 ReplicaSet 迁移到新 ReplicaSet。 每个新的 ReplicaSet 都会更新 Deployment 的修订版本。&lt;&#x2F;li&gt;
+&lt;li&gt;如果 Deployment 的当前状态不稳定，回滚到较早的 Deployment 版本。 每次回滚都会更新 Deployment 的修订版本。&lt;&#x2F;li&gt;
+&lt;li&gt;扩大 Deployment 规模以承担更多负载。&lt;&#x2F;li&gt;
+&lt;li&gt;暂停 Deployment 以应用对 PodTemplateSpec 所作的多项修改， 然后恢复其执行以启动新的上线版本。&lt;&#x2F;li&gt;
+&lt;li&gt;使用 Deployment 状态 来判定上线过程是否出现停滞。&lt;&#x2F;li&gt;
+&lt;li&gt;清理较旧的不再需要的 ReplicaSet。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;chuang-jian-deployment&quot;&gt;创建 Deployment&lt;&#x2F;h2&gt;
+&lt;p&gt;下面是 Deployment 示例。Deployment 创建一个 ReplicaSet，负责启动三个 &lt;strong&gt;nginx&lt;&#x2F;strong&gt; Pods:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;apps&#x2F;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Deployment
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx-deployment
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;labels&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;app&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;replicas&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;3
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;selector&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;matchLabels&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;app&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;template&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;labels&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;app&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx:1.14.2
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ports&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containerPort&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;80
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;在该例中:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;创建名为 &lt;strong&gt;nginx-deployment&lt;&#x2F;strong&gt; (由 &lt;strong&gt;.metadata.name&lt;&#x2F;strong&gt; 字段标明) 的 Deployment。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;该 Deployment 创建三个 (由 &lt;strong&gt;.spec.replicas&lt;&#x2F;strong&gt; 字段标明) Pod 副本。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;.spec.selector&lt;&#x2F;strong&gt; 字段定义 Deployment 如何查找要管理的 Pods。 在这里，你只需选择在 Pod 模板中定义的标签（app: nginx）。 不过，更复杂的选择规则是也可能的，只要 Pod 模板&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;说明&lt;&#x2F;strong&gt;： &lt;strong&gt;matchLabels&lt;&#x2F;strong&gt; 字段是 {key,value} 字典映射。在 &lt;strong&gt;matchLabels&lt;&#x2F;strong&gt; 映射中的单个 {key,value} 映射等效于 &lt;strong&gt;matchExpressions&lt;&#x2F;strong&gt; 中的一个元素，即其 key 字段是 “key”，operator 为 “In”，value 数组仅包含 “value”。在 &lt;strong&gt;matchLabels&lt;&#x2F;strong&gt; 和 &lt;strong&gt;matchExpressions&lt;&#x2F;strong&gt; 中给出的所有条件都必须满足才能匹配。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;.spec.template&lt;&#x2F;strong&gt; 字段包含以下子字段:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用 &lt;strong&gt;.metadata.labels&lt;&#x2F;strong&gt; 字段为 Pod 设置标签 &lt;strong&gt;app: nginx&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;.template.spec&lt;&#x2F;strong&gt; 字段表示 Pod 的模板，指示 Pods 运行一个 &lt;strong&gt;nginx&lt;&#x2F;strong&gt; 容器，该容器运行 &lt;strong&gt;nginx:1.14.2&lt;&#x2F;strong&gt; 镜像。&lt;&#x2F;li&gt;
+&lt;li&gt;创建一个容器，使用 &lt;strong&gt;.spec.template.spec.containers[0].name&lt;&#x2F;strong&gt; 字段 &lt;strong&gt;nginx&lt;&#x2F;strong&gt; 作为名字&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;开始之前，请确保的 Kubernetes 集群已启动并运行。 按照以下步骤创建上述 Deployment:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;通过运行以下命令创建 Deployment:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; apply&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -f&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;k8s.io&#x2F;examples&#x2F;controllers&#x2F;nginx-deployment.yaml
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;检查 Deployment 是否已创建。如果仍在创建 Deployment， 则输出类似于:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; get deployments
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;NAME&lt;&#x2F;span&gt;&lt;span&gt;               READY   UP-TO-DATE   AVAILABLE   AGE
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nginx-deployment&lt;&#x2F;span&gt;&lt;span&gt;   0&#x2F;3     0            0           1s
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;在检查集群中的 Deployment 时，所显示的字段有：&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;NAME 列出了集群中 Deployment 的名称。&lt;&#x2F;li&gt;
+&lt;li&gt;READY 显示应用程序的可用的 &lt;strong&gt;副本&lt;&#x2F;strong&gt; 数。显示的模式是“就绪个数&#x2F;期望个数”。&lt;&#x2F;li&gt;
+&lt;li&gt;UP-TO-DATE 显示为了打到期望状态已经更新的副本数。&lt;&#x2F;li&gt;
+&lt;li&gt;AVAILABLE 显示应用可供用户使用的副本数。&lt;&#x2F;li&gt;
+&lt;li&gt;AGE 显示应用程序运行的时间。
+请注意期望副本数是根据 &lt;strong&gt;.spec.replicas&lt;&#x2F;strong&gt; 字段设置 3。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;查看 Deployment 上线状态:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; rollout status deployment.v1.apps&#x2F;nginx-deployment
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Waiting&lt;&#x2F;span&gt;&lt;span&gt; for rollout to finish: 2 out of 3 new replicas have been updated...
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;deployment &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx-deployment&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; successfully rolled out
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;查看 Deployment 创建的 ReplicaSet (rs):&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; get rs
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;NAME&lt;&#x2F;span&gt;&lt;span&gt;                          DESIRED   CURRENT   READY   AGE
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nginx-deployment-75675f5897&lt;&#x2F;span&gt;&lt;span&gt;   3         3         3       18s
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;ReplicaSet 输出中包含以下字段:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;NAME 列出名字空间中 ReplicaSet 的名称；&lt;&#x2F;li&gt;
+&lt;li&gt;DESIRED 显示应用的期望副本个数，即在创建 Deployment 时所定义的值。 此为期望状态；&lt;&#x2F;li&gt;
+&lt;li&gt;CURRENT 显示当前运行状态中的副本个数；&lt;&#x2F;li&gt;
+&lt;li&gt;READY 显示应用中有多少副本可以为用户提供服务；&lt;&#x2F;li&gt;
+&lt;li&gt;AGE 显示应用已经运行的时间长度。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;注意&lt;&#x2F;strong&gt;: ReplicaSet 的名称始终被格式化为 &lt;strong&gt;[Deployment名称]-[随机字符串]&lt;&#x2F;strong&gt;。 其中的随机字符串是使用 &lt;strong&gt;pod-template-hash&lt;&#x2F;strong&gt; 作为种子随机生成的。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;查看每个 Pod 自动生成的标签:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; get pods&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --show-labels
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;NAME&lt;&#x2F;span&gt;&lt;span&gt;                                READY     STATUS    RESTARTS   AGE       LABELS
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nginx-deployment-75675f5897-7ci7o&lt;&#x2F;span&gt;&lt;span&gt;   1&#x2F;1       Running   0          18s       app=nginx,pod-template-hash=3123191453
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nginx-deployment-75675f5897-kzszj&lt;&#x2F;span&gt;&lt;span&gt;   1&#x2F;1       Running   0          18s       app=nginx,pod-template-hash=3123191453
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nginx-deployment-75675f5897-qqcnn&lt;&#x2F;span&gt;&lt;span&gt;   1&#x2F;1       Running   0          18s       app=nginx,pod-template-hash=3123191453
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;所创建的 ReplicaSet 确保总是存在三个 &lt;strong&gt;nginx&lt;&#x2F;strong&gt; Pod。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;说明&lt;&#x2F;strong&gt;: 必须在 Deployment 中指定适当的 &lt;strong&gt;.spec.selector&lt;&#x2F;strong&gt; 和 &lt;strong&gt;.spec.template.metadata.labels&lt;&#x2F;strong&gt;。不要与其他控制器重叠。 Kubernetes 不会阻止这样做，但是如果多个控制器具有重叠的 selector，它们可能会发生冲突 执行难以预料的操作。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h3 id=&quot;pod-template-hash-biao-qian&quot;&gt;Pod-template-hash 标签&lt;&#x2F;h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;注意&lt;&#x2F;strong&gt;: 不要更改此标签&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Deployment 控制器将 &lt;strong&gt;pod-template-hash&lt;&#x2F;strong&gt; 标签添加到 Deployment 所创建或接收(adopt) 的 每个 ReplicaSet 。&lt;&#x2F;p&gt;
+&lt;p&gt;此标签可确保 Deployment 的子 ReplicaSets 不重叠。 标签是通过对 ReplicaSet 的 PodTemplate 进行哈希处理。 所生成的哈希值被添加到 ReplicaSet 的 &lt;strong&gt;selector&lt;&#x2F;strong&gt;、Pod 的 &lt;strong&gt;label&lt;&#x2F;strong&gt;，并存在于在 ReplicaSet 可能拥有的任何现有 Pod 中。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;geng-xin-deployment&quot;&gt;更新 Deployment&lt;&#x2F;h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;说明&lt;&#x2F;strong&gt;: 仅当 Deployment 的 &lt;strong&gt;.spec.template&lt;&#x2F;strong&gt; 发生改变时，例如模板的标签或容器镜像被更新，才会触发 Deployment 上线。其他更新(如对 Deployment 执行扩缩容的操作) 不会触发上线动作。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;按照以下步骤更新 Deployment:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;更新 &lt;strong&gt;nginx&lt;&#x2F;strong&gt; Pod 镜像，从 &lt;strong&gt;nginx:1.14.2&lt;&#x2F;strong&gt; 到 &lt;strong&gt;nginx:1.16.1&lt;&#x2F;strong&gt;:&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --record&lt;&#x2F;span&gt;&lt;span&gt; deployment.apps&#x2F;nginx-deployment set image \
+&lt;&#x2F;span&gt;&lt;span&gt;   deployment.v1.apps&#x2F;nginx-deployment nginx=nginx:1.16.1
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;deployment.apps&#x2F;nginx-deployment&lt;&#x2F;span&gt;&lt;span&gt; image updated
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;或者使用下面的命令:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl set image deployment&#x2F;nginx-deployment nginx=nginx:1.16.1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --record
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;deployment.apps&#x2F;nginx-deployment&lt;&#x2F;span&gt;&lt;span&gt; image updated
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;或者，可以 &lt;strong&gt;edit&lt;&#x2F;strong&gt; Deployment 并将 &lt;strong&gt;.spec.template.spec.containers[0].image&lt;&#x2F;strong&gt; 从 &lt;strong&gt;nginx:1.14.2&lt;&#x2F;strong&gt; 更改至 &lt;strong&gt;nginx:1.16.1&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl edit deployment.v1.apps&#x2F;nginx-deployment
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;deployment.apps&#x2F;nginx-deployment&lt;&#x2F;span&gt;&lt;span&gt; edited
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ol&gt;
+&lt;li&gt;查看上线状态，运行:&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl rollout status deployment.v1.apps&#x2F;nginx-deployment
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Waiting&lt;&#x2F;span&gt;&lt;span&gt; for rollout to finish: 2 out of 3 new replicas have been updated...
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 或者
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;deployment &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx-deployment&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; successfully rolled out
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;获取关于已更新的 Deployment 的更多信息:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;查看 Deployment:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl get deployments
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;NAME&lt;&#x2F;span&gt;&lt;span&gt;               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nginx-deployment&lt;&#x2F;span&gt;&lt;span&gt;   3         3         3            3           36s
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;查看 Deployment 通过创建新的 ReplicaSet:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl get rs
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;NAME&lt;&#x2F;span&gt;&lt;span&gt;                          DESIRED   CURRENT   READY   AGE
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nginx-deployment-1564180365&lt;&#x2F;span&gt;&lt;span&gt;   3         3         3       6s
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nginx-deployment-2035384211&lt;&#x2F;span&gt;&lt;span&gt;   0         0         0       36s
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;查看 Deployment 的 Pod&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl get pods
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;NAME&lt;&#x2F;span&gt;&lt;span&gt;                                READY     STATUS    RESTARTS   AGE
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nginx-deployment-1564180365-khku8&lt;&#x2F;span&gt;&lt;span&gt;   1&#x2F;1       Running   0          14s
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nginx-deployment-1564180365-nacti&lt;&#x2F;span&gt;&lt;span&gt;   1&#x2F;1       Running   0          14s
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nginx-deployment-1564180365-z9gth&lt;&#x2F;span&gt;&lt;span&gt;   1&#x2F;1       Running   0          14s
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Deployment 可确保在更新时仅关闭一定数量的 Pod。默认情况下，它确保至少所需 Pods 数量的 &lt;strong&gt;75%&lt;&#x2F;strong&gt; 处于运行状态 (最大不可用比例为 25%)。&lt;&#x2F;p&gt;
+&lt;p&gt;Deployment 还确保所创建 Pod 的数量只比期望 Pods 的数量超出一定数值。默认情况下，Deployment 可确保实际启动的 Pod 个数最大为期望值的 125%。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;获取 Deployment 的更多信息:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; describe deployments
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;can-kao-wen-dang&quot;&gt;参考文档&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;pods&#x2F;&quot;&gt;Kubernetes Pods&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;controllers&#x2F;replicaset&#x2F;&quot;&gt;Kubernetes ReplicaSets&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Kubernetes 控制器</title>
+		<published>2020-10-06T13:13:35+00:00</published>
+		<updated>2020-10-06T13:13:35+00:00</updated>
+		<link href="https://blog.kiyoko.io/kubernetes-controllers/" type="text/html"/>
+		<id>https://blog.kiyoko.io/kubernetes-controllers/</id>
+		<content type="html">&lt;p&gt;在机器人技术和自动化领域，控制回路（Control Loop）是一个非终止回路，用于调节系统状态。&lt;&#x2F;p&gt;
+&lt;p&gt;这是一个控制环的例子：房间里的温度自动调节器。&lt;&#x2F;p&gt;
+&lt;p&gt;当你设置了温度，告诉了温度自动调节器你的期望状态（Desired State）。 房间的实际温度是当前状态（Current State）。 通过对设备的开关控制，温度自动调节器让其当前状态接近期望状态。&lt;&#x2F;p&gt;
+&lt;p&gt;控制器通过 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;reference&#x2F;generated&#x2F;kube-apiserver&#x2F;&quot;&gt;apiserver&lt;&#x2F;a&gt; 监控集群的公共状态，并致力于将当前状态转变为期望的状态。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;kong-zhi-qi-mo-shi&quot;&gt;控制器模式&lt;&#x2F;h2&gt;
+&lt;p&gt;一个控制器至少追踪一种类型的 Kubernetes 资源。这些 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;overview&#x2F;working-with-objects&#x2F;kubernetes-objects&#x2F;&quot;&gt;对象&lt;&#x2F;a&gt; 有一个代表期望状态的 spec 字段。 该资源的控制器负责确保其当前状态接近期望状态。&lt;&#x2F;p&gt;
+&lt;p&gt;控制器可能会自行执行操作；在 Kubernetes 中更常见的是一个控制器会发送信息给 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;reference&#x2F;generated&#x2F;kube-apiserver&#x2F;&quot;&gt;API 服务器&lt;&#x2F;a&gt;，这会有副作用。 具体可参看后文的例子。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;tong-guo-api-fu-wu-qi-lai-kong-zhi&quot;&gt;通过 API 服务器来控制&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;controllers&#x2F;jobs-run-to-completion&quot;&gt;Job&lt;&#x2F;a&gt; 控制器是一个 Kubernetes 内置控制器的例子。 内置控制器通过和集群 API 服务器交互来管理状态。&lt;&#x2F;p&gt;
+&lt;p&gt;Job 是一种 Kubernetes 资源，它运行一个或者多个 Pod， 来执行一个任务然后停止。 （一旦被调度了，对 kubelet 来说 Pod 对象就会变成了期望状态的一部分）。&lt;&#x2F;p&gt;
+&lt;p&gt;在集群中，当 Job 控制器拿到新任务时，它会保证一组 Node 节点上的 kubelet 可以运行正确数量的 Pod 来完成工作。 Job 控制器不会自己运行任何的 Pod 或者容器。Job 控制器是通知 API 服务器来创建或者移除 Pod。&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;reference&#x2F;glossary&#x2F;?all=true#term-control-plane&quot;&gt;控制面&lt;&#x2F;a&gt;中的其它组件 根据新的消息作出反应（调度并运行新 Pod）并且最终完成工作。&lt;&#x2F;p&gt;
+&lt;p&gt;创建新 Job 后，所期望的状态就是完成这个 Job。Job 控制器会让 Job 的当前状态不断接近期望状态：创建为 Job 要完成工作所需要的 Pod，使 Job 的状态接近完成。&lt;&#x2F;p&gt;
+&lt;p&gt;控制器也会更新配置对象。例如：一旦 Job 的工作完成了，Job 控制器会更新 Job 对象的状态为 Finished。&lt;&#x2F;p&gt;
+&lt;p&gt;（这有点像温度自动调节器关闭了一个灯，以此来告诉你房间的温度现在到你设定的值了）。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;zhi-jie-kong-zhi&quot;&gt;直接控制&lt;&#x2F;h3&gt;
+&lt;p&gt;相比 Job 控制器，有些控制器需要对集群外的一些东西进行修改。&lt;&#x2F;p&gt;
+&lt;p&gt;例如，如果你使用一个控制环来保证集群中有足够的&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;architecture&#x2F;nodes&#x2F;&quot;&gt;节点&lt;&#x2F;a&gt;，那么控制就需要当前集群外的一些服务在需要时创建新节点。&lt;&#x2F;p&gt;
+&lt;p&gt;和外部状态交互的控制器从 API 服务器获取到它想要的状态，然后直接和外部系统进行通信并使当前状态更接近期望状态。&lt;&#x2F;p&gt;
+&lt;p&gt;（实际上有一个控制器可以水平地扩展集群中的节点。请参阅 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;tasks&#x2F;administer-cluster&#x2F;cluster-management&#x2F;#cluster-autoscaling&quot;&gt;集群自动扩缩容&lt;&#x2F;a&gt;）。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;she-ji&quot;&gt;设计&lt;&#x2F;h2&gt;
+&lt;p&gt;作为设计原则之一，Kubernetes 使用了很多控制器，每个控制器管理集群状态的一个特定方面。 最常见的一个特定的控制器使用一种类型的资源作为它的期望状态， 控制器管理控制另外一种类型的资源向它的期望状态演化。&lt;&#x2F;p&gt;
+&lt;p&gt;使用简单的控制器而不是一组相互连接的单体控制回路是很有用的。 控制器会失败，所以 Kubernetes 的设计正是考虑到了这一点。&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;说明：
+可以有多个控制器来创建或者更新相同类型的对象。 在后台，Kubernetes 控制器确保它们只关心与其控制资源相关联的资源。&lt;&#x2F;p&gt;
+&lt;p&gt;例如，你可以创建 Deployment 和 Job；它们都可以创建 Pod。 Job 控制器不会删除 Deployment 所创建的 Pod，因为有信息 （&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;overview&#x2F;working-with-objects&#x2F;labels&#x2F;&quot;&gt;标签&lt;&#x2F;a&gt;）让控制器可以区分这些 Pod。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h2 id=&quot;yun-xing-kong-zhi-qi-de-fang-shi&quot;&gt;运行控制器的方式&lt;&#x2F;h2&gt;
+&lt;p&gt;Kubernetes 内置一组控制器，运行在 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;reference&#x2F;command-line-tools-reference&#x2F;kube-controller-manager&#x2F;&quot;&gt;kube-controller-manager&lt;&#x2F;a&gt; 内。 这些内置的控制器提供了重要的核心功能。&lt;&#x2F;p&gt;
+&lt;p&gt;Deployment 控制器和 Job 控制器是 Kubernetes 内置控制器的典型例子。 Kubernetes 允许你运行一个稳定的控制平面，这样即使某些内置控制器失败了， 控制平面的其他部分会接替它们的工作。&lt;&#x2F;p&gt;
+&lt;p&gt;你会遇到某些控制器运行在控制面之外，用以扩展 Kubernetes。 或者，如果你愿意，你也可以自己编写新控制器。 你可以以一组 Pod 来运行你的控制器，或者运行在 Kubernetes 之外。 最合适的方案取决于控制器所要执行的功能是什么。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;ju-li-shuo-ming&quot;&gt;举例说明&lt;&#x2F;h2&gt;
+&lt;p&gt;以 &lt;strong&gt;Deployment&lt;&#x2F;strong&gt; 为例:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;apps&#x2F;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Deployment
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx-deployment
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;selector&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;matchLabels&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;app&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;replicas&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;template&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;labels&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;app&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx:1.7.9
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ports&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containerPort&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;80
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;该 Deployment 定义的编排动作要求: 确保携带了 &lt;strong&gt;app=nginx&lt;&#x2F;strong&gt; 标签的 Pod 的个数，永远等于 &lt;strong&gt;spec.replicas&lt;&#x2F;strong&gt; 指定的个数，即 &lt;strong&gt;2&lt;&#x2F;strong&gt; 个。&lt;&#x2F;p&gt;
+&lt;p&gt;集群会根据携带 &lt;strong&gt;app=nginx&lt;&#x2F;strong&gt; 标签的 &lt;strong&gt;Pod&lt;&#x2F;strong&gt; 的实际数量来执行创建或者删除 Pod 操作，使数量收敛于 &lt;strong&gt;2&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;这时，你也许就会好奇：究竟是 Kubernetes 项目中的哪个组件，在执行这些操作呢？&lt;&#x2F;p&gt;
+&lt;p&gt;在上一小节提到的 &lt;strong&gt;kube-controller-manager&lt;&#x2F;strong&gt; 就是负责管理 &lt;strong&gt;Controllers&lt;&#x2F;strong&gt; 的服务组件。并且，&lt;strong&gt;Kubernetes&lt;&#x2F;strong&gt; 项目已经包含了若干的 &lt;strong&gt;Controllers&lt;&#x2F;strong&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cd kubernetes&#x2F;pkg&#x2F;controller&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; ls&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -d &lt;&#x2F;span&gt;&lt;span&gt;*&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;deployment&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;             job&#x2F;                    podautoscaler&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cloud&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;                  disruption&#x2F;             namespace&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;replicaset&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;             serviceaccount&#x2F;         volume&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cronjob&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;                garbagecollector&#x2F;       nodelifecycle&#x2F;          replication&#x2F;            statefulset&#x2F;            daemon&#x2F;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;kong-zhi-xun-huan&quot;&gt;控制循环&lt;&#x2F;h3&gt;
+&lt;p&gt;正如本文开篇所说，&lt;strong&gt;Kubernetes&lt;&#x2F;strong&gt; 的 &lt;strong&gt;Controllers&lt;&#x2F;strong&gt; 遵循 &lt;strong&gt;控制回路（Control Loop）&lt;&#x2F;strong&gt; 的工作模式。&lt;&#x2F;p&gt;
+&lt;p&gt;比如，对于编排的对象 X，可以用一段 Go 语言风格的伪代码，来描述其 Controller 的控制循环：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;实际状态 &lt;&#x2F;span&gt;&lt;span&gt;:= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;获取集群中对象X的实际状态&lt;&#x2F;span&gt;&lt;span&gt;（&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Actual State&lt;&#x2F;span&gt;&lt;span&gt;）
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;期望状态 &lt;&#x2F;span&gt;&lt;span&gt;:= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;获取集群中对象X的期望状态&lt;&#x2F;span&gt;&lt;span&gt;（&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Desired State&lt;&#x2F;span&gt;&lt;span&gt;）
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;实际状态 &lt;&#x2F;span&gt;&lt;span&gt;== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;期望状态&lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;什么都不做
+&lt;&#x2F;span&gt;&lt;span&gt;    } &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;else &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;执行编排动作&lt;&#x2F;span&gt;&lt;span&gt;，&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;将实际状态调整为期望状态
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;一般情况:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;实际状态来自于 Kubernetes 集群本身&lt;&#x2F;strong&gt;: 比如，kubelet 通过心跳汇报的容器状态和节点状态，或者监控系统中保存的应用监控数据，或者控制器主动收集的它自己感兴趣的信息，这些都是常见的实际状态的来源。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;期望状态来自于用户提交的 YAML 文件&lt;&#x2F;strong&gt;: 比如，Deployment 对象中 Replicas 字段的值。很明显，这些信息往往都保存在 Etcd 中。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;具体到本示例，Deployment 控制器的工作流程为:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;从 Etcd 中获取到所有携带了 &lt;strong&gt;app: nginx&lt;&#x2F;strong&gt; 标签的 Pod，统计其数量，作为实际状态&lt;&#x2F;li&gt;
+&lt;li&gt;从 Template 中获取 Deployment 对象的 &lt;strong&gt;spec.replicas&lt;&#x2F;strong&gt; 值，作为期望状态&lt;&#x2F;li&gt;
+&lt;li&gt;将两个状态做比较，然后根据比较结果，确定是创建 Pod，还是删除已有的 Pod&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;以上即为 &lt;strong&gt;Kubernetes Controller&lt;&#x2F;strong&gt; 的工作模式。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;can-kao-wen-dang&quot;&gt;参考文档&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;architecture&#x2F;controller&#x2F;&quot;&gt;Architecture-Controllers&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;controllers&#x2F;&quot;&gt;Workloads-Controllers&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+</feed>

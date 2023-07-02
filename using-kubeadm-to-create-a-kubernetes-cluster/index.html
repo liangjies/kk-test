@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 使用 kubeadm 创建 kubernetes 集群</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/using-kubeadm-to-create-a-kubernetes-cluster/#an-zhuang-docker" class="toc-link">安装 Docker</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/using-kubeadm-to-create-a-kubernetes-cluster/#xia-zai-kubernetes-xiang-guan-cheng-xu" class="toc-link">下载 Kubernetes 相关程序</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/using-kubeadm-to-create-a-kubernetes-cluster/#pei-zhi-qiao-jie-wang-luo-fang-huo-qiang" class="toc-link">配置桥接网络防火墙</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/using-kubeadm-to-create-a-kubernetes-cluster/#guan-bi-swap" class="toc-link">关闭 swap</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/using-kubeadm-to-create-a-kubernetes-cluster/#guan-bi-fang-huo-qiang" class="toc-link">关闭防火墙</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/using-kubeadm-to-create-a-kubernetes-cluster/#guan-bi-selinux" class="toc-link">关闭 selinux</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/using-kubeadm-to-create-a-kubernetes-cluster/#la-qu-gcr-jing-xiang" class="toc-link">拉取 gcr 镜像</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/using-kubeadm-to-create-a-kubernetes-cluster/#chu-shi-hua-master-jie-dian" class="toc-link">初始化 Master 节点</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/using-kubeadm-to-create-a-kubernetes-cluster/#pei-zhi-wang-luo" class="toc-link">配置网络</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/using-kubeadm-to-create-a-kubernetes-cluster/#calico" class="toc-link">Calico</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/using-kubeadm-to-create-a-kubernetes-cluster/#tian-jia-worker-jie-dian" class="toc-link">添加 Worker 节点</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/using-kubeadm-to-create-a-kubernetes-cluster/#ce-shi-ji-qun" class="toc-link">测试集群</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/using-kubeadm-to-create-a-kubernetes-cluster/#qing-li-ji-qun" class="toc-link">清理集群</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/using-kubeadm-to-create-a-kubernetes-cluster/#can-kao-wen-dang" class="toc-link">参考文档</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;using-kubeadm-to-create-a-kubernetes-cluster&#x2F;">使用 kubeadm 创建 kubernetes 集群</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-10-19</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>在 <strong>Ubuntu 20.04</strong> 系统上搭建 <strong>Kubernetes</strong> 集群。</p>
+<h2 id="an-zhuang-docker">安装 Docker</h2>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> apt-get remove docker docker-engine docker.io containerd runc
+</span><span style="color:#bf616a;">sudo</span><span> apt-get update
+</span><span style="color:#bf616a;">sudo</span><span> apt-get install</span><span style="color:#bf616a;"> -y </span><span>\
+</span><span>    apt-transport-https \
+</span><span>    ca-certificates \
+</span><span>    curl \
+</span><span>    gnupg-agent \
+</span><span>    software-properties-common
+</span><span style="color:#bf616a;">curl -fsSL</span><span> https://download.docker.com/linux/ubuntu/gpg | </span><span style="color:#bf616a;">sudo</span><span> apt-key add -
+</span><span style="color:#bf616a;">sudo</span><span> apt-key fingerprint 0EBFCD88
+</span><span style="color:#bf616a;">sudo</span><span> add-apt-repository \
+</span><span>   &quot;</span><span style="color:#a3be8c;">deb [arch=amd64] https://download.docker.com/linux/ubuntu </span><span style="color:#96b5b4;">\
+</span><span style="color:#a3be8c;">   </span><span>$</span><span style="color:#a3be8c;">(</span><span style="color:#bf616a;">lsb_release -cs</span><span style="color:#a3be8c;">) </span><span style="color:#96b5b4;">\
+</span><span style="color:#a3be8c;">   stable</span><span>&quot;
+</span><span style="color:#bf616a;">sudo</span><span> apt-get update</span><span style="color:#bf616a;"> --fix-missing
+</span><span style="color:#bf616a;">sudo</span><span> apt-get install</span><span style="color:#bf616a;"> -y</span><span> docker-ce docker-ce-cli containerd.io
+</span><span style="color:#bf616a;">cat </span><span>&lt;&lt;</span><span style="color:#b48ead;">EOF </span><span>| </span><span style="color:#bf616a;">sudo</span><span> tee /etc/docker/daemon.json
+</span><span style="color:#a3be8c;">{
+</span><span style="color:#a3be8c;">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],
+</span><span style="color:#a3be8c;">  &quot;log-driver&quot;: &quot;json-file&quot;,
+</span><span style="color:#a3be8c;">  &quot;log-opts&quot;: {
+</span><span style="color:#a3be8c;">    &quot;max-size&quot;: &quot;100m&quot;
+</span><span style="color:#a3be8c;">  },
+</span><span style="color:#a3be8c;">  &quot;storage-driver&quot;: &quot;overlay2&quot;
+</span><span style="color:#a3be8c;">}
+</span><span style="color:#b48ead;">EOF
+</span><span style="color:#bf616a;">sudo</span><span> mkdir</span><span style="color:#bf616a;"> -p</span><span> /etc/systemd/system/docker.service.d
+</span><span style="color:#bf616a;">sudo</span><span> systemctl daemon-reload
+</span><span style="color:#bf616a;">sudo</span><span> systemctl restart docker
+</span><span style="color:#bf616a;">sudo</span><span> systemctl enable docker
+</span></code></pre>
+<h2 id="xia-zai-kubernetes-xiang-guan-cheng-xu">下载 Kubernetes 相关程序</h2>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> apt-get update &amp;&amp; </span><span style="color:#bf616a;">sudo</span><span> apt-get install</span><span style="color:#bf616a;"> -y</span><span> apt-transport-https curl
+</span><span style="color:#bf616a;">curl -s</span><span> https://packages.cloud.google.com/apt/doc/apt-key.gpg | </span><span style="color:#bf616a;">sudo</span><span> apt-key add -
+</span><span style="color:#bf616a;">cat </span><span>&lt;&lt;</span><span style="color:#b48ead;">EOF </span><span>| </span><span style="color:#bf616a;">sudo</span><span> tee /etc/apt/sources.list.d/kubernetes.list
+</span><span style="color:#a3be8c;">deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main
+</span><span style="color:#b48ead;">EOF
+</span><span style="color:#bf616a;">sudo</span><span> apt-get update</span><span style="color:#bf616a;"> --fix-missing
+</span><span style="color:#bf616a;">sudo</span><span> apt-get install</span><span style="color:#bf616a;"> -y</span><span> kubelet kubeadm kubectl
+</span><span style="color:#bf616a;">sudo</span><span> apt-mark hold kubelet kubeadm kubectl
+</span></code></pre>
+<h2 id="pei-zhi-qiao-jie-wang-luo-fang-huo-qiang">配置桥接网络防火墙</h2>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">cat </span><span>&lt;&lt;</span><span style="color:#b48ead;">EOF </span><span>| </span><span style="color:#bf616a;">sudo</span><span> tee /etc/sysctl.d/k8s.conf
+</span><span style="color:#a3be8c;">net.bridge.bridge-nf-call-ip6tables = 1
+</span><span style="color:#a3be8c;">net.bridge.bridge-nf-call-iptables = 1
+</span><span style="color:#b48ead;">EOF
+</span><span style="color:#bf616a;">sudo</span><span> sysctl</span><span style="color:#bf616a;"> --system
+</span></code></pre>
+<h2 id="guan-bi-swap">关闭 swap</h2>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#65737e;"># 临时关闭
+</span><span style="color:#bf616a;">swapoff -a
+</span><span>
+</span><span style="color:#65737e;"># 永久关闭，注释 swap 配置
+</span><span style="color:#bf616a;">vi</span><span> /etc/fstab
+</span></code></pre>
+<h2 id="guan-bi-fang-huo-qiang">关闭防火墙</h2>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> systemctl stop firewalld
+</span><span style="color:#bf616a;">sudo</span><span> systemctl disable firewalld
+</span></code></pre>
+<h2 id="guan-bi-selinux">关闭 selinux</h2>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> sed</span><span style="color:#bf616a;"> -i </span><span>&#39;</span><span style="color:#a3be8c;">s/enforcing/disabled/</span><span>&#39; /etc/selinux/config
+</span><span style="color:#bf616a;">sudo</span><span> setenforce 0
+</span><span>
+</span></code></pre>
+<h2 id="la-qu-gcr-jing-xiang">拉取 gcr 镜像</h2>
+<p>需要在所有的 <strong>Master</strong> 节点与 <strong>Worker</strong> 节点拉取镜像。</p>
+<p><strong>bash</strong> 环境使用如下脚本:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">image_list</span><span>=$</span><span style="color:#a3be8c;">(</span><span style="color:#bf616a;">kubeadm</span><span style="color:#a3be8c;"> config images list)
+</span><span>
+</span><span style="color:#b48ead;">for</span><span> image </span><span style="color:#b48ead;">in </span><span>${</span><span style="color:#bf616a;">image_list</span><span>} ; </span><span style="color:#b48ead;">do
+</span><span>  </span><span style="color:#bf616a;">name</span><span>=$</span><span style="color:#a3be8c;">(</span><span style="color:#96b5b4;">echo </span><span>$</span><span style="color:#a3be8c;">{</span><span style="color:#bf616a;">image</span><span style="color:#a3be8c;">} </span><span>| </span><span style="color:#bf616a;">cut -d</span><span>&#39;</span><span style="color:#a3be8c;">/</span><span>&#39;</span><span style="color:#bf616a;"> -f2</span><span style="color:#a3be8c;">)
+</span><span>  </span><span style="color:#bf616a;">docker</span><span> pull registry.aliyuncs.com/google_containers/$</span><span style="color:#bf616a;">name
+</span><span>  </span><span style="color:#bf616a;">docker</span><span> image tag registry.aliyuncs.com/google_containers/$</span><span style="color:#bf616a;">name</span><span> k8s.gcr.io/$</span><span style="color:#bf616a;">name
+</span><span>  </span><span style="color:#bf616a;">docker</span><span> image rm registry.aliyuncs.com/google_containers/$</span><span style="color:#bf616a;">name
+</span><span style="color:#b48ead;">done
+</span></code></pre>
+<p><strong>zsh</strong> 环境使用如下脚本:</p>
+<pre data-lang="zsh" style="background-color:#2b303b;color:#c0c5ce;" class="language-zsh "><code class="language-zsh" data-lang="zsh"><span style="color:#bf616a;">image_list</span><span>=$</span><span style="color:#a3be8c;">(</span><span style="color:#bf616a;">kubeadm</span><span style="color:#a3be8c;"> config images list)
+</span><span style="color:#bf616a;">images</span><span>=(`</span><span style="color:#96b5b4;">echo </span><span>${</span><span style="color:#bf616a;">image_list</span><span>} | </span><span style="color:#bf616a;">tr </span><span>&#39;</span><span style="color:#a3be8c;">\n</span><span>&#39; &#39; &#39;`)
+</span><span>
+</span><span style="color:#b48ead;">for</span><span> image </span><span style="color:#b48ead;">in </span><span>${</span><span style="color:#bf616a;">images</span><span>} ; </span><span style="color:#b48ead;">do
+</span><span>  </span><span style="color:#bf616a;">name</span><span>=$</span><span style="color:#a3be8c;">(</span><span style="color:#96b5b4;">echo </span><span>$</span><span style="color:#a3be8c;">{</span><span style="color:#bf616a;">image</span><span style="color:#a3be8c;">} </span><span>| </span><span style="color:#bf616a;">cut -d</span><span>&#39;</span><span style="color:#a3be8c;">/</span><span>&#39;</span><span style="color:#bf616a;"> -f2</span><span style="color:#a3be8c;">)
+</span><span>  </span><span style="color:#bf616a;">docker</span><span> pull registry.aliyuncs.com/google_containers/$</span><span style="color:#bf616a;">name
+</span><span>  </span><span style="color:#bf616a;">docker</span><span> image tag registry.aliyuncs.com/google_containers/$</span><span style="color:#bf616a;">name</span><span> k8s.gcr.io/$</span><span style="color:#bf616a;">name
+</span><span>  </span><span style="color:#bf616a;">docker</span><span> image rm registry.aliyuncs.com/google_containers/$</span><span style="color:#bf616a;">name
+</span><span style="color:#b48ead;">done
+</span></code></pre>
+<h2 id="chu-shi-hua-master-jie-dian">初始化 Master 节点</h2>
+<p>在 <strong>Master</strong> 节点执行命令:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> kubeadm init \
+</span><span style="color:#bf616a;">  --apiserver-advertise-address </span><span>$(</span><span style="color:#bf616a;">hostname -i</span><span>) \
+</span><span style="color:#bf616a;">  --pod-network-cidr</span><span> 10.244.0.0/16</span><span style="color:#bf616a;"> --v</span><span>=5
+</span><span>
+</span><span style="color:#bf616a;">Your</span><span> Kubernetes control-plane has initialized successfully!
+</span><span>
+</span><span style="color:#bf616a;">To</span><span> start using your cluster, you need to run the following as a regular user:
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">mkdir -p </span><span>$</span><span style="color:#bf616a;">HOME</span><span>/.kube
+</span><span>  </span><span style="color:#bf616a;">sudo</span><span> cp</span><span style="color:#bf616a;"> -i</span><span> /etc/kubernetes/admin.conf $</span><span style="color:#bf616a;">HOME</span><span>/.kube/config
+</span><span>  </span><span style="color:#bf616a;">sudo</span><span> chown $(</span><span style="color:#bf616a;">id -u</span><span>):$(</span><span style="color:#bf616a;">id -g</span><span>) $</span><span style="color:#bf616a;">HOME</span><span>/.kube/config
+</span><span>
+</span><span style="color:#bf616a;">You</span><span> should now deploy a pod network to the cluster.
+</span><span style="color:#bf616a;">Run </span><span>&quot;</span><span style="color:#a3be8c;">kubectl apply -f [podnetwork].yaml</span><span>&quot; with one of the options listed at:
+</span><span>  </span><span style="color:#bf616a;">https://kubernetes.io/docs/concepts/cluster-administration/addons/
+</span><span>
+</span><span style="color:#bf616a;">Then</span><span> you can join any number of worker nodes by running the following on each as root:
+</span><span>
+</span><span style="color:#bf616a;">kubeadm</span><span> join 192.168.50.5:6443</span><span style="color:#bf616a;"> --token</span><span> 7zjyq9.x3xkoatt6pb1cbsu \
+</span><span style="color:#bf616a;">    --discovery-token-ca-cert-hash</span><span> sha256:1c78c44bc57e6e887c5f81e7a9c6c3e52f098e1ba9255f5303ac78129d410774
+</span></code></pre>
+<p>或者省略下载镜像步骤，直接创建集群:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> kubeadm init \
+</span><span style="color:#bf616a;">  --apiserver-advertise-address</span><span>=$(</span><span style="color:#bf616a;">hostname -i</span><span>) \
+</span><span style="color:#bf616a;">  --image-repository</span><span> registry.aliyuncs.com/google_containers \
+</span><span style="color:#bf616a;">  --service-cidr</span><span>=10.5.0.0/16 \
+</span><span style="color:#bf616a;">  --pod-network-cidr</span><span>=10.244.0.0/16
+</span></code></pre>
+<p>然后配置 <strong>kubeconfig</strong>:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">mkdir -p </span><span>$</span><span style="color:#bf616a;">HOME</span><span>/.kube
+</span><span style="color:#bf616a;">sudo</span><span> cp</span><span style="color:#bf616a;"> -i</span><span> /etc/kubernetes/admin.conf $</span><span style="color:#bf616a;">HOME</span><span>/.kube/config
+</span><span style="color:#bf616a;">sudo</span><span> chown $(</span><span style="color:#bf616a;">id -u</span><span>):$(</span><span style="color:#bf616a;">id -g</span><span>) $</span><span style="color:#bf616a;">HOME</span><span>/.kube/config
+</span></code></pre>
+<h2 id="pei-zhi-wang-luo">配置网络</h2>
+<h3 id="calico">Calico</h3>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> apply</span><span style="color:#bf616a;"> -f</span><span> https://docs.projectcalico.org/manifests/canal.yaml
+</span></code></pre>
+<h2 id="tian-jia-worker-jie-dian">添加 Worker 节点</h2>
+<p>在 <strong>Worker</strong> 节点执行命令:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> kubeadm join 192.168.50.5:6443</span><span style="color:#bf616a;"> --token</span><span> 4n2pwp.hq9jyo3auaibma3q</span><span style="color:#bf616a;">     --discovery-token-ca-cert-hash</span><span> sha256:750da2c87a67b96bfec73ade40888d22b61e045fdd28bbb7a4ff2c6ce3e0309c
+</span><span>
+</span><span style="color:#bf616a;">This</span><span> node has joined the cluster:
+</span><span style="color:#bf616a;">*</span><span> Certificate signing request was sent to apiserver and a response was received.
+</span><span style="color:#bf616a;">*</span><span> The Kubelet was informed of the new secure connection details.
+</span><span>
+</span><span style="color:#bf616a;">Run </span><span>&#39;</span><span style="color:#a3be8c;">kubectl get nodes</span><span>&#39; on the control-plane to see this node join the cluster.
+</span></code></pre>
+<h2 id="ce-shi-ji-qun">测试集群</h2>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> apply</span><span style="color:#bf616a;"> -f</span><span> https://raw.githubusercontent.com/kubernetes/website/master/content/en/examples/application/nginx-app.yaml
+</span></code></pre>
+<h2 id="qing-li-ji-qun">清理集群</h2>
+<p>在期望清理的节点执行:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> kubeadm reset
+</span><span style="color:#bf616a;">sudo</span><span> rm</span><span style="color:#bf616a;"> -rf</span><span> /etc/cni/net.d
+</span><span style="color:#bf616a;">rm -rf ~</span><span>/.kube
+</span></code></pre>
+<h2 id="can-kao-wen-dang">参考文档</h2>
+<ul>
+<li><a href="https://docs.docker.com/engine/install/ubuntu/">Install Docker Engine on Ubuntu</a></li>
+<li><a href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/">Container runtimes</a></li>
+<li><a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/">Installing kubeadm</a></li>
+<li><a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/">Creating a cluster with kubeadm</a></li>
+<li><a href="https://github.com/cloudnativelabs/kube-router/blob/master/docs/kubeadm.md">Deploying kube-router with kubeadm</a></li>
+<li><a href="https://docs.projectcalico.org/getting-started/kubernetes/flannel/flannel">Install Calico for policy and flannel (aka Canal) for networking</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/kubeadm/">#kubeadm</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/kubernetes/">#kubernetes</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;configure-networks-on-ubuntu-20-04&#x2F;">‹ Ubuntu 20.04 配置静态网络</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;upgrade-ubuntu-release&#x2F;">升级 Ubuntu 发行版 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

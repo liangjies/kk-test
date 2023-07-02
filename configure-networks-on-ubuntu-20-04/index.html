@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - Ubuntu 20.04 配置静态网络</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;configure-networks-on-ubuntu-20-04&#x2F;">Ubuntu 20.04 配置静态网络</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-10-19</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p><strong>Ubuntu 20.04</strong> 的网络配置文件位于 <strong>/etc/netplan/00-installer-config.yaml</strong>:</p>
+<pre data-lang="yaml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yaml "><code class="language-yaml" data-lang="yaml"><span style="color:#65737e;"># This is the network config written by &#39;subiquity&#39;
+</span><span style="color:#bf616a;">network</span><span>:
+</span><span>  </span><span style="color:#bf616a;">ethernets</span><span>:
+</span><span>    </span><span style="color:#bf616a;">ens33</span><span>:
+</span><span>      </span><span style="color:#bf616a;">dhcp4</span><span>: </span><span style="color:#d08770;">false
+</span><span>      </span><span style="color:#bf616a;">addresses</span><span>: [</span><span style="color:#a3be8c;">192.168.50.30/24</span><span>]
+</span><span>      </span><span style="color:#bf616a;">gateway4</span><span>: </span><span style="color:#d08770;">192.168.50.1
+</span><span>      </span><span style="color:#bf616a;">nameservers</span><span>:
+</span><span>        </span><span style="color:#bf616a;">addresses</span><span>: [</span><span style="color:#d08770;">192.168.50.1</span><span>, </span><span style="color:#d08770;">8.8.8.8</span><span>]
+</span></code></pre>
+<p>更新配置:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">root@ubuntu-00:~#</span><span> netplan</span><span style="color:#bf616a;"> --debug</span><span> apply
+</span><span style="color:#bf616a;">**</span><span> (generate:3768)</span><span style="color:#96b5b4;">:</span><span> DEBUG: 11:49:11.734: Processing input file /etc/netplan/00-installer-config.yaml..
+</span><span style="color:#bf616a;">**</span><span> (generate:3768)</span><span style="color:#96b5b4;">:</span><span> DEBUG: 11:49:11.734: starting new processing pass
+</span><span style="color:#bf616a;">**</span><span> (generate:3768)</span><span style="color:#96b5b4;">:</span><span> DEBUG: 11:49:11.735: We have some netdefs, pass them through a final round of validation
+</span><span style="color:#bf616a;">**</span><span> (generate:3768)</span><span style="color:#96b5b4;">:</span><span> DEBUG: 11:49:11.735: ens33: setting default backend to 1
+</span><span style="color:#bf616a;">**</span><span> (generate:3768)</span><span style="color:#96b5b4;">:</span><span> DEBUG: 11:49:11.735: Configuration is valid
+</span><span style="color:#bf616a;">**</span><span> (generate:3768)</span><span style="color:#96b5b4;">:</span><span> DEBUG: 11:49:11.736: Generating output files..
+</span><span style="color:#bf616a;">**</span><span> (generate:3768)</span><span style="color:#96b5b4;">:</span><span> DEBUG: 11:49:11.736: NetworkManager: definition ens33 is not for us (backend 1)
+</span><span>(</span><span style="color:#bf616a;">generate:3768</span><span>): GLib-DEBUG: 11:49:11.736: posix_spawn avoided (fd close requested)
+</span><span style="color:#bf616a;">DEBUG:netplan</span><span> generated networkd configuration changed, restarting networkd
+</span></code></pre>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/ubuntu/">#ubuntu</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/networks/">#networks</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;command-configure-not-found-in-docker&#x2F;">‹ </a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;using-kubeadm-to-create-a-kubernetes-cluster&#x2F;">使用 kubeadm 创建 kubernetes 集群 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - Nvidia Docker</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/nvidia-docker/#the-architecture-overview-of-nvidia-container-toolkit" class="toc-link">The Architecture Overview of Nvidia Container Toolkit</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/nvidia-docker/#components-and-packages" class="toc-link">Components and Packages</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/nvidia-docker/#installation" class="toc-link">Installation</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/nvidia-docker/#pre-requisites" class="toc-link">Pre-Requisites</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/nvidia-docker/#setting-up-nvidia-container-toolkit" class="toc-link">Setting up NVIDIA Container Toolkit</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/nvidia-docker/#can-kao-wen-dang" class="toc-link">参考文档</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;nvidia-docker&#x2F;">Nvidia Docker</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-11-14</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p><img src="/images/nvidia-docker/nvidia-container-toolkit.png" alt="nvidia-container-toolkit.png" /></p>
+<p>Nvidia Container Toolkit 包含容器运行时库和一些工具，用于自动配置容器使用 GPU 资源。并且，支持多种不同的容器引擎，如 Docker、LXC、Podman 等。用户根据需要可以自行选择使用哪种引擎。</p>
+<h2 id="the-architecture-overview-of-nvidia-container-toolkit">The Architecture Overview of Nvidia Container Toolkit</h2>
+<p>Nvidia Container Toolkit 的架构允许其支持任何容器运行时。若以 Docker 为例，其由以下组件，以从上到下的层次结构组成:</p>
+<ul>
+<li>nvidia-docker2</li>
+<li>nvidia-container-runtime</li>
+<li>nvidia-container-toolkit</li>
+<li>libnvidia-container</li>
+</ul>
+<p>下图为各个组件的关系:</p>
+<p><img src="/images/nvidia-docker/nvidia-docker-arch.png" alt="nvidia-docker-arch.png" /></p>
+<h3 id="components-and-packages">Components and Packages</h3>
+<h4 id="libnvidia-container">libnvidia-container</h4>
+<p>提供库与 CLI 程序，实现自动化配置 GNU/Linux 容器使用 NVIDIA GPU 资源，其实现依赖于内核基础功能，且在设计上与容器运行时解耦。</p>
+<p>libnvidia-container 提供了一个定义良好的 API 和一个封装好的 CLI 程序(nvidia-container-cli)，任何容器运行时都可以调用它来支持 NVIDIA GPU。</p>
+<h4 id="nvidia-container-toolkit">nvidia-container-toolkit</h4>
+<p>实现了 runC prestart hook 需要的接口的脚本。该脚本在容器被创建之后，启动之前被 runC 调用，且被赋予访问与容器相关联的 config.json 的权限。脚本根据 config.json 中的信息作为合适的命令行参数 (an appropriate set of flags) 来调用 libnvidia-container CLI。其中，“指定哪些 GPU 设备在容器中使用” 是最重要的参数。</p>
+<p>该组件之前的名字是 nvidia-container-runtime-hook，现在系统上的 nvidia-container-runtime-hook 是 nvidia-container-toolkit 的符号链接。</p>
+<h4 id="nvidia-container-runtime">nvidia-container-runtime</h4>
+<p>曾经，nvidia-container-runtime 以 runC 作为基础，添加了 NVIDIA 特定的代码。2019 年，更改为对宿主机上原生 runC 做简单的封装。nvidia-container-runtime 将 runC spec 作为输入，将 nvidia-container-toolkit 脚本作为 prestart hook 注入到 runC spec 中。然后，将修改后的带有该 hook set 的 runC spec 传递给原生 runC 并调用 runC。需要注意的是，该组件不一定是针对 docker 的(但它是针对runC的)。</p>
+<p>当该 package 完成安装后，Docker 的 daemon.json 文件会被更新为指向这个二进制文件:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cat /etc/docker/daemon.json
+</span><span>{
+</span><span>  &quot;</span><span style="color:#a3be8c;">exec-opts</span><span>&quot;</span><span style="color:#bf616a;">: </span><span style="color:#b48ead;">[</span><span>&quot;</span><span style="color:#a3be8c;">native.cgroupdriver=systemd</span><span>&quot;</span><span style="color:#b48ead;">]</span><span>,
+</span><span>  &quot;</span><span style="color:#a3be8c;">default-runtime</span><span>&quot;</span><span style="color:#bf616a;">: </span><span>&quot;</span><span style="color:#a3be8c;">nvidia</span><span>&quot;,
+</span><span>  &quot;</span><span style="color:#a3be8c;">runtimes</span><span>&quot;</span><span style="color:#bf616a;">: </span><span>{
+</span><span>    &quot;</span><span style="color:#a3be8c;">nvidia</span><span>&quot;: {
+</span><span>        &quot;</span><span style="color:#a3be8c;">path</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">/usr/bin/nvidia-container-runtime</span><span>&quot;,
+</span><span>        &quot;</span><span style="color:#a3be8c;">runtimeArgs</span><span>&quot;: </span><span style="color:#b48ead;">[]
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<h4 id="nvidia-docker2">nvidia-docker2</h4>
+<p>这个 package 是架构中唯一的 docker 专用包。它采用与 nvidia-container-runtime 相关的脚本，并将其安装到 docker 的 /etc/docker/daemon.json 文件中。这样，使用者就可以运行 <strong>docker run --runtime=nvidia ...</strong> 来自动为容器添加对 GPU 的支持。这个 package 还安装了一个封装了原生 docker CLI 的脚本，名为 nvidia-docker，避免每次都指定 --runtime=nvidia 来调用 docker。它还允许用户在宿主机上设置环境变量 NV_GPU 来指定将哪些 GPU 注入到容器中。</p>
+<h2 id="installation">Installation</h2>
+<h3 id="pre-requisites">Pre-Requisites</h3>
+<ul>
+<li><a href="https://www.nvidia.com/Download/index.aspx?lang=en-us">NVIDIA Drivers</a></li>
+<li>Platform Requirements:
+<ol>
+<li>GNU/Linux x86_64 with kernel version &gt; 3.10</li>
+<li>Docker &gt;= 19.03 (recommended, but some distributions may include older versions of Docker. The minimum supported version is 1.12)</li>
+<li>NVIDIA GPU with Architecture &gt; Fermi (or compute capability 2.1)</li>
+<li>NVIDIA drivers ~= 361.93 (untested on older versions)</li>
+</ol>
+</li>
+<li>Docker CE</li>
+</ul>
+<h3 id="setting-up-nvidia-container-toolkit">Setting up NVIDIA Container Toolkit</h3>
+<p>安装软件源与 GPG key:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> distribution=$(</span><span style="color:#96b5b4;">.</span><span> /etc/os-release;</span><span style="color:#96b5b4;">echo </span><span>$</span><span style="color:#bf616a;">ID</span><span>$</span><span style="color:#bf616a;">VERSION_ID</span><span>) \
+</span><span>   &amp;&amp; </span><span style="color:#bf616a;">curl -s -L</span><span> https://nvidia.github.io/nvidia-docker/gpgkey | </span><span style="color:#bf616a;">sudo</span><span> apt-key add - \
+</span><span>   &amp;&amp; </span><span style="color:#bf616a;">curl -s -L</span><span> https://nvidia.github.io/nvidia-docker/$</span><span style="color:#bf616a;">distribution</span><span>/nvidia-docker.list | </span><span style="color:#bf616a;">sudo</span><span> tee /etc/apt/sources.list.d/nvidia-docker.list
+</span></code></pre>
+<p>安装 nvidia-docker2 并重启 Docker Daemon:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo apt-get update \
+</span><span>   &amp;&amp; </span><span style="color:#bf616a;">sudo</span><span> apt-get install</span><span style="color:#bf616a;"> -y</span><span> nvidia-docker2 \
+</span><span>   &amp;&amp; </span><span style="color:#bf616a;">sudo</span><span> systemctl restart docker
+</span></code></pre>
+<p>启动容器测试，如果得到类似如下的输出则安装成功:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo docker run</span><span style="color:#bf616a;"> --rm --gpus</span><span> all nvidia/cuda:11.0-base nvidia-smi
+</span><span>
+</span><span style="color:#bf616a;">+-----------------------------------------------------------------------------+
+</span><span>| </span><span style="color:#bf616a;">NVIDIA-SMI</span><span> 450.51.06    Driver Version: 450.51.06    CUDA Version: 11.0     |
+</span><span>|</span><span style="color:#bf616a;">-------------------------------+----------------------+----------------------+
+</span><span>| </span><span style="color:#bf616a;">GPU</span><span>  Name        Persistence-M| </span><span style="color:#bf616a;">Bus-Id</span><span>        Disp.A | </span><span style="color:#bf616a;">Volatile</span><span> Uncorr. ECC |
+</span><span>| </span><span style="color:#bf616a;">Fan</span><span>  Temp  Perf  Pwr:Usage/Cap|         </span><span style="color:#bf616a;">Memory-Usage </span><span>| </span><span style="color:#bf616a;">GPU-Util</span><span>  Compute M. |
+</span><span>|                               |                      |               </span><span style="color:#bf616a;">MIG</span><span> M. |
+</span><span style="color:#a3be8c;">|===============================+======================+======================</span><span>|
+</span><span>|   </span><span style="color:#bf616a;">0</span><span>  Tesla T4            On   | </span><span style="color:#bf616a;">00000000:00:1E.0</span><span> Off |                    </span><span style="color:#bf616a;">0 </span><span>|
+</span><span>| </span><span style="color:#bf616a;">N/A</span><span>   34C    P8     9W /  70W |      </span><span style="color:#bf616a;">0MiB</span><span> / 15109MiB |      </span><span style="color:#bf616a;">0</span><span>%      Default |
+</span><span>|                               |                      |                  </span><span style="color:#bf616a;">N/A </span><span>|
+</span><span style="color:#bf616a;">+-------------------------------+----------------------+----------------------+
+</span><span>
+</span><span style="color:#bf616a;">+-----------------------------------------------------------------------------+
+</span><span>| </span><span style="color:#bf616a;">Processes:                                                                  </span><span>|
+</span><span>|  </span><span style="color:#bf616a;">GPU</span><span>   GI   CI        PID   Type   Process name                  GPU Memory |
+</span><span>|        </span><span style="color:#bf616a;">ID</span><span>   ID                                                   Usage      |
+</span><span style="color:#a3be8c;">|=============================================================================</span><span>|
+</span><span>|  </span><span style="color:#bf616a;">No</span><span> running processes found                                                 |
+</span><span style="color:#bf616a;">+-----------------------------------------------------------------------------+
+</span></code></pre>
+<h2 id="can-kao-wen-dang">参考文档</h2>
+<ul>
+<li><a href="https://docs.nvidia.com/datacenter/cloud-native/index.html">NVIDIA Cloud Native Technologies</a></li>
+<li><a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html">Container Toolkit Installation Guide</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/gpu/">#gpu</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/nvidia/">#nvidia</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/docker/">#docker</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;adding-a-new-hard-drive-for-linux&#x2F;">‹ 为 Linux 增加新磁盘</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-device-plugin&#x2F;">Kubernetes Device Plugin ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

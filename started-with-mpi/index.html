@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 初识 MPI</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/started-with-mpi/#xiao-xi-chuan-di-mo-xing" class="toc-link">消息传递模型</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/started-with-mpi/#mpi-ji-chu-gai-nian" class="toc-link">MPI 基础概念</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/started-with-mpi/#communicator" class="toc-link">Communicator</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/started-with-mpi/#rank" class="toc-link">Rank</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/started-with-mpi/#tag" class="toc-link">Tag</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/started-with-mpi/#point-to-point-communications" class="toc-link">Point-to-Point Communications</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/started-with-mpi/#collective-communications" class="toc-link">Collective Communications</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/started-with-mpi/#shi-yong-mpi" class="toc-link">使用 MPI</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/started-with-mpi/#an-zhuang-openmpi" class="toc-link">安装 OpenMPI</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/started-with-mpi/#can-kao-wen-dang" class="toc-link">参考文档</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;started-with-mpi&#x2F;">初识 MPI</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-10-11</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <h2 id="xiao-xi-chuan-di-mo-xing">消息传递模型</h2>
+<p><strong>消息传递模型(Message Passing Model)</strong> 指程序通过在进程间传递消息（消息可以理解成带有一些信息和数据的一个数据结构）来完成某些任务。在实践中，基于此模型，很容易开发 <strong>并发程序</strong>。</p>
+<p>举例来说:</p>
+<ol>
+<li>主进程(manager process) 可以通过向从进程(worker process) 发送一个描述工作的消息的方式，将工作分配给从进程。</li>
+<li>一个并发的排序程序可以在当前进程中对当前进程可见的(我们称作本地的，locally) 数据进行排序，然后把排好序的数据发送到邻居进程上面来进行合并的操作。</li>
+</ol>
+<p>几乎所有的并行程序可以使用消息传递模型来描述。</p>
+<p>之后，业界统一制定了一套消息传递模型的接口标准，即 <strong>Message Passing Interface —— MPI</strong>。</p>
+<h2 id="mpi-ji-chu-gai-nian">MPI 基础概念</h2>
+<h3 id="communicator">Communicator</h3>
+<p><strong>通讯器(communicator)</strong> 定义了一组能够互相发消息的进程。</p>
+<h3 id="rank">Rank</h3>
+<p>在 <strong>通讯器(communicator)</strong> 中，每个进程会被分配一个序号，称作 <strong>秩(rank)</strong>，进程间显性地通过指定 <strong>rank</strong> 来进行通信。</p>
+<h3 id="tag">Tag</h3>
+<p>不同进程之间发送、接收操作是通信的基础。</p>
+<p>作为发送者时，进程可以通过指定另一个进程的 <strong>rank</strong> 和一个独一无二的 <strong>消息标签(tag)</strong> 来发送消息给另一个进程。</p>
+<p>作为接受者时，进程可以发送一个 <strong>接收特定标签标记的消息的请求 (或者忽略标签，接收任何消息)</strong>，然后依次处理接收到的数据。</p>
+<h3 id="point-to-point-communications">Point-to-Point Communications</h3>
+<p>一个发送者，一个接受者的通信被称作 <strong>点对点(point-to-point) 通信</strong>。</p>
+<h3 id="collective-communications">Collective Communications</h3>
+<p>在很多情况下，某个进程可能需要跟所有其他进程通信。比如主进程想发一个广播给所有的从进程。在这种情况下，如果通过写代码的方式来完成所有的发送和接收过程会很麻烦。并且，事实上，这种方式往往也不会以最佳方式使用网络。MPI 可以处理各种各样的这些涉及所有进程的 <strong>集体(Collective)通信</strong> 类型。</p>
+<h2 id="shi-yong-mpi">使用 MPI</h2>
+<p><strong>MPI</strong> 只是一套接口标准，无法直接使用。对此不必担心，业内已经存在很多符合标准的实现。其中 <strong>OpenMPI</strong> 就是最受欢迎的实现之一。因此，之后的内容基于 <strong>OpenMPI</strong> 展开。</p>
+<h3 id="an-zhuang-openmpi">安装 OpenMPI</h3>
+<p>从 <a href="https://www.open-mpi.org/software/ompi/v4.0/">这里</a> 可以找到最新的版本，本文基于版本 <a href="https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.5.tar.gz">4.0.5</a>。</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#65737e;"># download package
+</span><span style="color:#bf616a;">$</span><span> wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.5.tar.gz
+</span><span>
+</span><span style="color:#65737e;"># extract files
+</span><span style="color:#bf616a;">$</span><span> tar xzf openmpi-4.0.5.tar.gz
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> cd openmpi-4.0.5
+</span><span>
+</span><span style="color:#65737e;"># configure project
+</span><span style="color:#bf616a;">$</span><span> mkdir</span><span style="color:#bf616a;"> -p</span><span> build; </span><span style="color:#bf616a;">./configure --prefix</span><span>=$(</span><span style="color:#bf616a;">pwd</span><span>)/build
+</span><span>
+</span><span style="color:#65737e;"># build
+</span><span style="color:#bf616a;">$</span><span> make</span><span style="color:#bf616a;"> -j</span><span>; </span><span style="color:#bf616a;">make -j</span><span> install
+</span></code></pre>
+<h2 id="can-kao-wen-dang">参考文档</h2>
+<ul>
+<li><a href="https://mpitutorial.com/tutorials/mpi-introduction/">MPI Tutorial Introduction</a></li>
+<li><a href="https://www.open-mpi.org/faq/">OpenMPI FAQ</a></li>
+<li><a href="https://www.mpi-forum.org/">MPI Forum</a></li>
+<li><a href="https://www.citutor.org//browse.php">The &quot;Introduction to MPI&quot; and &quot;Intermediate MPI&quot; tutorials</a></li>
+<li><a href="http://hpc.mediawiki.hull.ac.uk/Applications/OpenMPI">UNIVERSITY OF HULL HPC: OpenMPI</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/mpi/">#mpi</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;readings-about-training-system&#x2F;">‹ 训练系统相关读物</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;cannot-connect-to-docker-daemon-on-wsl2&#x2F;">WSL2 中无法连接 Docker 服务 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

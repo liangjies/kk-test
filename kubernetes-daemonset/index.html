@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - Kubernetes DaemonSet</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-daemonset/#chuang-jian-daemonset" class="toc-link">创建 DaemonSet</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-daemonset/#ru-he-diao-du-daemon-pods" class="toc-link">如何调度 Daemon Pods</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-daemonset/#tong-guo-mo-ren-diao-du-qi-diao-du" class="toc-link">通过默认调度器调度</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-daemonset/#can-kao-wen-dang" class="toc-link">参考文档</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-daemonset&#x2F;">Kubernetes DaemonSet</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-10-28</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p><strong>DaemonSet</strong> 确保全部 (或者某些) 节点上运行一个 Pod 的副本。 当有节点加入集群时，也会为他们新增一个 Pod 。当有节点从集群移除时，这些 Pod 也会被回收。删除 DaemonSet 将会删除它创建的所有 Pod。</p>
+<p>DaemonSet 的一些典型用法:</p>
+<ul>
+<li>在每个节点上运行集群守护进程
+<ul>
+<li>比如: 网络插件，存储插件</li>
+</ul>
+</li>
+<li>在每个节点上运行日志收集守护进程</li>
+<li>在每个节点上运行监控守护进程</li>
+</ul>
+<h2 id="chuang-jian-daemonset">创建 DaemonSet</h2>
+<p>下面的 <strong>daemonset.yaml</strong> 文件描述了一个运行 <strong>fluentd-elasticsearch</strong> Docker 镜像的 DaemonSet:</p>
+<pre data-lang="yaml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yaml "><code class="language-yaml" data-lang="yaml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">apps/v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">DaemonSet
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">fluentd-elasticsearch
+</span><span>  </span><span style="color:#bf616a;">namespace</span><span>: </span><span style="color:#a3be8c;">kube-system
+</span><span>  </span><span style="color:#bf616a;">labels</span><span>:
+</span><span>    </span><span style="color:#bf616a;">k8s-app</span><span>: </span><span style="color:#a3be8c;">fluentd-logging
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">selector</span><span>:
+</span><span>    </span><span style="color:#bf616a;">matchLabels</span><span>:
+</span><span>      </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">fluentd-elasticsearch
+</span><span>  </span><span style="color:#bf616a;">template</span><span>:
+</span><span>    </span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>      </span><span style="color:#bf616a;">labels</span><span>:
+</span><span>        </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">fluentd-elasticsearch
+</span><span>    </span><span style="color:#bf616a;">spec</span><span>:
+</span><span>      </span><span style="color:#bf616a;">tolerations</span><span>:
+</span><span>      </span><span style="color:#65737e;"># this toleration is to have the daemonset runnable on master nodes
+</span><span>      </span><span style="color:#65737e;"># remove it if your masters can&#39;t run pods
+</span><span>      - </span><span style="color:#bf616a;">key</span><span>: </span><span style="color:#a3be8c;">node-role.kubernetes.io/master
+</span><span>        </span><span style="color:#bf616a;">effect</span><span>: </span><span style="color:#a3be8c;">NoSchedule
+</span><span>      </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>      - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">fluentd-elasticsearch
+</span><span>        </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">quay.io/fluentd_elasticsearch/fluentd:v2.5.2
+</span><span>        </span><span style="color:#bf616a;">resources</span><span>:
+</span><span>          </span><span style="color:#bf616a;">limits</span><span>:
+</span><span>            </span><span style="color:#bf616a;">memory</span><span>: </span><span style="color:#a3be8c;">200Mi
+</span><span>          </span><span style="color:#bf616a;">requests</span><span>:
+</span><span>            </span><span style="color:#bf616a;">cpu</span><span>: </span><span style="color:#a3be8c;">100m
+</span><span>            </span><span style="color:#bf616a;">memory</span><span>: </span><span style="color:#a3be8c;">200Mi
+</span><span>        </span><span style="color:#bf616a;">volumeMounts</span><span>:
+</span><span>        - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">varlog
+</span><span>          </span><span style="color:#bf616a;">mountPath</span><span>: </span><span style="color:#a3be8c;">/var/log
+</span><span>        - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">varlibdockercontainers
+</span><span>          </span><span style="color:#bf616a;">mountPath</span><span>: </span><span style="color:#a3be8c;">/var/lib/docker/containers
+</span><span>          </span><span style="color:#bf616a;">readOnly</span><span>: </span><span style="color:#d08770;">true
+</span><span>      </span><span style="color:#bf616a;">terminationGracePeriodSeconds</span><span>: </span><span style="color:#d08770;">30
+</span><span>      </span><span style="color:#bf616a;">volumes</span><span>:
+</span><span>      - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">varlog
+</span><span>        </span><span style="color:#bf616a;">hostPath</span><span>:
+</span><span>          </span><span style="color:#bf616a;">path</span><span>: </span><span style="color:#a3be8c;">/var/log
+</span><span>      - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">varlibdockercontainers
+</span><span>        </span><span style="color:#bf616a;">hostPath</span><span>:
+</span><span>          </span><span style="color:#bf616a;">path</span><span>: </span><span style="color:#a3be8c;">/var/lib/docker/containers
+</span></code></pre>
+<p>使用 <strong>yaml</strong> 文件创建 <strong>DaemonSet</strong>:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> apply</span><span style="color:#bf616a;"> -f</span><span> https://k8s.io/examples/controllers/daemonset.yaml
+</span></code></pre>
+<h2 id="ru-he-diao-du-daemon-pods">如何调度 Daemon Pods</h2>
+<h3 id="tong-guo-mo-ren-diao-du-qi-diao-du">通过默认调度器调度</h3>
+<p>DaemonSet 确保所有符合条件的节点都运行该 Pod 的一个副本。 通常，运行 Pod 的节点由 Kubernetes 调度器选择。不过，DaemonSet pods 由 DaemonSet 控制器创建和调度。这就带来了以下问题:</p>
+<ul>
+<li>Pod 行为的不一致性: 正常 Pod 在被创建后等待调度时处于 Pending 状态， DaemonSet Pods 创建后不会处于 Pending 状态下。这使用户感到困惑。</li>
+<li><a href="https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/">Pod 抢占</a> 由默认调度器处理。启用抢占后，DaemonSet 控制器将在不考虑 Pod 优先级和抢占 的情况下制定调度决策。</li>
+</ul>
+<p><strong>ScheduleDaemonSetPods</strong> 控制 Kubernetes 使用 <strong>默认调度器</strong> 而不是 <strong>DaemonSet 控制器</strong> 来调度 DaemonSets，通过将 <strong>yaml</strong> 配置文件中 <strong>Pod</strong> 部分的 <strong>.spec.nodeName</strong> 替换为 <strong>.spec.affinity.nodeAffinity</strong>。更多内容请点击 <a href="https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity">Assigning Pods to Nodes: Affinity and anti-affinity</a>。</p>
+<pre data-lang="yaml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yaml "><code class="language-yaml" data-lang="yaml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Pod
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">with-node-affinity
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">affinity</span><span>:
+</span><span>    </span><span style="color:#bf616a;">nodeAffinity</span><span>:
+</span><span>      </span><span style="color:#bf616a;">requiredDuringSchedulingIgnoredDuringExecution</span><span>:
+</span><span>        </span><span style="color:#bf616a;">nodeSelectorTerms</span><span>:
+</span><span>        - </span><span style="color:#bf616a;">matchExpressions</span><span>:
+</span><span>          - </span><span style="color:#bf616a;">key</span><span>: </span><span style="color:#a3be8c;">kubernetes.io/e2e-az-name
+</span><span>            </span><span style="color:#bf616a;">operator</span><span>: </span><span style="color:#a3be8c;">In
+</span><span>            </span><span style="color:#bf616a;">values</span><span>:
+</span><span>            - </span><span style="color:#a3be8c;">e2e-az1
+</span><span>            - </span><span style="color:#a3be8c;">e2e-az2
+</span><span>      </span><span style="color:#bf616a;">preferredDuringSchedulingIgnoredDuringExecution</span><span>:
+</span><span>      - </span><span style="color:#bf616a;">weight</span><span>: </span><span style="color:#d08770;">1
+</span><span>        </span><span style="color:#bf616a;">preference</span><span>:
+</span><span>          </span><span style="color:#bf616a;">matchExpressions</span><span>:
+</span><span>          - </span><span style="color:#bf616a;">key</span><span>: </span><span style="color:#a3be8c;">another-node-label-key
+</span><span>            </span><span style="color:#bf616a;">operator</span><span>: </span><span style="color:#a3be8c;">In
+</span><span>            </span><span style="color:#bf616a;">values</span><span>:
+</span><span>            - </span><span style="color:#a3be8c;">another-node-label-value
+</span><span>  </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">with-node-affinity
+</span><span>    </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">k8s.gcr.io/pause:2.0
+</span></code></pre>
+<ul>
+<li><strong>requiredDuringSchedulingIgnoredDuringExecution</strong>: 必须将 Pod 部署到满足条件的节点上，否则不断重试</li>
+<li><strong>preferredDuringSchedulingIgnoredDuringExecution</strong>: 优先将 Pod 部署到满足条件的节点上，否则忽略该条件</li>
+</ul>
+<p>此外，系统会自动添加 <strong>node.kubernetes.io/unschedulable: NoSchedule</strong> 容忍度到 <strong>DaemonSet Pods</strong>。在调度 DaemonSet Pod 时，默认调度器会忽略 <strong>unschedulable</strong> 节点。</p>
+<h2 id="can-kao-wen-dang">参考文档</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/">Kubernetes DaemonSet</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/">Pod Priority and Preemption</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity">Assigning Pods to Nodes: Affinity and anti-affinity</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/kubernetes/">#kubernetes</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/controllers/">#controllers</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-statefulset&#x2F;">‹ Kubernetes StatefulSet</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;adding-a-new-hard-drive-for-linux&#x2F;">为 Linux 增加新磁盘 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

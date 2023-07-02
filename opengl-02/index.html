@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 使用 GLEW 库开发 OpenGL</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/opengl-02/#pei-zhi-huan-jing" class="toc-link">配置环境</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/opengl-02/#zhu-yi-shi-xiang" class="toc-link">注意事项</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/opengl-02/#tou-wen-jian" class="toc-link">头文件</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/opengl-02/#chu-shi-hua" class="toc-link">初始化</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/opengl-02/#yu-chu-li-hong-ding-yi" class="toc-link">预处理宏定义</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/opengl-02/#wen-dang" class="toc-link">文档</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;opengl-02&#x2F;">使用 GLEW 库开发 OpenGL</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2022-01-30</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p><a href="http://glew.sourceforge.net/"><code>GLEW</code></a> 是一个跨平台开源的 <code>c/c++</code> 扩展加载库。将下载的<a href="https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0-win32.zip/download"><code>GLEW</code></a>安装到如下目录:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">└─dependencies
+</span><span>   </span><span style="color:#bf616a;">└─glew-2.1.0
+</span><span>      </span><span style="color:#bf616a;">├─bin
+</span><span>      </span><span style="color:#bf616a;">│</span><span>  └─Release
+</span><span>      </span><span style="color:#bf616a;">│</span><span>      ├─Win32
+</span><span>      </span><span style="color:#bf616a;">│</span><span>      └─x64
+</span><span>      </span><span style="color:#bf616a;">├─doc
+</span><span>      </span><span style="color:#bf616a;">├─include
+</span><span>      </span><span style="color:#bf616a;">│</span><span>  └─GL
+</span><span>      </span><span style="color:#bf616a;">└─lib
+</span><span>          </span><span style="color:#bf616a;">└─Release
+</span><span>              </span><span style="color:#bf616a;">├─Win32
+</span><span>              </span><span style="color:#bf616a;">└─x64
+</span></code></pre>
+<h2 id="pei-zhi-huan-jing">配置环境</h2>
+<ul>
+<li>在 <code>Configuration Properties</code> &gt; <code>C/C++</code> &gt; <code>General</code> &gt; <code>Additional Include Directories</code> 添加 <code>$(SolutionDir)dependencies\glew-2.1.0\include</code></li>
+<li>在 <code>Configuration Properties</code> &gt; <code>Linker</code> &gt; <code>General</code> &gt; <code>Additional Library Directories</code> 添加 <code>$(SolutionDir)dependencies\glew-2.1.0\lib\Release\Win32</code></li>
+<li>在 <code>Configuration Properties</code> &gt; <code>Linker</code> &gt; <code>Input</code> &gt; <code>Additional Dependencies</code> 添加 <code>glew32s.lib</code></li>
+</ul>
+<p>值得注意的是:</p>
+<p>在 <code>lib</code> 文件夹下存在两个文件，其使用场景不同:</p>
+<ul>
+<li><code>glew32.lib</code>: 需要配合 <code>dll</code> 一起作为动态链接库使用</li>
+<li><code>glew32s.lib</code>: 用于静态链接</li>
+</ul>
+<h2 id="zhu-yi-shi-xiang">注意事项</h2>
+<h3 id="tou-wen-jian">头文件</h3>
+<p>在引入 <code>&lt;GL/glew.h&gt;</code> 文件时，<code>#include &lt;GL/glew.h&gt;</code> 必须写在其他 <code>OpenGL</code> 的引用语句之前，否则会出现错误:</p>
+<pre data-lang="text" style="background-color:#2b303b;color:#c0c5ce;" class="language-text "><code class="language-text" data-lang="text"><span>1&gt;C:\Users\divinerapier\Documents\code\opengl\opengl\dependencies\glew-2.1.0\include\GL\glew.h(85,1): fatal error C1189: #error:  gl.h included before glew.h
+</span></code></pre>
+<p>这是因为，在 <code>&lt;GL/glew.h&gt;</code> 文件中会进行判断:</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#b48ead;">#if defined</span><span>(__gl_h_) || </span><span style="color:#b48ead;">defined</span><span>(__GL_H__) || </span><span style="color:#b48ead;">defined</span><span>(_GL_H) || </span><span style="color:#b48ead;">defined</span><span>(__X_GL_H)
+</span><span style="color:#b48ead;">#error </span><span style="color:#a3be8c;">gl.h included before glew.h
+</span><span style="color:#b48ead;">#endif
+</span></code></pre>
+<p>要求引入 <code>&lt;GL/glew.h&gt;</code> 文件之前，不能有 <code>__gl_h_</code> 等宏定义。因此，应该写作:</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">GL/glew.h</span><span>&gt;
+</span><span style="color:#b48ead;">#include </span><span>&lt;</span><span style="color:#a3be8c;">GLFW/glfw3.h</span><span>&gt;
+</span></code></pre>
+<h3 id="chu-shi-hua">初始化</h3>
+<p><code>GLFW</code> 与 <code>GLEW</code> 都需要初始化，那应该按照什么顺序，谁先谁后? 在 <code>GLEW</code> 的<a href="http://glew.sourceforge.net/basic.html">官网</a>中有说明:</p>
+<blockquote>
+<p>First you need to create a valid OpenGL rendering context and call glewInit() to initialize the extension entry points. If glewInit() returns GLEW_OK, the initialization succeeded and you can use the available extensions as well as core OpenGL functionality.</p>
+</blockquote>
+<p>就是应该先初始化 <code>GLEW</code> 之外的其他库，并创建好有效的渲染窗体(a valid OpenGL rendering context)，之后才能调用 <code>glewInit()</code> 函数。即代码中应该:</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#b48ead;">int </span><span style="color:#8fa1b3;">main</span><span>(</span><span style="color:#b48ead;">void</span><span>) {
+</span><span>    GLFWwindow* window;
+</span><span>
+</span><span>    </span><span style="color:#65737e;">/* Initialize the library */
+</span><span>    </span><span style="color:#b48ead;">if </span><span>(!</span><span style="color:#bf616a;">glfwInit</span><span>()) {
+</span><span>        </span><span style="color:#b48ead;">return </span><span>-</span><span style="color:#d08770;">1</span><span>;
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#65737e;">/* Create a windowed mode window and its OpenGL context */
+</span><span>    window = </span><span style="color:#bf616a;">glfwCreateWindow</span><span>(</span><span style="color:#d08770;">640</span><span>, </span><span style="color:#d08770;">480</span><span>, &quot;</span><span style="color:#a3be8c;">Hello World</span><span>&quot;, </span><span style="color:#d08770;">NULL</span><span>, </span><span style="color:#d08770;">NULL</span><span>);
+</span><span>    </span><span style="color:#b48ead;">if </span><span>(!window) {
+</span><span>        </span><span style="color:#bf616a;">glfwTerminate</span><span>();
+</span><span>        </span><span style="color:#b48ead;">return </span><span>-</span><span style="color:#d08770;">1</span><span>;
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#65737e;">/* Make the window&#39;s context current */
+</span><span>    </span><span style="color:#bf616a;">glfwMakeContextCurrent</span><span>(window);
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">if </span><span>(</span><span style="color:#bf616a;">glewInit</span><span>() != GLEW_OK) {
+</span><span>        std::cout &lt;&lt; &quot;</span><span style="color:#a3be8c;">ohhhhhhhhh</span><span>&quot; &lt;&lt; std::endl;
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">1</span><span>;
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h3 id="yu-chu-li-hong-ding-yi">预处理宏定义</h3>
+<p>上述代码在运行的时候会遇到一个链接错误:</p>
+<blockquote>
+<p><code>1&gt;Application.obj : error LNK2019: unresolved external symbol __imp__glewInit@0 referenced in function _main</code>。</p>
+</blockquote>
+<p>即找不到函数 <code>glewInit</code>。</p>
+<p>这个问题只要看一下 <code>glewInit</code> 定义就能明白:</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span>GLEWAPI GLenum GLEWAPIENTRY </span><span style="color:#8fa1b3;">glewInit </span><span>(</span><span style="color:#b48ead;">void</span><span>);
+</span></code></pre>
+<p>再跳转到 <code>GLEWAPI</code> 的宏定义:</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span style="color:#b48ead;">#ifdef</span><span> GLEW_STATIC
+</span><span style="color:#b48ead;">#  define </span><span>GLEWAPI </span><span style="color:#b48ead;">extern
+</span><span style="color:#b48ead;">#else
+</span><span style="color:#b48ead;">#  ifdef</span><span> GLEW_BUILD
+</span><span style="color:#b48ead;">#    define </span><span>GLEWAPI </span><span style="color:#b48ead;">extern __declspec</span><span>(</span><span style="color:#d08770;">dllexport</span><span>)
+</span><span style="color:#b48ead;">#  else
+</span><span style="color:#b48ead;">#    define </span><span>GLEWAPI </span><span style="color:#b48ead;">extern __declspec</span><span>(</span><span style="color:#d08770;">dllimport</span><span>)
+</span><span style="color:#b48ead;">#  endif
+</span><span style="color:#b48ead;">#endif
+</span></code></pre>
+<p>可以发现，由于 <code>GLEW_STATIC</code> 与 <code>GLEW_BUILD</code> 均未定义，因此，会使用</p>
+<pre data-lang="c" style="background-color:#2b303b;color:#c0c5ce;" class="language-c "><code class="language-c" data-lang="c"><span>define GLEWAPI </span><span style="color:#b48ead;">extern __declspec</span><span>(</span><span style="color:#d08770;">dllimport</span><span>)
+</span></code></pre>
+<p>解决办法就是定义 <code>GLEW_STATIC</code>。</p>
+<p>在 <code>Configuration Properties</code> &gt; <code>C/C++</code> &gt; <code>Preprocessor</code> &gt; <code>Preprocessor Definitions</code> 中添加 <code>GLEW_STATIC</code>。</p>
+<h2 id="wen-dang">文档</h2>
+<p>在<a href="https://docs.gl/">文档</a>上可以直接使用函数名进行搜索。</p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/opengl/">#opengl</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;opengl-01&#x2F;">‹ 搭建 OpenGL 环境环境</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;opengl-03&#x2F;">使用 GLEW 绘制三角形 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

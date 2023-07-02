@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - B 树</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/b-tree/#gai-shu" class="toc-link">概述</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/b-tree/#shi-jian-fu-za-du" class="toc-link">时间复杂度</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/b-tree/#xing-zhi" class="toc-link">性质</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/b-tree/#yi-ge-jian-dan-de-li-zi" class="toc-link">一个简单的例子</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/b-tree/#can-kao-yue-du" class="toc-link">参考阅读</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;b-tree&#x2F;">B 树</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-09-10</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <h2 id="gai-shu">概述</h2>
+<p><strong>B-Tree</strong> 属于<strong>自平衡树</strong>的一种。其他种类的自平衡树，比如，<strong>AVL</strong>、<strong>Red-Black Tree</strong> 等，都是假设所有数据均保存在内存中。而 <strong>B-Tree</strong> 是用于内存无法保存所有数据的超大数据量场景。</p>
+<p>当 <strong>key</strong> 的数量庞大，需要以 <strong>block</strong> 的形式从磁盘中读取数据时，相较于从内存中读取数据而言，访问磁盘需要很长的时间。<strong>B-Tree</strong> 的主要目标，或者说核心思想就是为了减少访问磁盘的次数。</p>
+<h2 id="shi-jian-fu-za-du">时间复杂度</h2>
+<table><thead><tr><th align="left">ALGORITHM</th><th align="left">TIME COMPLEXITY</th></tr></thead><tbody>
+<tr><td align="left">Search</td><td align="left">O(log n)</td></tr>
+<tr><td align="left">Insert</td><td align="left">O(log n)</td></tr>
+<tr><td align="left">Delete</td><td align="left">O(log n)</td></tr>
+</tbody></table>
+<blockquote>
+<p><strong>n</strong>: <strong>B-Tree</strong> 的节点总数。</p>
+</blockquote>
+<h2 id="xing-zhi">性质</h2>
+<ol>
+<li>所有的叶子节点在同一级。</li>
+<li><strong>B-Tree</strong> 的 <strong>度(degree)</strong> 取决于磁盘块大小。</li>
+<li>除根节点之外，其余节点必须至少包含 <strong>t-1</strong> 个 <strong>key</strong>；跟节点至少包含 <strong>1</strong> 个 <strong>key</strong>。</li>
+<li>包括根节点在内，所有节点至多包含 <strong>2t-1</strong> 个 <strong>key</strong>。</li>
+<li>节点的子节点数量等于节点中 <strong>key</strong> 的数量 <strong>+1</strong>。</li>
+<li>节点的所有 <strong>key</strong> 按照升序排列，在 <strong>key: k1, k2</strong> 之间的所有子节点包含 <strong>[k1, k2]</strong> 范围内的所有 <strong>key</strong>。</li>
+<li>不同于 <strong>BST</strong> 向下生长，向下收缩。<strong>B-Tree</strong> 从根节点开始生长和收缩。</li>
+</ol>
+<h3 id="yi-ge-jian-dan-de-li-zi">一个简单的例子</h3>
+<p><img src="/images/b-tree/01.PNG" alt="01.png" /></p>
+<p>在上面的例子中，可以观察到:</p>
+<ul>
+<li>所有的叶子结点均处于同一级别</li>
+<li>所有非叶子节点都没有空的子树</li>
+<li>所有非叶子节点 <strong>key</strong> 的数量比其自带数 <strong>少 1</strong></li>
+</ul>
+<h2 id="can-kao-yue-du">参考阅读</h2>
+<ul>
+<li><a href="https://www.geeksforgeeks.org/introduction-of-b-tree-2">Introduction of B-Tree</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/data-structure/">#data structure</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/tree/">#tree</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/storage-engine/">#storage engine</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/index/">#index</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;windows-terminal&#x2F;">‹ Windows Terminal</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;understanding-kubernetes-objects&#x2F;">理解 Kubernetes 对象 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

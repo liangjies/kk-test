@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - Kubernetes 控制器</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-controllers/#kong-zhi-qi-mo-shi" class="toc-link">控制器模式</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-controllers/#tong-guo-api-fu-wu-qi-lai-kong-zhi" class="toc-link">通过 API 服务器来控制</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-controllers/#zhi-jie-kong-zhi" class="toc-link">直接控制</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-controllers/#she-ji" class="toc-link">设计</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-controllers/#yun-xing-kong-zhi-qi-de-fang-shi" class="toc-link">运行控制器的方式</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-controllers/#ju-li-shuo-ming" class="toc-link">举例说明</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-controllers/#kong-zhi-xun-huan" class="toc-link">控制循环</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-controllers/#can-kao-wen-dang" class="toc-link">参考文档</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-controllers&#x2F;">Kubernetes 控制器</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-10-06</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>在机器人技术和自动化领域，控制回路（Control Loop）是一个非终止回路，用于调节系统状态。</p>
+<p>这是一个控制环的例子：房间里的温度自动调节器。</p>
+<p>当你设置了温度，告诉了温度自动调节器你的期望状态（Desired State）。 房间的实际温度是当前状态（Current State）。 通过对设备的开关控制，温度自动调节器让其当前状态接近期望状态。</p>
+<p>控制器通过 <a href="https://kubernetes.io/docs/reference/generated/kube-apiserver/">apiserver</a> 监控集群的公共状态，并致力于将当前状态转变为期望的状态。</p>
+<h2 id="kong-zhi-qi-mo-shi">控制器模式</h2>
+<p>一个控制器至少追踪一种类型的 Kubernetes 资源。这些 <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/">对象</a> 有一个代表期望状态的 spec 字段。 该资源的控制器负责确保其当前状态接近期望状态。</p>
+<p>控制器可能会自行执行操作；在 Kubernetes 中更常见的是一个控制器会发送信息给 <a href="https://kubernetes.io/docs/reference/generated/kube-apiserver/">API 服务器</a>，这会有副作用。 具体可参看后文的例子。</p>
+<h3 id="tong-guo-api-fu-wu-qi-lai-kong-zhi">通过 API 服务器来控制</h3>
+<p><a href="https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion">Job</a> 控制器是一个 Kubernetes 内置控制器的例子。 内置控制器通过和集群 API 服务器交互来管理状态。</p>
+<p>Job 是一种 Kubernetes 资源，它运行一个或者多个 Pod， 来执行一个任务然后停止。 （一旦被调度了，对 kubelet 来说 Pod 对象就会变成了期望状态的一部分）。</p>
+<p>在集群中，当 Job 控制器拿到新任务时，它会保证一组 Node 节点上的 kubelet 可以运行正确数量的 Pod 来完成工作。 Job 控制器不会自己运行任何的 Pod 或者容器。Job 控制器是通知 API 服务器来创建或者移除 Pod。<a href="https://kubernetes.io/docs/reference/glossary/?all=true#term-control-plane">控制面</a>中的其它组件 根据新的消息作出反应（调度并运行新 Pod）并且最终完成工作。</p>
+<p>创建新 Job 后，所期望的状态就是完成这个 Job。Job 控制器会让 Job 的当前状态不断接近期望状态：创建为 Job 要完成工作所需要的 Pod，使 Job 的状态接近完成。</p>
+<p>控制器也会更新配置对象。例如：一旦 Job 的工作完成了，Job 控制器会更新 Job 对象的状态为 Finished。</p>
+<p>（这有点像温度自动调节器关闭了一个灯，以此来告诉你房间的温度现在到你设定的值了）。</p>
+<h3 id="zhi-jie-kong-zhi">直接控制</h3>
+<p>相比 Job 控制器，有些控制器需要对集群外的一些东西进行修改。</p>
+<p>例如，如果你使用一个控制环来保证集群中有足够的<a href="https://kubernetes.io/docs/concepts/architecture/nodes/">节点</a>，那么控制就需要当前集群外的一些服务在需要时创建新节点。</p>
+<p>和外部状态交互的控制器从 API 服务器获取到它想要的状态，然后直接和外部系统进行通信并使当前状态更接近期望状态。</p>
+<p>（实际上有一个控制器可以水平地扩展集群中的节点。请参阅 <a href="https://kubernetes.io/docs/tasks/administer-cluster/cluster-management/#cluster-autoscaling">集群自动扩缩容</a>）。</p>
+<h2 id="she-ji">设计</h2>
+<p>作为设计原则之一，Kubernetes 使用了很多控制器，每个控制器管理集群状态的一个特定方面。 最常见的一个特定的控制器使用一种类型的资源作为它的期望状态， 控制器管理控制另外一种类型的资源向它的期望状态演化。</p>
+<p>使用简单的控制器而不是一组相互连接的单体控制回路是很有用的。 控制器会失败，所以 Kubernetes 的设计正是考虑到了这一点。</p>
+<blockquote>
+<p>说明：
+可以有多个控制器来创建或者更新相同类型的对象。 在后台，Kubernetes 控制器确保它们只关心与其控制资源相关联的资源。</p>
+<p>例如，你可以创建 Deployment 和 Job；它们都可以创建 Pod。 Job 控制器不会删除 Deployment 所创建的 Pod，因为有信息 （<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/">标签</a>）让控制器可以区分这些 Pod。</p>
+</blockquote>
+<h2 id="yun-xing-kong-zhi-qi-de-fang-shi">运行控制器的方式</h2>
+<p>Kubernetes 内置一组控制器，运行在 <a href="https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/">kube-controller-manager</a> 内。 这些内置的控制器提供了重要的核心功能。</p>
+<p>Deployment 控制器和 Job 控制器是 Kubernetes 内置控制器的典型例子。 Kubernetes 允许你运行一个稳定的控制平面，这样即使某些内置控制器失败了， 控制平面的其他部分会接替它们的工作。</p>
+<p>你会遇到某些控制器运行在控制面之外，用以扩展 Kubernetes。 或者，如果你愿意，你也可以自己编写新控制器。 你可以以一组 Pod 来运行你的控制器，或者运行在 Kubernetes 之外。 最合适的方案取决于控制器所要执行的功能是什么。</p>
+<h2 id="ju-li-shuo-ming">举例说明</h2>
+<p>以 <strong>Deployment</strong> 为例:</p>
+<pre data-lang="yaml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yaml "><code class="language-yaml" data-lang="yaml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">apps/v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Deployment
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx-deployment
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">selector</span><span>:
+</span><span>    </span><span style="color:#bf616a;">matchLabels</span><span>:
+</span><span>      </span><span style="color:#bf616a;">app</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>  </span><span style="color:#bf616a;">replicas</span><span>: </span><span style="color:#d08770;">2
+</span><span>  </span><span style="color:#bf616a;">template</span><span>:
+</span><span>    </span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>      </span><span style="color:#bf616a;">labels</span><span>:
+</span><span>        </span><span style="color:#bf616a;">app</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>    </span><span style="color:#bf616a;">spec</span><span>:
+</span><span>      </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>      - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>        </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">nginx:1.7.9
+</span><span>        </span><span style="color:#bf616a;">ports</span><span>:
+</span><span>        - </span><span style="color:#bf616a;">containerPort</span><span>: </span><span style="color:#d08770;">80
+</span></code></pre>
+<p>该 Deployment 定义的编排动作要求: 确保携带了 <strong>app=nginx</strong> 标签的 Pod 的个数，永远等于 <strong>spec.replicas</strong> 指定的个数，即 <strong>2</strong> 个。</p>
+<p>集群会根据携带 <strong>app=nginx</strong> 标签的 <strong>Pod</strong> 的实际数量来执行创建或者删除 Pod 操作，使数量收敛于 <strong>2</strong>。</p>
+<p>这时，你也许就会好奇：究竟是 Kubernetes 项目中的哪个组件，在执行这些操作呢？</p>
+<p>在上一小节提到的 <strong>kube-controller-manager</strong> 就是负责管理 <strong>Controllers</strong> 的服务组件。并且，<strong>Kubernetes</strong> 项目已经包含了若干的 <strong>Controllers</strong>:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cd kubernetes/pkg/controller/
+</span><span style="color:#bf616a;">$</span><span> ls</span><span style="color:#bf616a;"> -d </span><span>*/
+</span><span style="color:#bf616a;">deployment/</span><span>             job/                    podautoscaler/
+</span><span style="color:#bf616a;">cloud/</span><span>                  disruption/             namespace/
+</span><span style="color:#bf616a;">replicaset/</span><span>             serviceaccount/         volume/
+</span><span style="color:#bf616a;">cronjob/</span><span>                garbagecollector/       nodelifecycle/          replication/            statefulset/            daemon/
+</span></code></pre>
+<h3 id="kong-zhi-xun-huan">控制循环</h3>
+<p>正如本文开篇所说，<strong>Kubernetes</strong> 的 <strong>Controllers</strong> 遵循 <strong>控制回路（Control Loop）</strong> 的工作模式。</p>
+<p>比如，对于编排的对象 X，可以用一段 Go 语言风格的伪代码，来描述其 Controller 的控制循环：</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">for </span><span>{
+</span><span>    </span><span style="color:#bf616a;">实际状态 </span><span>:= </span><span style="color:#bf616a;">获取集群中对象X的实际状态</span><span>（</span><span style="color:#bf616a;">Actual State</span><span>）
+</span><span>    </span><span style="color:#bf616a;">期望状态 </span><span>:= </span><span style="color:#bf616a;">获取集群中对象X的期望状态</span><span>（</span><span style="color:#bf616a;">Desired State</span><span>）
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">实际状态 </span><span>== </span><span style="color:#bf616a;">期望状态</span><span>{
+</span><span>        </span><span style="color:#bf616a;">什么都不做
+</span><span>    } </span><span style="color:#b48ead;">else </span><span>{
+</span><span>        </span><span style="color:#bf616a;">执行编排动作</span><span>，</span><span style="color:#bf616a;">将实际状态调整为期望状态
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>一般情况:</p>
+<ul>
+<li><strong>实际状态来自于 Kubernetes 集群本身</strong>: 比如，kubelet 通过心跳汇报的容器状态和节点状态，或者监控系统中保存的应用监控数据，或者控制器主动收集的它自己感兴趣的信息，这些都是常见的实际状态的来源。</li>
+<li><strong>期望状态来自于用户提交的 YAML 文件</strong>: 比如，Deployment 对象中 Replicas 字段的值。很明显，这些信息往往都保存在 Etcd 中。</li>
+</ul>
+<p>具体到本示例，Deployment 控制器的工作流程为:</p>
+<ol>
+<li>从 Etcd 中获取到所有携带了 <strong>app: nginx</strong> 标签的 Pod，统计其数量，作为实际状态</li>
+<li>从 Template 中获取 Deployment 对象的 <strong>spec.replicas</strong> 值，作为期望状态</li>
+<li>将两个状态做比较，然后根据比较结果，确定是创建 Pod，还是删除已有的 Pod</li>
+</ol>
+<p>以上即为 <strong>Kubernetes Controller</strong> 的工作模式。</p>
+<h2 id="can-kao-wen-dang">参考文档</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/architecture/controller/">Architecture-Controllers</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/controllers/">Workloads-Controllers</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/kubernetes/">#kubernetes</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/controllers/">#controllers</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;how-to-use-nfs&#x2F;">‹ 使用 NFS</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-persistent-volume&#x2F;">Kubernetes 持久卷 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

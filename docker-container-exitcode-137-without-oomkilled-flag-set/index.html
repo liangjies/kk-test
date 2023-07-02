@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - Docker container 137 错误码异常退出</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;docker-container-exitcode-137-without-oomkilled-flag-set&#x2F;">Docker container 137 错误码异常退出</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-03-19</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>又是一次喜闻乐见的容器 <strong>137</strong> 错误码退出事件，事件案发现场如下:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> kubectl</span><span style="color:#bf616a;"> -n</span><span> ns get pod
+</span><span style="color:#bf616a;">NAME</span><span>                                 READY   STATUS      RESTARTS   AGE
+</span><span style="color:#bf616a;">cassification-xwcc2</span><span>         0/1     Error       0          2d12h
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> kubectl</span><span style="color:#bf616a;"> -n</span><span> ns describe pod cassification-xwcc2
+</span><span style="color:#bf616a;">Name:</span><span>         cassification-xwcc2
+</span><span style="color:#bf616a;">Namespace:</span><span>    ns
+</span><span style="color:#bf616a;">Priority:</span><span>     0
+</span><span style="color:#bf616a;">Node:</span><span>         n017.example.com/10.100.200.27
+</span><span style="color:#bf616a;">Start</span><span> Time:   Tue, 16 Mar 2021 20:41:13 +0800
+</span><span style="color:#bf616a;">Labels:</span><span>       controller-uid=9c5aed2c-895b-4012-8a06-9bb9d44d49b4
+</span><span>              </span><span style="color:#bf616a;">job-name</span><span>=</span><span style="color:#a3be8c;">cassification
+</span><span style="color:#bf616a;">Annotations:  </span><span>&lt;none&gt;
+</span><span style="color:#bf616a;">Status:</span><span>       Failed
+</span><span style="color:#bf616a;">IP:</span><span>           10.216.3.55
+</span><span style="color:#bf616a;">IPs:
+</span><span>  </span><span style="color:#bf616a;">IP:</span><span>           10.216.3.55
+</span><span style="color:#bf616a;">Controlled</span><span> By:  Job/cassification
+</span><span style="color:#bf616a;">Containers:
+</span><span>  </span><span style="color:#bf616a;">cassification:
+</span><span>    </span><span style="color:#bf616a;">Container</span><span> ID:  docker://f0c2b1129c1c7ce74e8eff9633b31cc4d564a18b6fc5a1416a305df811420242
+</span><span>    </span><span style="color:#bf616a;">Image:</span><span>         harbor.exmple.com/pytorch:v3
+</span><span>    </span><span style="color:#bf616a;">Image</span><span> ID:      docker-pullable://harbor.exmple.com/pytorch@sha256:3197c2b34fb0b525652b5382d3f61c580700d80dd0332796bc1a96149b0853cc
+</span><span>    </span><span style="color:#bf616a;">Port:          </span><span>&lt;none&gt;
+</span><span>    </span><span style="color:#bf616a;">Host</span><span> Port:     &lt;none&gt;
+</span><span>    </span><span style="color:#bf616a;">Command:
+</span><span>      </span><span style="color:#bf616a;">/bin/bash
+</span><span>      </span><span style="color:#bf616a;">-c
+</span><span>      </span><span style="color:#bf616a;">sleep</span><span> 8000000
+</span><span>    </span><span style="color:#bf616a;">State:</span><span>          Terminated
+</span><span>      </span><span style="color:#bf616a;">Reason:</span><span>       Error
+</span><span>      </span><span style="color:#bf616a;">Exit</span><span> Code:    137
+</span><span>      </span><span style="color:#bf616a;">Started:</span><span>      Tue, 16 Mar 2021 20:41:15 +0800
+</span><span>      </span><span style="color:#bf616a;">Finished:</span><span>     Thu, 18 Mar 2021 18:47:45 +0800
+</span><span>    </span><span style="color:#bf616a;">Ready:</span><span>          False
+</span><span>    </span><span style="color:#bf616a;">Restart</span><span> Count:  0
+</span><span>    </span><span style="color:#bf616a;">Limits:
+</span><span>      </span><span style="color:#bf616a;">cpu:</span><span>             5
+</span><span>      </span><span style="color:#bf616a;">memory:</span><span>          50Gi
+</span><span>      </span><span style="color:#bf616a;">nvidia.com/gpu:</span><span>  2
+</span><span>    </span><span style="color:#bf616a;">Requests:
+</span><span>      </span><span style="color:#bf616a;">cpu:</span><span>             5
+</span><span>      </span><span style="color:#bf616a;">memory:</span><span>          50Gi
+</span><span>      </span><span style="color:#bf616a;">nvidia.com/gpu:</span><span>  2
+</span><span>    </span><span style="color:#bf616a;">Environment:       </span><span>&lt;none&gt;
+</span><span style="color:#bf616a;">Conditions:
+</span><span>  </span><span style="color:#bf616a;">Type</span><span>              Status
+</span><span>  </span><span style="color:#bf616a;">Initialized</span><span>       True
+</span><span>  </span><span style="color:#bf616a;">Ready</span><span>             False
+</span><span>  </span><span style="color:#bf616a;">ContainersReady</span><span>   False
+</span><span>  </span><span style="color:#bf616a;">PodScheduled</span><span>      Trued
+</span><span style="color:#bf616a;">Volumes:
+</span><span>  </span><span style="color:#bf616a;">default-token-9rxgg:
+</span><span>    </span><span style="color:#bf616a;">Type:</span><span>        Secret (a volume populated by a Secret)
+</span><span>    </span><span style="color:#bf616a;">SecretName:</span><span>  default-token-9rxgg
+</span><span>    </span><span style="color:#bf616a;">Optional:</span><span>    false
+</span><span style="color:#bf616a;">QoS</span><span> Class:       Guaranteed
+</span><span style="color:#bf616a;">Node-Selectors:  </span><span>&lt;none&gt;
+</span><span style="color:#bf616a;">Tolerations:</span><span>     node.kubernetes.io/not-ready:NoExecute for 300s
+</span><span>                 </span><span style="color:#bf616a;">node.kubernetes.io/unreachable:NoExecute</span><span> for 300s
+</span><span style="color:#bf616a;">Events:          </span><span>&lt;none&gt;
+</span></code></pre>
+<p><strong>137</strong> 错误码大部分情况是超出资源被 <code>kill -9</code> 干掉了。但还是本着负责任的态度~~(空口无凭，研发不信)~~找出真相。</p>
+<p>根据 <code>Container ID</code> 查看容器信息:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> docker inspect f0c2b1129c1c7ce74e8eff9633b31cc4d564a18b6fc5a1416a305df811420242
+</span><span style="color:#96b5b4;">[
+</span><span>    {
+</span><span>        &quot;</span><span style="color:#a3be8c;">Id</span><span>&quot;</span><span style="color:#bf616a;">: </span><span>&quot;</span><span style="color:#a3be8c;">f0c2b1129c1c7ce74e8eff9633b31cc4d564a18b6fc5a1416a305df811420242</span><span>&quot;,
+</span><span>        &quot;</span><span style="color:#a3be8c;">Created</span><span>&quot;</span><span style="color:#bf616a;">: </span><span>&quot;</span><span style="color:#a3be8c;">2021-03-16T12:41:15.010687771Z</span><span>&quot;,
+</span><span>        &quot;</span><span style="color:#a3be8c;">Path</span><span>&quot;</span><span style="color:#bf616a;">: </span><span>&quot;</span><span style="color:#a3be8c;">/bin/bash</span><span>&quot;,
+</span><span>        &quot;</span><span style="color:#a3be8c;">Args</span><span>&quot;</span><span style="color:#bf616a;">:</span><span> [
+</span><span>            &quot;</span><span style="color:#a3be8c;">-c</span><span>&quot;</span><span style="color:#bf616a;">,
+</span><span>            &quot;</span><span style="color:#a3be8c;">sleep 8000000</span><span>&quot;
+</span><span>        </span><span style="color:#bf616a;">],
+</span><span>        &quot;</span><span style="color:#a3be8c;">State</span><span>&quot;</span><span style="color:#bf616a;">: </span><span>{
+</span><span>            &quot;</span><span style="color:#a3be8c;">Status</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">exited</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">Running</span><span>&quot;: false,
+</span><span>            &quot;</span><span style="color:#a3be8c;">Paused</span><span>&quot;: false,
+</span><span>            &quot;</span><span style="color:#a3be8c;">Restarting</span><span>&quot;: false,
+</span><span>            &quot;</span><span style="color:#a3be8c;">OOMKilled</span><span>&quot;: false,
+</span><span>            &quot;</span><span style="color:#a3be8c;">Dead</span><span>&quot;: false,
+</span><span>            &quot;</span><span style="color:#a3be8c;">Pid</span><span>&quot;: 0,
+</span><span>            &quot;</span><span style="color:#a3be8c;">ExitCode</span><span>&quot;: 137,
+</span><span>            &quot;</span><span style="color:#a3be8c;">Error</span><span>&quot;: &quot;&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">StartedAt</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">2021-03-16T12:41:15.553418777Z</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">FinishedAt</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">2021-03-18T10:47:45.230995698Z</span><span>&quot;
+</span><span>        }
+</span><span>    }
+</span><span style="color:#bf616a;">]
+</span></code></pre>
+<p>很遗憾 <code>State.OOMKilled</code> 是 <code>false</code>，没关系，还可以查看 <code>dmesg</code> 信息:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> dmesg</span><span style="color:#bf616a;"> -T </span><span>| </span><span style="color:#bf616a;">grep</span><span> killed | </span><span style="color:#bf616a;">grep</span><span> f0c2b1129c1c
+</span><span style="color:#bf616a;">[四</span><span> 3月 18 18:47:12 2021] Task in /kubepods/pod3759885e-2d2e-45f6-a100-a1230831cbac/f0c2b1129c1c7ce74e8eff9633b31cc4d564a18b6fc5a1416a305df811420242 killed as a result of limit of /kubepods/pod3759885e-2d2e-45f6-a100-a1230831cbac
+</span><span style="color:#bf616a;">[四</span><span> 3月 18 18:47:12 2021] Task in /kubepods/pod3759885e-2d2e-45f6-a100-a1230831cbac/f0c2b1129c1c7ce74e8eff9633b31cc4d564a18b6fc5a1416a305df811420242 killed as a result of limit of /kubepods/pod3759885e-2d2e-45f6-a100-a1230831cbac
+</span><span style="color:#bf616a;">[四</span><span> 3月 18 18:47:12 2021] Task in /kubepods/pod3759885e-2d2e-45f6-a100-a1230831cbac/f0c2b1129c1c7ce74e8eff9633b31cc4d564a18b6fc5a1416a305df811420242 killed as a result of limit of /kubepods/pod3759885e-2d2e-45f6-a100-a1230831cbac
+</span></code></pre>
+<p><code>dmesg</code> 的信息中的时间与 <code>container</code> 异常退出的时间非常接近。</p>
+<p>至此，结案。</p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/docker/">#docker</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/kubernetes/">#kubernetes</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubectl-exec-hangs&#x2F;">‹ Kubectl Exec 无响应</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;mongodb-cheat-sheet&#x2F;">MongoDB Cheat Sheet ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

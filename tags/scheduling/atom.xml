@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - scheduling</title>
+	<link href="https://blog.kiyoko.io/tags/scheduling/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-11-15T18:47:40+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/scheduling/atom.xml</id>
+	<entry xml:lang="en">
+		<title>调度与驱逐 —— 将 Pod 分配到节点上</title>
+		<published>2020-11-15T18:47:40+00:00</published>
+		<updated>2020-11-15T18:47:40+00:00</updated>
+		<link href="https://blog.kiyoko.io/scheduling-and-eviction-assigning-pods-to-nodes/" type="text/html"/>
+		<id>https://blog.kiyoko.io/scheduling-and-eviction-assigning-pods-to-nodes/</id>
+		<content type="html">&lt;p&gt;Kubernetes 允许用户强制 Pod 只能在特定的 Node(s) 上，或者建议优先在特定的 Node(s) 上运行。常规方法是使用 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;overview&#x2F;working-with-objects&#x2F;labels&#x2F;&quot;&gt;Labels and Selectors&lt;&#x2F;a&gt; 来选择。该约束为可选项，默认情况下调度器将自动进行合理的调度，比如，将 pod 分散到节点上，而非在可用资源不足的节点上。但在某些情况下，用户期望对调度 Pod 的 Node(s) 有更多控制，例如，确保 pod 最终落在有 SSD 的机器上，或者将若干有大量通信的服务的 pod 放置在同一个可用区。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;nodeselector&quot;&gt;nodeSelector&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;nodeSelector&lt;&#x2F;strong&gt; 是最简单推荐形式的节点选择约束。nodeSelector 是 PodSpec 的一个字段，其包含键值对映射。为了使 pod 可以在某个节点上运行，约束键值对构成的集合必须是节点标签集合的子集。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;get-nodes&quot;&gt;Get nodes&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; get nodes
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;get-the-names-of-cluster-s-nodes&quot;&gt;Get the names of cluster&#x27;s nodes&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; get nodes
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;attach-label-to-the-node&quot;&gt;Attach label to the node&lt;&#x2F;h3&gt;
+&lt;p&gt;规则为:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; label nodes &amp;lt;node-name&amp;gt; &amp;lt;label-key&amp;gt;=&amp;lt;label-value&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;例如，节点 &#x27;kubernetes-foo-node-1.c.a-robinson.internal&#x27;，标签 &#x27;disktype=ssd&#x27;，则可以执行:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; label nodes kubernetes-foo-node-1.c.a-robinson.internal disktype=ssd
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;通过命令验证:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; get nodes&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --show-labels
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;或者:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; describe node &amp;lt;node-name&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;add-a-nodeselector-field-to-your-pod-configuration&quot;&gt;Add a nodeSelector field to your pod configuration&lt;&#x2F;h3&gt;
+&lt;p&gt;如下为原始 Pod 配置文件:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;labels&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;env&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;在此基础上，添加 nodeSelector:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;labels&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;env&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;imagePullPolicy&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;IfNotPresent
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nodeSelector&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;disktype&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ssd
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;而改文件可以在 &lt;a href=&quot;https:&#x2F;&#x2F;k8s.io&#x2F;examples&#x2F;pods&#x2F;pod-nginx.yaml&quot;&gt;https:&#x2F;&#x2F;k8s.io&#x2F;examples&#x2F;pods&#x2F;pod-nginx.yaml&lt;&#x2F;a&gt; 得到。因此，使用如下命令创建 Pod:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; apply&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -f&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;k8s.io&#x2F;examples&#x2F;pods&#x2F;pod-nginx.yaml
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;之后，查看 Pod 所在的 Node 并验证约束是否有效:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; get pods&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -o&lt;&#x2F;span&gt;&lt;span&gt; wide
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; describe node &amp;lt;node-name&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;affinity-and-anti-affinity&quot;&gt;Affinity and anti-affinity&lt;&#x2F;h3&gt;
+&lt;p&gt;Affinity and anti-affinity (亲和与反亲和) 是 nodeSelector 提供的一种非常简单的将 pod 约束到具有特定标签的节点上的方法，极大地扩展了用户可以表达约束的类型。关键增强表现为:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;语言更具表现力，不只是 “完全匹配的 AND” 语义&lt;&#x2F;li&gt;
+&lt;li&gt;规则可以是一种建议性的，而非硬性要求，即使调度器无法找到满足要求的 Node，依旧会调度该 pod&lt;&#x2F;li&gt;
+&lt;li&gt;除了可以使用 Node 本身的标签作为约束之外，还可以使用运行在 Node 上的 pod 的标签作为约束，表明可以或者不可以与哪些 pod 运行在同一 Node 上。&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;Affinity 功能包含两种类型的 affinity: &lt;strong&gt;node affinity&lt;&#x2F;strong&gt; 与 &lt;strong&gt;inter-pod affinity&#x2F;anti-affinity&lt;&#x2F;strong&gt;。&lt;strong&gt;node affinity&lt;&#x2F;strong&gt; 类似于 &lt;strong&gt;nodeSelector&lt;&#x2F;strong&gt;，对应上述 &lt;strong&gt;1,2&lt;&#x2F;strong&gt; 两点优势。而 &lt;strong&gt;inter-pod affinity&#x2F;anti-affinity&lt;&#x2F;strong&gt; 具有上述 &lt;strong&gt;1,2,3&lt;&#x2F;strong&gt; 三点优势。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;node-affinity&quot;&gt;Node affinity&lt;&#x2F;h4&gt;
+&lt;p&gt;&lt;strong&gt;Node affinity&lt;&#x2F;strong&gt; 概念上类似于 &lt;strong&gt;nodeSelector&lt;&#x2F;strong&gt;，可以根据节点上的标签来约束 pod 可以调度到哪些节点。&lt;&#x2F;p&gt;
+&lt;p&gt;目前有两种类型的 Node affinity，分别为 &lt;strong&gt;requiredDuringSchedulingIgnoredDuringExecution&lt;&#x2F;strong&gt; 和 &lt;strong&gt;preferredDuringSchedulingIgnoredDuringExecution&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;requiredDuringSchedulingIgnoredDuringExecution&lt;&#x2F;strong&gt; 指定了将 pod 调度到一个节点上必须满足的规则，原则上等同于 nodeSelector，但语法更具有表现力。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;preferredDuringSchedulingIgnoredDuringExecution&lt;&#x2F;strong&gt; 指定调度器将尝试执行但不能保证的偏好。&lt;&#x2F;p&gt;
+&lt;p&gt;名称中 &lt;strong&gt;IgnoredDuringExecution&lt;&#x2F;strong&gt; 类似于 &lt;strong&gt;nodeSelector&lt;&#x2F;strong&gt; 的用法，表明如果节点的标签在 Pod 运行时发生变更，从而不再满足 pod 上的 affinity 规则时，pod 将仍然继续运行在原节点上。&lt;strong&gt;requiredDuringSchedulingRequiredDuringExecution&lt;&#x2F;strong&gt; 还只存在于计划中。&lt;&#x2F;p&gt;
+&lt;p&gt;因此，在下面的示例中:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;requiredDuringSchedulingIgnoredDuringExecution&lt;&#x2F;strong&gt; 的含义为: &lt;strong&gt;必须将 pod 运行在具有 kubernetes.io&#x2F;e2e-az-name=e2e-az1 或 kubernetes.io&#x2F;e2e-az-name=e2e-az2 标签的 Node 上&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;preferredDuringSchedulingIgnoredDuringExecution&lt;&#x2F;strong&gt; 的含义为: &lt;strong&gt;尝试将 pod 运行具有 another-node-label-key=another-node-label-value 标签的 Node 上，如果这不可能的话，则允许 pod 在其他地方运行&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;with-node-affinity
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;affinity&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nodeAffinity&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;requiredDuringSchedulingIgnoredDuringExecution&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nodeSelectorTerms&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;matchExpressions&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;kubernetes.io&#x2F;e2e-az-name
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;operator&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;In
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;values&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;e2e-az1
+&lt;&#x2F;span&gt;&lt;span&gt;            - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;e2e-az2
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;preferredDuringSchedulingIgnoredDuringExecution&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;weight&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;preference&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;matchExpressions&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;another-node-label-key
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;operator&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;In
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;values&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;another-node-label-value
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;with-node-affinity
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;k8s.gcr.io&#x2F;pause:2.0
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Node affinity 语法支持的操作符: In，NotIn，Exists，DoesNotExist，Gt，Lt。使用 NotIn 和 DoesNotExist 来实现 &lt;strong&gt;node anti-affinity&lt;&#x2F;strong&gt; 行为，或者使用 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;scheduling-eviction&#x2F;taint-and-toleration&#x2F;&quot;&gt;node taints(节点污点将)&lt;&#x2F;a&gt; pod 从特定节点中驱逐。&lt;&#x2F;p&gt;
+&lt;p&gt;如果同时指定了 &lt;strong&gt;nodeSelector&lt;&#x2F;strong&gt; 和 &lt;strong&gt;nodeAffinity&lt;&#x2F;strong&gt;，则要求两者必须同时满足，才能将 pod 调度到候选 Node 上。&lt;&#x2F;p&gt;
+&lt;p&gt;如果指定了多个与 &lt;strong&gt;nodeAffinity&lt;&#x2F;strong&gt; 类型关联的 &lt;strong&gt;nodeSelectorTerms&lt;&#x2F;strong&gt;，则 Node 只需要满足其中任何一个 nodeSelectorTerms 即可将 pod 调度到 Node 上。&lt;&#x2F;p&gt;
+&lt;p&gt;如果指定了多个与 &lt;strong&gt;nodeSelectorTerms&lt;&#x2F;strong&gt; 关联的 &lt;strong&gt;matchExpressions&lt;&#x2F;strong&gt;，则当且仅当所有 &lt;strong&gt;matchExpressions&lt;&#x2F;strong&gt; 得到满足时才将 pod 调度到该 Node 上。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;can-kao-wen-dang&quot;&gt;参考文档&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;scheduling-eviction&#x2F;assign-pod-node&#x2F;&quot;&gt;Assigning Pods to Nodes&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+</feed>

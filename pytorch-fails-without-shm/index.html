@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 未设置 shm 导致 PyTorch 任务失败</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/pytorch-fails-without-shm/#zong-jie" class="toc-link">总结</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;pytorch-fails-without-shm&#x2F;">未设置 shm 导致 PyTorch 任务失败</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-03-05</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>最近，配合研发同学将原来在老集群上直接用 <code>docker</code> 运行的 <code>pytorch</code> 算法迁移到使用 <code>k8s</code> 的新集群上运行。结果，很不幸，研发同学说无法运行。错误日志如下:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-Traceback</span><span> (most recent call last)</span><span style="color:#96b5b4;">:
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>  File &quot;</span><span style="color:#a3be8c;">/miniconda3/envs/pyasr/lib/python3.7/runpy.py</span><span>&quot;, line 193, in _run_module_as_main
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>&quot;</span><span style="color:#a3be8c;">__main__</span><span>&quot;</span><span style="color:#bf616a;">,</span><span> mod_spec)
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>  File &quot;</span><span style="color:#a3be8c;">/miniconda3/envs/pyasr/lib/python3.7/runpy.py</span><span>&quot;, line 85, in _run_code
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-exec</span><span>(code, run_globals)
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>  File &quot;</span><span style="color:#a3be8c;">/pytorch-asr/egs/chn_40h/extend_code/launch.py</span><span>&quot;, line 29, in &lt;module&gt;
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-main</span><span>()
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>  File &quot;</span><span style="color:#a3be8c;">/pytorch-asr/asr/launch.py</span><span>&quot;, line 10, in main
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-launch</span><span>(args)
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>  File &quot;</span><span style="color:#a3be8c;">/pytorch-asr/asr/cli/launch.py</span><span>&quot;, line 148, in launch
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-trainer.train_on</span><span>(data)
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>  File &quot;</span><span style="color:#a3be8c;">/pytorch-asr/asr/trainer/trainer.py</span><span>&quot;, line 77, in train_on
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-self.train_epoch</span><span>(data</span><span style="color:#b48ead;">[</span><span>&#39;</span><span style="color:#a3be8c;">tr</span><span>&#39;</span><span style="color:#b48ead;">]</span><span>)
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>  File &quot;</span><span style="color:#a3be8c;">/pytorch-asr/asr/trainer/trainer.py</span><span>&quot;, line 41, in train_epoch
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-return</span><span> self._one_epoch(data_queue, is_training=True)
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>  File &quot;</span><span style="color:#a3be8c;">/pytorch-asr/asr/trainer/trainer.py</span><span>&quot;, line 63, in _one_epoch
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-return</span><span> self.one_epoch(data_queue, is_training)
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>  File &quot;</span><span style="color:#a3be8c;">/pytorch-asr/asr/trainer/naive_trainer.py</span><span>&quot;, line 115, in one_epoch
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-for</span><span> batch_idx, batch in enumerate(self.timer</span><span style="color:#b48ead;">[</span><span>&#39;</span><span style="color:#a3be8c;">io</span><span>&#39;</span><span style="color:#b48ead;">]</span><span>.profile(data_queue))</span><span style="color:#96b5b4;">:
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>  File &quot;</span><span style="color:#a3be8c;">/pytorch-asr/asr/trainer/common.py</span><span>&quot;, line 102, in profile
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-value</span><span> = next(iterator)
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>  File &quot;</span><span style="color:#a3be8c;">&lt;string&gt;</span><span>&quot;, line 2, in get
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>  File &quot;</span><span style="color:#a3be8c;">/miniconda3/envs/pyasr/lib/python3.7/multiprocessing/managers.py</span><span>&quot;, line 834, in _callmethod
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-raise</span><span> convert_to_error(kind, result)
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-_queue
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-.
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-Empty
+</span><span style="color:#bf616a;">11:12:55[asr.utils.bootstrap]-WARNING-Version</span><span> 0.3.1.dev28
+</span></code></pre>
+<p>看到这个错误，就挺迷茫的。</p>
+<p>根据错误信息:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>  File &quot;</span><span style="color:#a3be8c;">/pytorch-asr/asr/trainer/naive_trainer.py</span><span>&quot;, line 115, in one_epoch
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-for</span><span> batch_idx, batch in enumerate(self.timer</span><span style="color:#b48ead;">[</span><span>&#39;</span><span style="color:#a3be8c;">io</span><span>&#39;</span><span style="color:#b48ead;">]</span><span>.profile(data_queue))</span><span style="color:#96b5b4;">:
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-</span><span>  File &quot;</span><span style="color:#a3be8c;">/pytorch-asr/asr/trainer/common.py</span><span>&quot;, line 102, in profile
+</span><span style="color:#bf616a;">10:59:01[asr.utils.bootstrap]-ERROR-value</span><span> = next(iterator)
+</span></code></pre>
+<p>推断是读数据的时候出现了问题。虽然看起来与 <code>GPU</code> 没有关系，但是，为了保险起见，依然对比了前后环境的 <code>NVIDIA Driver</code>，<code>CUDA</code> 等版本信息，结果是一致的。而且，<code>NCCL</code> 是在镜像中安装的，不太可能有问题。</p>
+<p>之后，尝试在容器中安装 <code>perf</code>，但是失败了，尝试在容器中使用 <code>strace</code>，提示没有权限。</p>
+<p>正在我继续死磕的时候，研发提供了另一段错误日志:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">pytorch-956sg:9319:9379 </span><span style="color:#b48ead;">[</span><span>0</span><span style="color:#b48ead;">]</span><span> include/shm.h:48 NCCL WARN Error while creating shared memory segment nccl-shm-recv-183375136c5888b6-0-2-3 (size 9637888)
+</span></code></pre>
+<p>这个错误就很有价值啊，创建共享内存失败。</p>
+<p>此前，反复与研发同学确认过，是否只依赖于外部的 <code>NVIDIA Driver</code> 与 <code>CUDA</code>，得到了肯定的答复。因此，就一直以此为前提进行排查。但现在我产生了怀疑，问研发要来启动命令，隐藏敏感数据后如下:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">docker</span><span> run</span><span style="color:#bf616a;"> -dit</span><span> /data:/data</span><span style="color:#bf616a;"> --name</span><span> asr</span><span style="color:#bf616a;"> --ipc</span><span>=host image:latest /bin/bash
+</span></code></pre>
+<p>果然就发现了隐藏信息: <strong>--ipc=host</strong> 。</p>
+<p>因此，修改在原有创建任务的 <code>yaml</code> 文件中增加 <code>volume</code>:</p>
+<pre data-lang="yaml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yaml "><code class="language-yaml" data-lang="yaml"><span>   </span><span style="color:#bf616a;">spec</span><span>:
+</span><span>     </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>       - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">asr
+</span><span>         </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">image:latest
+</span><span>         </span><span style="color:#bf616a;">volumeMounts</span><span>:
+</span><span>           - </span><span style="color:#bf616a;">mountPath</span><span>: </span><span style="color:#a3be8c;">/dev/shm
+</span><span>             </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">shm
+</span><span>     </span><span style="color:#bf616a;">volumes</span><span>:
+</span><span>       - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">shm
+</span><span>         </span><span style="color:#bf616a;">emptyDir</span><span>:
+</span><span>            </span><span style="color:#bf616a;">medium</span><span>: </span><span style="color:#a3be8c;">Memory
+</span></code></pre>
+<p>在容器内，挂载一个 <code>tmpfs</code> 到 <code>/dev/shm</code>。成功解决上述两个问题。</p>
+<h2 id="zong-jie">总结</h2>
+<ol>
+<li>
+<p>虽然成功解决了两个问题，但是对于第一个问题还是感到迷惑。虽然，根据答案反推原因，可以查到 <code>DataLoader</code> 在工作的时候会依赖于 <code>shm</code>。但是，查到的错误却不同于第一份错误日志。</p>
+</li>
+<li>
+<p>这次是运气好，遇到了第二个错误明显的提示。否则，可能就需要继续跟 <code>perf</code>，<code>strace</code> 作斗争了，甚至于调试 <code>coredump</code>。</p>
+</li>
+<li>
+<p>在遇到错误二之前，已经决定自己在新集群上使用 <code>docker</code> 运行看看了，其实，这样的话也能发现被隐藏的 <code>--ipc=host</code>。</p>
+</li>
+<li>
+<p>最终要的一点，不要轻易相信他人给定的条件。即使对方不是有意隐瞒，也可能会由于遗忘，或本来就不清楚等各种原因，导致丢失已知条件。</p>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/pytorch/">#pytorch</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/docker/">#docker</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/k8s/">#k8s</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/linux/">#linux</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;programming-open-closed-principle&#x2F;">‹ 开闭原则</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;innodb-introduction&#x2F;">InnoDB 入门 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>
