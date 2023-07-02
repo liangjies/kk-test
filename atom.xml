@@ -16,6 +16,7 @@
 &lt;script type=&quot;math&#x2F;tex;mode=display&quot;&gt;R_\theta
 =
 
+
 \begin{pmatrix}
 \cos\theta &amp; -\sin\theta \\
 \sin\theta &amp;  \cos\theta
