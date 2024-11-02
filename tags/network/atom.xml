@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - network</title>
+	<link href="https://blog.kiyoko.io/tags/network/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-11-19T13:14:30+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/network/atom.xml</id>
+	<entry xml:lang="en">
+		<title>测试节点之间的网络带宽</title>
+		<published>2020-11-19T13:14:30+00:00</published>
+		<updated>2020-11-19T13:14:30+00:00</updated>
+		<link href="https://blog.kiyoko.io/testing-the-bandwidth-between-two-nodes/" type="text/html"/>
+		<id>https://blog.kiyoko.io/testing-the-bandwidth-between-two-nodes/</id>
+		<content type="html">&lt;p&gt;昨天同事找到我，说 &lt;strong&gt;nfs&lt;&#x2F;strong&gt; 太慢了，通过 &lt;strong&gt;iostat&lt;&#x2F;strong&gt; 看只有 &lt;strong&gt;1-2MB&#x2F;s&lt;&#x2F;strong&gt; 的写入速度。在通过 &lt;strong&gt;fio&lt;&#x2F;strong&gt; 测试磁盘顺序写入速度，得到结果为 &lt;strong&gt;300MB&#x2F;s&lt;&#x2F;strong&gt; 之后，遂怀疑是网络的问题。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;iperf&quot;&gt;iperf&lt;&#x2F;h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;iperf is a tool for performing network throughput measurements.  It can test either TCP or UDP throughput.  To perform an iperf test the user must establish both a server (to discard traffic) and a client (to generate traffic).&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;此处省略安装过程。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;ce-shi-wang-luo-dai-kuan&quot;&gt;测试网络带宽&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;strong&gt;iperf&lt;&#x2F;strong&gt; 通过使用不同的命令行参数，支持分别作为 &lt;strong&gt;服务端&lt;&#x2F;strong&gt; 或 &lt;strong&gt;客户端&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;qi-dong-fu-wu-duan&quot;&gt;启动服务端&lt;&#x2F;h4&gt;
+&lt;p&gt;监听默认端口 &lt;strong&gt;5001&lt;&#x2F;strong&gt;，启动服务端:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;iperf -s
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;或者，监听指定端口，启动服务端:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;iperf -s -p &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;port&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;qi-dong-ke-hu-duan&quot;&gt;启动客户端&lt;&#x2F;h4&gt;
+&lt;p&gt;连接默认端口 &lt;strong&gt;5001&lt;&#x2F;strong&gt;，启动客户端:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;iperf -c &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;server-host&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;或者，连接指定端口，启动客户端:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;iperf -c &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;server-host&amp;gt; -p &amp;lt;port&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;同时，&lt;strong&gt;iperf&lt;&#x2F;strong&gt; 也支持多线程的客户端:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;iperf -c &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;server-host&amp;gt; -p &amp;lt;port&amp;gt; -P &amp;lt;threadiness&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;ce-shi-jie-guo&quot;&gt;测试结果&lt;&#x2F;h4&gt;
+&lt;p&gt;单线程客户端的测试结果:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;------------------------------------------------------------
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Client&lt;&#x2F;span&gt;&lt;span&gt; connecting to 10.100.28.26, TCP port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;TCP&lt;&#x2F;span&gt;&lt;span&gt; window size:  170 KByte (default)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;------------------------------------------------------------
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  3] local 172.29.60.164 port 37290 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; ID] Interval       Transfer     Bandwidth
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  3]  0.0-10.6 sec  24.0 MBytes  19.0 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;多线程客户端的测试结果，两个节点都有 &lt;strong&gt;16&lt;&#x2F;strong&gt; 个 &lt;strong&gt;CPU&lt;&#x2F;strong&gt; 核心:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;------------------------------------------------------------
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Client&lt;&#x2F;span&gt;&lt;span&gt; connecting to 10.100.28.26, TCP port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;TCP&lt;&#x2F;span&gt;&lt;span&gt; window size: 85.0 KByte (default)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;------------------------------------------------------------
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 18] local 172.29.60.164 port 37392 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 17] local 172.29.60.164 port 37390 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  4] local 172.29.60.164 port 37364 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 11] local 172.29.60.164 port 37378 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  9] local 172.29.60.164 port 37374 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  8] local 172.29.60.164 port 37372 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 10] local 172.29.60.164 port 37376 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  6] local 172.29.60.164 port 37366 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 13] local 172.29.60.164 port 37382 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 14] local 172.29.60.164 port 37384 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  3] local 172.29.60.164 port 37362 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  5] local 172.29.60.164 port 37368 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  7] local 172.29.60.164 port 37370 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 15] local 172.29.60.164 port 37386 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 16] local 172.29.60.164 port 37388 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 12] local 172.29.60.164 port 37380 connected with 10.100.28.26 port 9999
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; ID] Interval       Transfer     Bandwidth
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  3]  0.0-10.2 sec  2.62 MBytes  2.17 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 13]  0.0-10.2 sec  2.88 MBytes  2.36 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 15]  0.0-10.2 sec  1.88 MBytes  1.54 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  7]  0.0-10.9 sec  1.50 MBytes  1.15 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  6]  0.0-11.0 sec  1.75 MBytes  1.34 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 17]  0.0-11.2 sec  1.88 MBytes  1.40 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  5]  0.0-11.3 sec  1.50 MBytes  1.12 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 10]  0.0-11.6 sec  1.88 MBytes  1.35 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  9]  0.0-12.4 sec  1.62 MBytes  1.10 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  4]  0.0-13.0 sec  2.88 MBytes  1.85 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 11]  0.0-13.0 sec  4.62 MBytes  2.98 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 14]  0.0-13.1 sec  4.88 MBytes  3.12 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;  8]  0.0-13.9 sec  2.12 MBytes  1.28 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 16]  0.0-14.1 sec  2.00 MBytes  1.19 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 18]  0.0-14.1 sec  2.12 MBytes  1.26 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt; 12]  0.0-14.3 sec  1.73 MBytes  1.01 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;[SUM]&lt;&#x2F;span&gt;&lt;span&gt;  0.0-14.3 sec  37.9 MBytes  22.1 Mbits&#x2F;sec
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;jie-lun&quot;&gt;结论&lt;&#x2F;h2&gt;
+&lt;p&gt;瓶颈在网络带宽，悲哀。&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>

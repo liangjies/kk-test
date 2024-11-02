@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - rdma</title>
+	<link href="https://blog.kiyoko.io/tags/rdma/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-10-11T11:44:32+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/rdma/atom.xml</id>
+	<entry xml:lang="en">
+		<title>训练系统相关读物</title>
+		<published>2020-10-11T11:44:32+00:00</published>
+		<updated>2020-10-11T11:44:32+00:00</updated>
+		<link href="https://blog.kiyoko.io/readings-about-training-system/" type="text/html"/>
+		<id>https://blog.kiyoko.io/readings-about-training-system/</id>
+		<content type="html">&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;images.nvidia.com&#x2F;events&#x2F;sc15&#x2F;pdfs&#x2F;NCCL-Woolley.pdf&quot;&gt;NCCL: ACCELERATED MULTI-GPU COLLECTIVE COMMUNICATIONS&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;http:&#x2F;&#x2F;citeseerx.ist.psu.edu&#x2F;viewdoc&#x2F;download?doi=10.1.1.95.2490&amp;amp;rep=rep1&amp;amp;type=pdf&quot;&gt;Message Passing, Remote Procedure Calls and Distributed Shared Memory as Communication Paradigms for Distributed Systems&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;50116885&quot;&gt;分布式训练的方案和效率对比&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;http:&#x2F;&#x2F;gaocegege.com&#x2F;Blog&#x2F;mpi-1&quot;&gt;MPI，OpenMPI 与深度学习&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;mpitutorial.com&#x2F;tutorials&#x2F;mpi-introduction&#x2F;zh_cn&#x2F;&quot;&gt;MPI 教程介绍&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.mpi-forum.org&#x2F;&quot;&gt;MPI Forum&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;149771261&quot;&gt;2020 Rethinking GPU 集群上的分布式训练&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;zhuanlan.zhihu.com&#x2F;p&#x2F;40578792&quot;&gt;Horovod-基于TensorFlow分布式深度学习框架&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;horovod&#x2F;horovod&quot;&gt;Github: Horovod&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;tasks&#x2F;manage-gpus&#x2F;scheduling-gpus&#x2F;&quot;&gt;Schedule GPUs&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;extend-kubernetes&#x2F;compute-storage-net&#x2F;device-plugins&#x2F;&quot;&gt;Device Plugins&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;towardsdatascience.com&#x2F;distributed-deep-learning-training-with-horovod-on-kubernetes-6b28ac1d6b5d&quot;&gt;Distributed Deep Learning Training with Horovod on Kubernetes&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;developer.nvidia.com&#x2F;kubernetes-gpu&quot;&gt;Kubernetes on NVIDIA GPUs&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+</feed>

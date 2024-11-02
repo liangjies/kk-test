@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - Volcano Plugin - binpack</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/volcano-plugin-binpack/#mu-biao" class="toc-link">目标</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/volcano-plugin-binpack/#yuan-ma-fen-xi" class="toc-link">源码分析</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/volcano-plugin-binpack/#pei-zhi-wen-jian" class="toc-link">配置文件</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/volcano-plugin-binpack/#volcano-scheduler-ri-zhi" class="toc-link">Volcano Scheduler 日志</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;volcano-plugin-binpack&#x2F;">Volcano Plugin - binpack</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-12-07</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <h2 id="mu-biao">目标</h2>
+<p><strong>binpack</strong> 解决的问题是，提高节点的利用率，避免资源碎片化。</p>
+<h2 id="yuan-ma-fen-xi">源码分析</h2>
+<p>如下代码来自: <code>pkg/scheduler/plugins/binpack/binpack.go</code>。</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#65737e;">// BinPackingScore use the best fit polices during scheduling.
+</span><span style="color:#65737e;">// Goals:
+</span><span style="color:#65737e;">// - Schedule Jobs using BestFit Policy using Resource Bin Packing Priority Function
+</span><span style="color:#65737e;">// - Reduce Fragmentation of scarce resources on the Cluster
+</span><span style="color:#b48ead;">func </span><span style="color:#8fa1b3;">BinPackingScore</span><span>(</span><span style="color:#bf616a;">task </span><span>*</span><span style="color:#bf616a;">api</span><span>.</span><span style="color:#b48ead;">TaskInfo</span><span>, </span><span style="color:#bf616a;">node </span><span>*</span><span style="color:#bf616a;">api</span><span>.</span><span style="color:#b48ead;">NodeInfo</span><span>, </span><span style="color:#bf616a;">weight </span><span style="color:#b48ead;">priorityWeight</span><span>) </span><span style="color:#b48ead;">float64 </span><span>{
+</span><span>    </span><span style="color:#bf616a;">score </span><span>:= </span><span style="color:#d08770;">0.0
+</span><span>    </span><span style="color:#bf616a;">weightSum </span><span>:= </span><span style="color:#d08770;">0
+</span><span>    </span><span style="color:#bf616a;">requested </span><span>:= </span><span style="color:#bf616a;">task</span><span>.</span><span style="color:#bf616a;">Resreq
+</span><span>    </span><span style="color:#bf616a;">allocatable </span><span>:= </span><span style="color:#bf616a;">node</span><span>.</span><span style="color:#bf616a;">Allocatable
+</span><span>    </span><span style="color:#bf616a;">used </span><span>:= </span><span style="color:#bf616a;">node</span><span>.</span><span style="color:#bf616a;">Used
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for </span><span style="color:#bf616a;">_</span><span>, </span><span style="color:#bf616a;">resource </span><span>:= </span><span style="color:#b48ead;">range </span><span style="color:#bf616a;">requested</span><span>.</span><span style="color:#bf616a;">ResourceNames</span><span>() {
+</span><span>        </span><span style="color:#bf616a;">request </span><span>:= </span><span style="color:#bf616a;">requested</span><span>.</span><span style="color:#bf616a;">Get</span><span>(</span><span style="color:#bf616a;">resource</span><span>)
+</span><span>        </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">request </span><span>== </span><span style="color:#d08770;">0 </span><span>{
+</span><span>            </span><span style="color:#b48ead;">continue
+</span><span>        }
+</span><span>        </span><span style="color:#bf616a;">allocate </span><span>:= </span><span style="color:#bf616a;">allocatable</span><span>.</span><span style="color:#bf616a;">Get</span><span>(</span><span style="color:#bf616a;">resource</span><span>)
+</span><span>        </span><span style="color:#bf616a;">nodeUsed </span><span>:= </span><span style="color:#bf616a;">used</span><span>.</span><span style="color:#bf616a;">Get</span><span>(</span><span style="color:#bf616a;">resource</span><span>)
+</span><span>
+</span><span>        </span><span style="color:#bf616a;">resourceWeight </span><span>:= </span><span style="color:#d08770;">0
+</span><span>        </span><span style="color:#bf616a;">found </span><span>:= </span><span style="color:#d08770;">false
+</span><span>        </span><span style="color:#b48ead;">switch </span><span style="color:#bf616a;">resource </span><span>{
+</span><span>        </span><span style="color:#b48ead;">case </span><span style="color:#bf616a;">v1</span><span>.</span><span style="color:#bf616a;">ResourceCPU</span><span>:
+</span><span>            </span><span style="color:#bf616a;">resourceWeight </span><span>= </span><span style="color:#bf616a;">weight</span><span>.</span><span style="color:#bf616a;">BinPackingCPU
+</span><span>            </span><span style="color:#bf616a;">found </span><span>= </span><span style="color:#d08770;">true
+</span><span>        </span><span style="color:#b48ead;">case </span><span style="color:#bf616a;">v1</span><span>.</span><span style="color:#bf616a;">ResourceMemory</span><span>:
+</span><span>            </span><span style="color:#bf616a;">resourceWeight </span><span>= </span><span style="color:#bf616a;">weight</span><span>.</span><span style="color:#bf616a;">BinPackingMemory
+</span><span>            </span><span style="color:#bf616a;">found </span><span>= </span><span style="color:#d08770;">true
+</span><span>        </span><span style="color:#b48ead;">default</span><span>:
+</span><span>            </span><span style="color:#bf616a;">resourceWeight</span><span>, </span><span style="color:#bf616a;">found </span><span>= </span><span style="color:#bf616a;">weight</span><span>.</span><span style="color:#bf616a;">BinPackingResources</span><span>[</span><span style="color:#bf616a;">resource</span><span>]
+</span><span>        }
+</span><span>        </span><span style="color:#b48ead;">if </span><span>!</span><span style="color:#bf616a;">found </span><span>{
+</span><span>            </span><span style="color:#b48ead;">continue
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="color:#bf616a;">resourceScore </span><span>:= </span><span style="color:#bf616a;">ResourceBinPackingScore</span><span>(</span><span style="color:#bf616a;">request</span><span>, </span><span style="color:#bf616a;">allocate</span><span>, </span><span style="color:#bf616a;">nodeUsed</span><span>, </span><span style="color:#bf616a;">resourceWeight</span><span>)
+</span><span>        </span><span style="color:#bf616a;">klog</span><span>.</span><span style="color:#bf616a;">V</span><span>(</span><span style="color:#d08770;">5</span><span>).</span><span style="color:#bf616a;">Infof</span><span>(&quot;</span><span style="color:#a3be8c;">task </span><span style="color:#d08770;">%s</span><span style="color:#a3be8c;">/</span><span style="color:#d08770;">%s</span><span style="color:#a3be8c;"> on node </span><span style="color:#d08770;">%s</span><span style="color:#a3be8c;"> resource </span><span style="color:#d08770;">%s</span><span style="color:#a3be8c;">, need </span><span style="color:#d08770;">%f</span><span style="color:#a3be8c;">, used </span><span style="color:#d08770;">%f</span><span style="color:#a3be8c;">, allocatable </span><span style="color:#d08770;">%f</span><span style="color:#a3be8c;">, weight </span><span style="color:#d08770;">%d</span><span style="color:#a3be8c;">, score </span><span style="color:#d08770;">%f</span><span>&quot;, </span><span style="color:#bf616a;">task</span><span>.</span><span style="color:#bf616a;">Namespace</span><span>, </span><span style="color:#bf616a;">task</span><span>.</span><span style="color:#bf616a;">Name</span><span>, </span><span style="color:#bf616a;">node</span><span>.</span><span style="color:#bf616a;">Name</span><span>, </span><span style="color:#bf616a;">resource</span><span>, </span><span style="color:#bf616a;">request</span><span>, </span><span style="color:#bf616a;">nodeUsed</span><span>, </span><span style="color:#bf616a;">allocate</span><span>, </span><span style="color:#bf616a;">resourceWeight</span><span>, </span><span style="color:#bf616a;">resourceScore</span><span>)
+</span><span>
+</span><span>        </span><span style="color:#bf616a;">score </span><span>+= </span><span style="color:#bf616a;">resourceScore
+</span><span>        </span><span style="color:#bf616a;">weightSum </span><span>+= </span><span style="color:#bf616a;">resourceWeight
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// mapping the result from [0, weightSum] to [0, 10(MaxPriority)]
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">weightSum </span><span>&gt; </span><span style="color:#d08770;">0 </span><span>{
+</span><span>        </span><span style="color:#bf616a;">score </span><span>/= </span><span style="color:#bf616a;">float64</span><span>(</span><span style="color:#bf616a;">weightSum</span><span>)
+</span><span>    }
+</span><span>    </span><span style="color:#bf616a;">score </span><span>*= </span><span style="color:#bf616a;">float64</span><span>(</span><span style="color:#bf616a;">v1alpha1</span><span>.</span><span style="color:#bf616a;">MaxNodeScore </span><span>* </span><span style="color:#bf616a;">int64</span><span>(</span><span style="color:#bf616a;">weight</span><span>.</span><span style="color:#bf616a;">BinPackingWeight</span><span>))
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">score
+</span><span>}
+</span><span>
+</span><span style="color:#65737e;">// ResourceBinPackingScore calculate the binpack score for resource with provided info
+</span><span style="color:#b48ead;">func </span><span style="color:#8fa1b3;">ResourceBinPackingScore</span><span>(</span><span style="color:#bf616a;">requested</span><span>, </span><span style="color:#bf616a;">capacity</span><span>, </span><span style="color:#bf616a;">used </span><span style="color:#b48ead;">float64</span><span>, </span><span style="color:#bf616a;">weight </span><span style="color:#b48ead;">int</span><span>) </span><span style="color:#b48ead;">float64 </span><span>{
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">capacity </span><span>== </span><span style="color:#d08770;">0 </span><span>|| </span><span style="color:#bf616a;">weight </span><span>== </span><span style="color:#d08770;">0 </span><span>{
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">0
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#bf616a;">usedFinally </span><span>:= </span><span style="color:#bf616a;">requested </span><span>+ </span><span style="color:#bf616a;">used
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">usedFinally </span><span>&gt; </span><span style="color:#bf616a;">capacity </span><span>{
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">0
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#bf616a;">score </span><span>:= </span><span style="color:#bf616a;">usedFinally </span><span>* </span><span style="color:#bf616a;">float64</span><span>(</span><span style="color:#bf616a;">weight</span><span>) / </span><span style="color:#bf616a;">capacity
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">score
+</span><span>}
+</span></code></pre>
+<h2 id="pei-zhi-wen-jian">配置文件</h2>
+<pre data-lang="yaml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yaml "><code class="language-yaml" data-lang="yaml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">ConfigMap
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">volcano-scheduler-configmap
+</span><span>  </span><span style="color:#bf616a;">namespace</span><span>: </span><span style="color:#a3be8c;">volcano-system
+</span><span style="color:#bf616a;">data</span><span>:
+</span><span>  </span><span style="color:#bf616a;">volcano-scheduler.conf</span><span>: </span><span style="color:#b48ead;">|
+</span><span style="color:#a3be8c;">    actions: &quot;enqueue, allocate, backfill&quot;
+</span><span style="color:#a3be8c;">    tiers:
+</span><span style="color:#a3be8c;">    - plugins:
+</span><span style="color:#a3be8c;">      - name: priority
+</span><span style="color:#a3be8c;">      - name: gang
+</span><span style="color:#a3be8c;">      - name: conformance
+</span><span style="color:#a3be8c;">    - plugins:
+</span><span style="color:#a3be8c;">      - name: drf
+</span><span style="color:#a3be8c;">      - name: predicates
+</span><span style="color:#a3be8c;">      - name: proportion
+</span><span style="color:#a3be8c;">      - name: nodeorder
+</span><span style="color:#a3be8c;">      - name: binpack
+</span><span style="color:#a3be8c;">        arguments:
+</span><span style="color:#a3be8c;">          # binpack 插件权重
+</span><span style="color:#a3be8c;">          - binpack.weight: 10
+</span><span style="color:#a3be8c;">          # cpu 资源权重
+</span><span style="color:#a3be8c;">          - binpack.cpu: 1
+</span><span style="color:#a3be8c;">          # memory 资源权重
+</span><span style="color:#a3be8c;">          - binpack.memory: 1
+</span><span style="color:#a3be8c;">          # gpu 等其他资源类型
+</span><span style="color:#a3be8c;">          - binpack.resources: nvidia.com/gpu
+</span><span style="color:#a3be8c;">          # gpu 等其他资源权重配置
+</span><span style="color:#a3be8c;">          - binpack.resources.nvidia.com/gpu: 2
+</span></code></pre>
+<h3 id="volcano-scheduler-ri-zhi">Volcano Scheduler 日志</h3>
+<p><strong>Volcano Scheduler</strong> 中可以看到 <strong>binpack plugin</strong> 加载的配置文件:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> kubectl</span><span style="color:#bf616a;"> -n</span><span> volcano-system logs</span><span style="color:#bf616a;"> -f</span><span> volcano-scheduler-566b6f749d-4wr6m
+</span><span>
+</span><span style="color:#bf616a;">I1208</span><span> 07:27:43.875761       1 binpack.go:161] Leaving binpack plugin. binpack.weight</span><span style="color:#b48ead;">[</span><span>10</span><span style="color:#b48ead;">]</span><span>, binpack.cpu</span><span style="color:#b48ead;">[</span><span>1</span><span style="color:#b48ead;">]</span><span>, binpack.memory</span><span style="color:#b48ead;">[</span><span>1</span><span style="color:#b48ead;">]</span><span>, nvidia.com/gpu</span><span style="color:#b48ead;">[</span><span>2</span><span style="color:#b48ead;">]</span><span> ...
+</span></code></pre>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/kubernetes/">#kubernetes</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/scheduler/">#scheduler</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/volcano/">#volcano</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;delete-all-evicted-pods&#x2F;">‹ 删除所有 Evicted 状态的 Pod</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;install-nvidia-driver-and-cuda&#x2F;">安装 NVIDIA Driver 和 CUDA ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

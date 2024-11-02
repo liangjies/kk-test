@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - macro tokio::main</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/tokio-main-macro/#gai-shu" class="toc-link">概述</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/tokio-main-macro/#chang-yong-pei-zhi" class="toc-link">常用配置</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/tokio-main-macro/#multi-threaded-runtime" class="toc-link">Multi-threaded runtime</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/tokio-main-macro/#current-thread-runtime" class="toc-link">Current thread runtime</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tokio-main-macro&#x2F;">macro tokio::main</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-05-30</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>在各种讲解 <code>async</code> 编程的的文章中，其使用的示例代码基本都类似于:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>tokio::net::TcpListener;
+</span><span style="color:#b48ead;">use </span><span>tokio::io::{AsyncReadExt, AsyncWriteExt};
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> listener = TcpListener::bind(&quot;</span><span style="color:#a3be8c;">127.0.0.1:8080</span><span>&quot;).await?;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">loop </span><span>{
+</span><span>        </span><span style="color:#b48ead;">let </span><span>(</span><span style="color:#b48ead;">mut</span><span> socket, _) = listener.</span><span style="color:#96b5b4;">accept</span><span>().await?;
+</span><span>
+</span><span>        tokio::spawn(async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>            </span><span style="color:#b48ead;">let mut</span><span> buf = [</span><span style="color:#d08770;">0</span><span>; </span><span style="color:#d08770;">1024</span><span>];
+</span><span>
+</span><span>            </span><span style="color:#65737e;">// In a loop, read data from the socket and write the data back.
+</span><span>            </span><span style="color:#b48ead;">loop </span><span>{
+</span><span>                </span><span style="color:#b48ead;">let</span><span> n = </span><span style="color:#b48ead;">match</span><span> socket.</span><span style="color:#96b5b4;">read</span><span>(&amp;</span><span style="color:#b48ead;">mut</span><span> buf).await {
+</span><span>                    </span><span style="color:#65737e;">// socket closed
+</span><span>                    Ok(n) </span><span style="color:#b48ead;">if</span><span> n == </span><span style="color:#d08770;">0 </span><span>=&gt; </span><span style="color:#b48ead;">return</span><span>,
+</span><span>                    Ok(n) =&gt; n,
+</span><span>                    Err(e) =&gt; {
+</span><span>                        eprintln!(&quot;</span><span style="color:#a3be8c;">failed to read from socket; err = </span><span style="color:#d08770;">{:?}</span><span>&quot;, e);
+</span><span>                        </span><span style="color:#b48ead;">return</span><span>;
+</span><span>                    }
+</span><span>                };
+</span><span>
+</span><span>                </span><span style="color:#65737e;">// Write the data back
+</span><span>                </span><span style="color:#b48ead;">if let </span><span>Err(e) = socket.</span><span style="color:#96b5b4;">write_all</span><span>(&amp;buf[</span><span style="color:#d08770;">0</span><span>..n]).await {
+</span><span>                    eprintln!(&quot;</span><span style="color:#a3be8c;">failed to write to socket; err = </span><span style="color:#d08770;">{:?}</span><span>&quot;, e);
+</span><span>                    </span><span style="color:#b48ead;">return</span><span>;
+</span><span>                }
+</span><span>            }
+</span><span>        });
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>使用 <code>#[tokio::main]</code> 宏将 <code>async fn main</code> 函数转换成普通的 <code>fn main</code> 函数。但是却很少有文章说明更多关于 <code>#[tokio::main]</code> 的内容。</p>
+<p>以下内容均来自官方<a href="https://docs.rs/tokio/1.6.1/tokio/attr.main.html">文档</a>。</p>
+<h2 id="gai-shu">概述</h2>
+<p>在官方文档中说明了几点:</p>
+<ul>
+<li>方便为被标记的 <code>async</code> 函数创建响应的运行时，而无需开发者直接操作 <code>tokio::runtime::Runtime</code> 或者 <code>tokio::runtime::Builder</code>。</li>
+<li>仅限于面向不需要复杂设置与功能的 <code>async</code> 函数，否则仍建议直接使用 <code>tokio::runtime::Builder</code> 配置。</li>
+<li>除用于 <code>async fn main</code> 函数之外，同样可用于其他任何函数(之后称作<strong>一般函数</strong>)。在配合一般函数使用时，每次进行函数调用时均会启动一个<strong>新</strong>的 <code>tokio::runtime::Runtime</code>，且函数的行为等同于同步函数。推荐对于需要被经常调用的函数<strong>复用</strong>由 <code>tokio::runtime::Builder</code> 创建的 <code>tokio::runtime::Runtime</code>。</li>
+</ul>
+<h2 id="chang-yong-pei-zhi">常用配置</h2>
+<h3 id="multi-threaded-runtime">Multi-threaded runtime</h3>
+<p>要使用 <code>Multi-threaded runtime</code> 功能，需要在 <code>Cargo.toml</code> 中启用 <code>rt-multi-thread</code> 功能:</p>
+<pre data-lang="toml" style="background-color:#2b303b;color:#c0c5ce;" class="language-toml "><code class="language-toml" data-lang="toml"><span style="color:#bf616a;">tokio </span><span>= { </span><span style="color:#bf616a;">version </span><span>= &quot;</span><span style="color:#a3be8c;">1.6</span><span>&quot;, </span><span style="color:#bf616a;">features </span><span>= [&quot;</span><span style="color:#a3be8c;">macros</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">rt-multi-thread</span><span>&quot;] }
+</span></code></pre>
+<p>在启用 <code>rt-multi-thread</code> 功能后，默认工作线程数量为系统的 <code>cpu</code> 数量:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    println!(&quot;</span><span style="color:#a3be8c;">Hello world</span><span>&quot;);
+</span><span>}
+</span></code></pre>
+<p>等价于:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    tokio::runtime::Builder::new_multi_thread()
+</span><span>        .</span><span style="color:#96b5b4;">enable_all</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">build</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">block_on</span><span>(async {
+</span><span>            println!(&quot;</span><span style="color:#a3be8c;">Hello world</span><span>&quot;);
+</span><span>        })
+</span><span>}
+</span></code></pre>
+<p>也可以通过配置 <code>worker_thread</code> 选项来指定工作线程的数量:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>(worker_threads = 2)]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    println!(&quot;</span><span style="color:#a3be8c;">Hello world</span><span>&quot;);
+</span><span>}
+</span></code></pre>
+<p>等价于:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    tokio::runtime::Builder::new_multi_thread()
+</span><span>        .</span><span style="color:#96b5b4;">worker_threads</span><span>(</span><span style="color:#d08770;">2</span><span>)
+</span><span>        .</span><span style="color:#96b5b4;">enable_all</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">build</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">block_on</span><span>(async {
+</span><span>            println!(&quot;</span><span style="color:#a3be8c;">Hello world</span><span>&quot;);
+</span><span>        })
+</span><span>}
+</span></code></pre>
+<h3 id="current-thread-runtime">Current thread runtime</h3>
+<p>另一种是只是用单线程的模式:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>(flavor = &quot;</span><span style="color:#a3be8c;">current_thread</span><span>&quot;)]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    println!(&quot;</span><span style="color:#a3be8c;">Hello world</span><span>&quot;);
+</span><span>}
+</span></code></pre>
+<p>等价于:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    tokio::runtime::Builder::new_current_thread()
+</span><span>        .</span><span style="color:#96b5b4;">enable_all</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">build</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">block_on</span><span>(async {
+</span><span>            println!(&quot;</span><span style="color:#a3be8c;">Hello world</span><span>&quot;);
+</span><span>        })
+</span><span>}
+</span></code></pre>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/rust/">#rust</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/tokio/">#tokio</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;run-async-block-in-non-async-function&#x2F;">‹ 在非 async 函数中执行 async 语句块</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tokio-stream-01&#x2F;">tokio stream ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

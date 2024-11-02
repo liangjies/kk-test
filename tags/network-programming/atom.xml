@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - network programming</title>
+	<link href="https://blog.kiyoko.io/tags/network-programming/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2021-05-09T16:34:02+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/network-programming/atom.xml</id>
+	<entry xml:lang="en">
+		<title>IO 模型</title>
+		<published>2021-05-09T16:34:02+00:00</published>
+		<updated>2021-05-09T16:34:02+00:00</updated>
+		<link href="https://blog.kiyoko.io/io-multiplexing-io-models/" type="text/html"/>
+		<id>https://blog.kiyoko.io/io-multiplexing-io-models/</id>
+		<content type="html">&lt;p&gt;在 Unix&#x2F;Linux 系统中，存在五中 &lt;code&gt;I&#x2F;O&lt;&#x2F;code&gt; 模型:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;阻塞式 I&#x2F;O&lt;&#x2F;li&gt;
+&lt;li&gt;非阻塞式 I&#x2F;O&lt;&#x2F;li&gt;
+&lt;li&gt;I&#x2F;O 复用 (select&#x2F;poll)&lt;&#x2F;li&gt;
+&lt;li&gt;信号驱动式 I&#x2F;O (SIGIO)&lt;&#x2F;li&gt;
+&lt;li&gt;异步 I&#x2F;O (aio_系列函数)&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;一次输入操作通常会包括两个不同的阶段:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;等待数据准备好&lt;&#x2F;li&gt;
+&lt;li&gt;将数据从内核复制到进程&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;而对于一个发生在套接字上的输入操作，第一步是等待数据从网络中到达。当目标分组到达时，数据将被复制到内核中的某个缓冲区。第二步是把数据从内核缓冲区复制到应用进程缓冲区。&lt;&#x2F;p&gt;
+&lt;p&gt;在之后的例子中，以 &lt;code&gt;UDP&lt;&#x2F;code&gt; 为例，并将函数 &lt;code&gt;recvfrom&lt;&#x2F;code&gt; 视为系统调用。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;zu-sai-shi-i-o-mo-xing&quot;&gt;阻塞式 I&#x2F;O 模型&lt;&#x2F;h2&gt;
+&lt;p&gt;最流行，最常用的 I&#x2F;O 模型当属阻塞式 I&#x2F;O (blocking I&#x2F;O) 模型。并且，在默认情况下，所有的套接字都是阻塞式的。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;io-multiplexing-io-models&#x2F;01-Blocking-IO-Model.png&quot; alt=&quot;图-Blocking-IO-Model&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;fei-zu-sai-shi-i-o-mo-xing&quot;&gt;非阻塞式 I&#x2F;O 模型&lt;&#x2F;h2&gt;
+&lt;p&gt;当进程将一个套接字设置成非阻塞式后，如果对其进行的 I&#x2F;O 操作会导致当前进程进入到睡眠状态，内核会直接返回一个错误，避免进程进入到睡眠状态。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;io-multiplexing-io-models&#x2F;02-Nonblocking-IO-Model.png&quot; alt=&quot;图-Blocking-IO-Model&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;上图所示，前三次调用 &lt;code&gt;recvfrom&lt;&#x2F;code&gt; 时均没有已就绪的数据，因此内核立刻返回了错误 &lt;code&gt;EWOULDBLOCK&lt;&#x2F;code&gt;。而当第四次调用 &lt;code&gt;recvfrom&lt;&#x2F;code&gt; 时，已有数据准备就绪，内核此时就会将这部分数据返回给进程。&lt;&#x2F;p&gt;
+&lt;p&gt;当应用进程如上图所示对一个非阻塞的文件描述符循环调用 &lt;code&gt;recvfrom&lt;&#x2F;code&gt; 时，该过程被称作 &lt;strong&gt;轮询 (polling)&lt;&#x2F;strong&gt;。该过程通常会消耗大量的 &lt;code&gt;CPU&lt;&#x2F;code&gt; 资源。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;i-o-fu-yong-mo-xing&quot;&gt;I&#x2F;O 复用模型&lt;&#x2F;h2&gt;
+&lt;p&gt;目前主流系统系统了一种叫做 &lt;code&gt;I&#x2F;O 多路复用 (I&#x2F;O Multiplexing)&lt;&#x2F;code&gt; 的技术，允许一次监听多个文件描述符。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;io-multiplexing-io-models&#x2F;03-Multiplexing-IO-Model.png&quot; alt=&quot;图-Blocking-IO-Model&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;对比 &lt;code&gt;I&#x2F;O 多路复用&lt;&#x2F;code&gt; 的处理过程与 &lt;code&gt;阻塞式 I&#x2F;O&lt;&#x2F;code&gt; 的处理过程，不难发现，阻塞式 &lt;code&gt;I&#x2F;O&lt;&#x2F;code&gt; 模型的两个阶段均阻塞在 &lt;code&gt;recvfrom&lt;&#x2F;code&gt; 系统调用上，而 &lt;code&gt;I&#x2F;O 多路复用&lt;&#x2F;code&gt; 模型将第一阶段阻塞在 &lt;code&gt;select&lt;&#x2F;code&gt; 系统调用上，而第二个阶段依然阻塞在 &lt;code&gt;recvfrom&lt;&#x2F;code&gt; 上。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;xin-hao-qu-dong-shi-i-o-mo-xing&quot;&gt;信号驱动式 I&#x2F;O 模型&lt;&#x2F;h2&gt;
+&lt;p&gt;当内核在文件描述符就绪时发送 &lt;code&gt;SIGIO&lt;&#x2F;code&gt; 信号通知应用进程。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;io-multiplexing-io-models&#x2F;04-Signal-Driven-IO-Model.png&quot; alt=&quot;图-Blocking-IO-Model&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;yi-bu-i-o&quot;&gt;异步 I&#x2F;O&lt;&#x2F;h2&gt;
+&lt;p&gt;应用进程告知内核启动某个操作，并让内核在完成整个操作(包含两个阶段)后通知应用进程。该模型与信号驱动模型的区别在于: 信号驱动式I&#x2F;O由内核通知应用进程何时可以启动I&#x2F;O操作，而异步I&#x2F;O模型是有内核通知应用进程I&#x2F;O操作何时完成。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;io-multiplexing-io-models&#x2F;05-Asynchronous-IO-Model.png&quot; alt=&quot;图-Blocking-IO-Model&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;can-kao-zi-liao&quot;&gt;参考资料&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;man7.org&#x2F;linux&#x2F;man-pages&#x2F;man2&#x2F;sigaction.2.html&quot;&gt;MAN Page: sigaction&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;man7.org&#x2F;tlpi&#x2F;code&#x2F;online&#x2F;dist&#x2F;altio&#x2F;demo_sigio.c.html&quot;&gt;SIGIO demo&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+</feed>

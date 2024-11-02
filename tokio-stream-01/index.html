@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - tokio stream</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/tokio-stream-01/#stream" class="toc-link">Stream</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/tokio-stream-01/#iterator-stream" class="toc-link">Iterator -&gt; Stream</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/tokio-stream-01/#shi-yong-stream-zhong-gou" class="toc-link">使用 Stream 重构</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/tokio-stream-01/#shi-yong-for-loop" class="toc-link">使用 for-loop</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/tokio-stream-01/#shi-yong-for-each" class="toc-link">使用 for-each</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/tokio-stream-01/#shi-yong-map" class="toc-link">使用 map</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tokio-stream-01&#x2F;">tokio stream</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-05-30</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>如下所示代码，<code>sleep</code> 代替实际可能遇到的其他 <code>async</code> 函数，即希望通过使用 <code>async</code> 配合 <code>adaptor</code> 的组合处理 <code>iterator</code>。显然，如下代码无法通过编译，因为不允许在 <code>non-async</code> 代码块中使用 <code>.await</code>。而且，也不允许传入 <code>async</code> 函数给 <code>fold</code>。可以尝试的一种方法是通过 <code>futures::executor::block_on</code> 将 <code>async</code> 函数转换为 <code>non-async</code> 函数，但这个方法看起来有些蠢笨。好在，在 <code>async</code> 环境中存在 <code>stream</code> 可以使用。</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>std::time::Duration;
+</span><span>
+</span><span style="color:#b48ead;">use </span><span>futures::StreamExt;
+</span><span style="color:#b48ead;">use </span><span>tokio::time::sleep;
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>(flavor = &quot;</span><span style="color:#a3be8c;">multi_thread</span><span>&quot;, worker_threads = 2)]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> handles = vec![];
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for</span><span> index in </span><span style="color:#d08770;">0</span><span>..</span><span style="color:#d08770;">16 </span><span>{
+</span><span>        </span><span style="color:#b48ead;">let</span><span> h = tokio::spawn(async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>            println!(&quot;</span><span style="color:#a3be8c;">start index: </span><span style="color:#d08770;">{}</span><span>&quot;, index);
+</span><span>            </span><span style="color:#b48ead;">let</span><span> res = (</span><span style="color:#d08770;">0</span><span style="color:#b48ead;">u128</span><span>..</span><span style="color:#d08770;">1000</span><span>).</span><span style="color:#96b5b4;">fold</span><span>(</span><span style="color:#d08770;">0</span><span style="color:#b48ead;">u128</span><span>, |</span><span style="color:#bf616a;">a</span><span>, </span><span style="color:#bf616a;">b</span><span>| {
+</span><span>                </span><span style="color:#96b5b4;">sleep</span><span>(Duration::from_micros(</span><span style="color:#d08770;">1</span><span>)).await;
+</span><span>                a + b * b
+</span><span>            });
+</span><span>            println!(&quot;</span><span style="color:#a3be8c;">finish index: </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> res: </span><span style="color:#d08770;">{}</span><span>&quot;, index, res);
+</span><span>        });
+</span><span>        handles.</span><span style="color:#96b5b4;">push</span><span>(h);
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for</span><span> h in handles {
+</span><span>        </span><span style="color:#b48ead;">let</span><span> _res = h.await.</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h2 id="stream">Stream</h2>
+<p>根据<a href="https://doc.rust-lang.org/std/stream/index.html">文档</a>:</p>
+<blockquote>
+<p>If futures are asynchronous values, then streams are asynchronous iterators. If you’ve found yourself with an asynchronous collection of some kind, and needed to perform an operation on the elements of said collection, you’ll quickly run into ‘streams’. Streams are heavily used in idiomatic asynchronous Rust code, so it’s worth becoming familiar with them.</p>
+</blockquote>
+<p>核心内容: <code>stream</code> 就是 <code>async</code> 编程中的 <code>iterator</code>。</p>
+<h3 id="iterator-stream">Iterator -&gt; Stream</h3>
+<p><code>crate futures</code> 提供的函数 <code>futures::stream::iter</code> 可以将一个 <code>iterator</code> 转换为 <code>stream</code>:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#65737e;">/// Converts an `Iterator` into a `Stream` which is always ready
+</span><span style="color:#65737e;">/// to yield the next value.
+</span><span style="color:#65737e;">///
+</span><span style="color:#65737e;">/// Iterators in Rust don&#39;t express the ability to block, so this adapter
+</span><span style="color:#65737e;">/// simply always calls `iter.next()` and returns that.
+</span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">iter</span><span>&lt;I&gt;(</span><span style="color:#bf616a;">i</span><span>: I) -&gt; Iter&lt;</span><span style="color:#b48ead;">I::</span><span>IntoIter&gt;
+</span><span style="color:#b48ead;">where
+</span><span>    I: IntoIterator,
+</span><span>{
+</span><span>    assert_stream::&lt;</span><span style="color:#b48ead;">I::</span><span>Item, _&gt;(Iter { iter: i.</span><span style="color:#96b5b4;">into_iter</span><span>() })
+</span><span>}
+</span></code></pre>
+<p>例如:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">foo</span><span>() {
+</span><span>  futures::executor::block_on(async {
+</span><span>    </span><span style="color:#b48ead;">use </span><span>futures::stream::{</span><span style="color:#bf616a;">self</span><span>, StreamExt};
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> stream = stream::iter(vec![</span><span style="color:#d08770;">17</span><span>, </span><span style="color:#d08770;">19</span><span>]);
+</span><span>    assert_eq!(vec![</span><span style="color:#d08770;">17</span><span>, </span><span style="color:#d08770;">19</span><span>], stream.collect::&lt;Vec&lt;</span><span style="color:#b48ead;">i32</span><span>&gt;&gt;().await);
+</span><span>  });
+</span><span>}
+</span></code></pre>
+<h2 id="shi-yong-stream-zhong-gou">使用 Stream 重构</h2>
+<p>整个重构的核心就是 <code>futures::stream::iter</code> 函数。</p>
+<p><code>main</code> 函数为:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>std::time::Duration;
+</span><span>
+</span><span style="color:#b48ead;">use </span><span>futures::StreamExt;
+</span><span style="color:#b48ead;">use </span><span>tokio::time::sleep;
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>(flavor = &quot;</span><span style="color:#a3be8c;">multi_thread</span><span>&quot;, worker_threads = 2)]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> start = std::time::Instant::now();
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// for_loop().await
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// for_each().await;
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// map().await;
+</span><span>
+</span><span>    println!(&quot;</span><span style="color:#a3be8c;">elapsed: </span><span style="color:#d08770;">{}</span><span>&quot;, start.</span><span style="color:#96b5b4;">elapsed</span><span>().</span><span style="color:#96b5b4;">as_secs_f64</span><span>());
+</span><span>}
+</span></code></pre>
+<p>各种重构代码分别位于 <code>for_loop</code>, <code>for_each</code>, <code>map</code> 中。</p>
+<h3 id="shi-yong-for-loop">使用 for-loop</h3>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">for_loop</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> handles = vec![];
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for</span><span> index in </span><span style="color:#d08770;">0</span><span>..</span><span style="color:#d08770;">16 </span><span>{
+</span><span>        </span><span style="color:#b48ead;">let</span><span> h = tokio::spawn(async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>            println!(&quot;</span><span style="color:#a3be8c;">start index: </span><span style="color:#d08770;">{}</span><span>&quot;, index);
+</span><span>            </span><span style="color:#96b5b4;">sleep</span><span>(Duration::from_secs(</span><span style="color:#d08770;">1</span><span>)).await;
+</span><span>            </span><span style="color:#b48ead;">let</span><span> res = futures::stream::iter(</span><span style="color:#d08770;">0</span><span style="color:#b48ead;">u128</span><span>..</span><span style="color:#d08770;">1000</span><span>).</span><span style="color:#96b5b4;">fold</span><span>(</span><span style="color:#d08770;">0</span><span style="color:#b48ead;">u128</span><span>, |</span><span style="color:#bf616a;">a</span><span>, </span><span style="color:#bf616a;">b</span><span>| async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>                </span><span style="color:#96b5b4;">sleep</span><span>(Duration::from_nanos(</span><span style="color:#d08770;">1</span><span>)).await;
+</span><span>                a + b * b
+</span><span>            });
+</span><span>            (index, res)
+</span><span>        });
+</span><span>        handles.</span><span style="color:#96b5b4;">push</span><span>(h);
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for</span><span> h in handles {
+</span><span>        </span><span style="color:#b48ead;">let</span><span> res = h.await.</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>        println!(&quot;</span><span style="color:#a3be8c;">index: </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">. result: </span><span style="color:#d08770;">{}</span><span>&quot;, res.</span><span style="color:#d08770;">0</span><span>, res.</span><span style="color:#d08770;">1.</span><span>await)
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>输出为:</p>
+<pre data-lang="text" style="background-color:#2b303b;color:#c0c5ce;" class="language-text "><code class="language-text" data-lang="text"><span>start index: 0
+</span><span>start index: 1
+</span><span>start index: 2
+</span><span>start index: 3
+</span><span>start index: 4
+</span><span>start index: 5
+</span><span>start index: 6
+</span><span>start index: 7
+</span><span>start index: 8
+</span><span>start index: 9
+</span><span>start index: 10
+</span><span>start index: 11
+</span><span>start index: 12
+</span><span>start index: 13
+</span><span>start index: 14
+</span><span>start index: 15
+</span><span>index: 0. result: 332833500
+</span><span>index: 1. result: 332833500
+</span><span>index: 2. result: 332833500
+</span><span>index: 3. result: 332833500
+</span><span>index: 4. result: 332833500
+</span><span>index: 5. result: 332833500
+</span><span>index: 6. result: 332833500
+</span><span>index: 7. result: 332833500
+</span><span>index: 8. result: 332833500
+</span><span>index: 9. result: 332833500
+</span><span>index: 10. result: 332833500
+</span><span>index: 11. result: 332833500
+</span><span>index: 12. result: 332833500
+</span><span>index: 13. result: 332833500
+</span><span>index: 14. result: 332833500
+</span><span>index: 15. result: 332833500
+</span><span>elapsed: 20.4097263
+</span></code></pre>
+<h3 id="shi-yong-for-each">使用 for-each</h3>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">for_each</span><span>() {
+</span><span>    futures::stream::iter(</span><span style="color:#d08770;">0</span><span>..</span><span style="color:#d08770;">16</span><span>)
+</span><span>        .</span><span style="color:#96b5b4;">for_each</span><span>(|</span><span style="color:#bf616a;">index</span><span>| async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>            tokio::spawn(async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>                println!(&quot;</span><span style="color:#a3be8c;">start index: </span><span style="color:#d08770;">{}</span><span>&quot;, index);
+</span><span>                </span><span style="color:#96b5b4;">sleep</span><span>(Duration::from_secs(</span><span style="color:#d08770;">1</span><span>)).await;
+</span><span>                </span><span style="color:#b48ead;">let</span><span> res = futures::stream::iter(</span><span style="color:#d08770;">0</span><span style="color:#b48ead;">u128</span><span>..</span><span style="color:#d08770;">1000</span><span>).</span><span style="color:#96b5b4;">fold</span><span>(</span><span style="color:#d08770;">0</span><span style="color:#b48ead;">u128</span><span>, |</span><span style="color:#bf616a;">a</span><span>, </span><span style="color:#bf616a;">b</span><span>| async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>                    </span><span style="color:#96b5b4;">sleep</span><span>(Duration::from_nanos(</span><span style="color:#d08770;">1</span><span>)).await;
+</span><span>                    a + b * b
+</span><span>                });
+</span><span>                println!(&quot;</span><span style="color:#a3be8c;">finish index: </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> res: </span><span style="color:#d08770;">{}</span><span>&quot;, index, res.await);
+</span><span>            })
+</span><span>            .await;
+</span><span>        })
+</span><span>        .await;
+</span><span>}
+</span></code></pre>
+<p>输出为:</p>
+<pre data-lang="text" style="background-color:#2b303b;color:#c0c5ce;" class="language-text "><code class="language-text" data-lang="text"><span>start index: 0
+</span><span>finish index: 0 res: 332833500
+</span><span>start index: 1
+</span><span>finish index: 1 res: 332833500
+</span><span>start index: 2
+</span><span>finish index: 2 res: 332833500
+</span><span>start index: 3
+</span><span>finish index: 3 res: 332833500
+</span><span>start index: 4
+</span><span>finish index: 4 res: 332833500
+</span><span>start index: 5
+</span><span>finish index: 5 res: 332833500
+</span><span>start index: 6
+</span><span>finish index: 6 res: 332833500
+</span><span>start index: 7
+</span><span>finish index: 7 res: 332833500
+</span><span>start index: 8
+</span><span>finish index: 8 res: 332833500
+</span><span>start index: 9
+</span><span>finish index: 9 res: 332833500
+</span><span>start index: 10
+</span><span>finish index: 10 res: 332833500
+</span><span>start index: 11
+</span><span>finish index: 11 res: 332833500
+</span><span>start index: 12
+</span><span>finish index: 12 res: 332833500
+</span><span>start index: 13
+</span><span>finish index: 13 res: 332833500
+</span><span>start index: 14
+</span><span>finish index: 14 res: 332833500
+</span><span>start index: 15
+</span><span>finish index: 15 res: 332833500
+</span><span>elapsed: 35.0121356
+</span></code></pre>
+<h3 id="shi-yong-map">使用 map</h3>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">map</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> handles = futures::stream::iter(</span><span style="color:#d08770;">0</span><span>..</span><span style="color:#d08770;">16</span><span>)
+</span><span>        .</span><span style="color:#96b5b4;">map</span><span>(|</span><span style="color:#bf616a;">index</span><span>| async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>            tokio::spawn(async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>                println!(&quot;</span><span style="color:#a3be8c;">start index: </span><span style="color:#d08770;">{}</span><span>&quot;, index);
+</span><span>                </span><span style="color:#96b5b4;">sleep</span><span>(Duration::from_secs(</span><span style="color:#d08770;">1</span><span>)).await;
+</span><span>                </span><span style="color:#b48ead;">let</span><span> res = futures::stream::iter(</span><span style="color:#d08770;">0</span><span style="color:#b48ead;">u128</span><span>..</span><span style="color:#d08770;">1000</span><span>).</span><span style="color:#96b5b4;">fold</span><span>(</span><span style="color:#d08770;">0</span><span style="color:#b48ead;">u128</span><span>, |</span><span style="color:#bf616a;">a</span><span>, </span><span style="color:#bf616a;">b</span><span>| async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>                    </span><span style="color:#96b5b4;">sleep</span><span>(Duration::from_nanos(</span><span style="color:#d08770;">1</span><span>)).await;
+</span><span>                    a + b * b
+</span><span>                });
+</span><span>                println!(&quot;</span><span style="color:#a3be8c;">finish index: </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> res: </span><span style="color:#d08770;">{}</span><span>&quot;, index, res.await);
+</span><span>            }).await
+</span><span>        }).collect::&lt;Vec&lt;_&gt;&gt;().await;
+</span><span>
+</span><span>    async {
+</span><span>        </span><span style="color:#b48ead;">for</span><span> h in handles {
+</span><span>            </span><span style="color:#b48ead;">let</span><span> a = h.await.</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>        }
+</span><span>    }.await
+</span><span>}
+</span></code></pre>
+<pre data-lang="text" style="background-color:#2b303b;color:#c0c5ce;" class="language-text "><code class="language-text" data-lang="text"><span>start index: 0
+</span><span>finish index: 0 res: 332833500
+</span><span>start index: 1
+</span><span>finish index: 1 res: 332833500
+</span><span>start index: 2
+</span><span>finish index: 2 res: 332833500
+</span><span>start index: 3
+</span><span>finish index: 3 res: 332833500
+</span><span>start index: 4
+</span><span>finish index: 4 res: 332833500
+</span><span>start index: 5
+</span><span>finish index: 5 res: 332833500
+</span><span>start index: 6
+</span><span>finish index: 6 res: 332833500
+</span><span>start index: 7
+</span><span>finish index: 7 res: 332833500
+</span><span>start index: 8
+</span><span>finish index: 8 res: 332833500
+</span><span>start index: 9
+</span><span>finish index: 9 res: 332833500
+</span><span>start index: 10
+</span><span>finish index: 10 res: 332833500
+</span><span>start index: 11
+</span><span>finish index: 11 res: 332833500
+</span><span>start index: 12
+</span><span>finish index: 12 res: 332833500
+</span><span>start index: 13
+</span><span>finish index: 13 res: 332833500
+</span><span>start index: 14
+</span><span>finish index: 14 res: 332833500
+</span><span>start index: 15
+</span><span>finish index: 15 res: 332833500
+</span><span>elapsed: 34.9667163
+</span></code></pre>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">map</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> handles = futures::stream::iter(</span><span style="color:#d08770;">0</span><span>..</span><span style="color:#d08770;">16</span><span>)
+</span><span>        .</span><span style="color:#96b5b4;">map</span><span>(|</span><span style="color:#bf616a;">index</span><span>| async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>            tokio::spawn(async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>                println!(&quot;</span><span style="color:#a3be8c;">start index: </span><span style="color:#d08770;">{}</span><span>&quot;, index);
+</span><span>                </span><span style="color:#96b5b4;">sleep</span><span>(Duration::from_secs(</span><span style="color:#d08770;">1</span><span>)).await;
+</span><span>                </span><span style="color:#b48ead;">let</span><span> res = futures::stream::iter(</span><span style="color:#d08770;">0</span><span style="color:#b48ead;">u128</span><span>..</span><span style="color:#d08770;">1000</span><span>).</span><span style="color:#96b5b4;">fold</span><span>(</span><span style="color:#d08770;">0</span><span style="color:#b48ead;">u128</span><span>, |</span><span style="color:#bf616a;">a</span><span>, </span><span style="color:#bf616a;">b</span><span>| async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>                    </span><span style="color:#96b5b4;">sleep</span><span>(Duration::from_nanos(</span><span style="color:#d08770;">1</span><span>)).await;
+</span><span>                    a + b * b
+</span><span>                });
+</span><span>                println!(&quot;</span><span style="color:#a3be8c;">finish index: </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> res: </span><span style="color:#d08770;">{}</span><span>&quot;, index, res.await);
+</span><span>            })
+</span><span>        }).collect::&lt;Vec&lt;_&gt;&gt;().await;
+</span><span>
+</span><span>    async {
+</span><span>        </span><span style="color:#b48ead;">for</span><span> h in handles {
+</span><span>            </span><span style="color:#b48ead;">let</span><span> a = h.await.await.</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>        }
+</span><span>    }.await
+</span><span>}
+</span></code></pre>
+<pre data-lang="text" style="background-color:#2b303b;color:#c0c5ce;" class="language-text "><code class="language-text" data-lang="text"><span>start index: 0
+</span><span>finish index: 0 res: 332833500
+</span><span>start index: 1
+</span><span>finish index: 1 res: 332833500
+</span><span>start index: 2
+</span><span>finish index: 2 res: 332833500
+</span><span>start index: 3
+</span><span>finish index: 3 res: 332833500
+</span><span>start index: 4
+</span><span>finish index: 4 res: 332833500
+</span><span>start index: 5
+</span><span>finish index: 5 res: 332833500
+</span><span>start index: 6
+</span><span>finish index: 6 res: 332833500
+</span><span>start index: 7
+</span><span>finish index: 7 res: 332833500
+</span><span>start index: 8
+</span><span>finish index: 8 res: 332833500
+</span><span>start index: 9
+</span><span>finish index: 9 res: 332833500
+</span><span>start index: 10
+</span><span>finish index: 10 res: 332833500
+</span><span>start index: 11
+</span><span>finish index: 11 res: 332833500
+</span><span>start index: 12
+</span><span>finish index: 12 res: 332833500
+</span><span>start index: 13
+</span><span>finish index: 13 res: 332833500
+</span><span>start index: 14
+</span><span>finish index: 14 res: 332833500
+</span><span>start index: 15
+</span><span>finish index: 15 res: 332833500
+</span><span>elapsed: 35.0125656
+</span></code></pre>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">map</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> handles = futures::stream::iter(</span><span style="color:#d08770;">0</span><span>..</span><span style="color:#d08770;">16</span><span>)
+</span><span>        .</span><span style="color:#96b5b4;">map</span><span>(|</span><span style="color:#bf616a;">index</span><span>| async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>            </span><span style="color:#b48ead;">let</span><span> h =tokio::spawn(async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>                println!(&quot;</span><span style="color:#a3be8c;">start index: </span><span style="color:#d08770;">{}</span><span>&quot;, index);
+</span><span>                </span><span style="color:#96b5b4;">sleep</span><span>(Duration::from_secs(</span><span style="color:#d08770;">1</span><span>)).await;
+</span><span>                </span><span style="color:#b48ead;">let</span><span> res = futures::stream::iter(</span><span style="color:#d08770;">0</span><span style="color:#b48ead;">u128</span><span>..</span><span style="color:#d08770;">1000</span><span>).</span><span style="color:#96b5b4;">fold</span><span>(</span><span style="color:#d08770;">0</span><span style="color:#b48ead;">u128</span><span>, |</span><span style="color:#bf616a;">a</span><span>, </span><span style="color:#bf616a;">b</span><span>| async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>                    </span><span style="color:#96b5b4;">sleep</span><span>(Duration::from_nanos(</span><span style="color:#d08770;">1</span><span>)).await;
+</span><span>                    a + b * b
+</span><span>                });
+</span><span>                (index, res)
+</span><span>            });
+</span><span>            h
+</span><span>        })
+</span><span>        .collect::&lt;Vec&lt;_&gt;&gt;()
+</span><span>        .await;
+</span><span>
+</span><span>    async {
+</span><span>        </span><span style="color:#b48ead;">for</span><span> h in handles {
+</span><span>            </span><span style="color:#b48ead;">let</span><span> a = h.await.await.</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>            println!(&quot;</span><span style="color:#a3be8c;">finish index: </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> res: </span><span style="color:#d08770;">{}</span><span>&quot;, a.</span><span style="color:#d08770;">0</span><span>, a.</span><span style="color:#d08770;">1.</span><span>await);
+</span><span>        }
+</span><span>    }
+</span><span>    .await
+</span><span>}
+</span></code></pre>
+<pre data-lang="text" style="background-color:#2b303b;color:#c0c5ce;" class="language-text "><code class="language-text" data-lang="text"><span>start index: 0
+</span><span>finish index: 0 res: 332833500
+</span><span>start index: 1
+</span><span>finish index: 1 res: 332833500
+</span><span>start index: 2
+</span><span>finish index: 2 res: 332833500
+</span><span>start index: 3
+</span><span>finish index: 3 res: 332833500
+</span><span>start index: 4
+</span><span>finish index: 4 res: 332833500
+</span><span>start index: 5
+</span><span>finish index: 5 res: 332833500
+</span><span>start index: 6
+</span><span>finish index: 6 res: 332833500
+</span><span>start index: 7
+</span><span>finish index: 7 res: 332833500
+</span><span>start index: 8
+</span><span>finish index: 8 res: 332833500
+</span><span>start index: 9
+</span><span>finish index: 9 res: 332833500
+</span><span>start index: 10
+</span><span>finish index: 10 res: 332833500
+</span><span>start index: 11
+</span><span>finish index: 11 res: 332833500
+</span><span>start index: 12
+</span><span>finish index: 12 res: 332833500
+</span><span>start index: 13
+</span><span>finish index: 13 res: 332833500
+</span><span>start index: 14
+</span><span>finish index: 14 res: 332833500
+</span><span>start index: 15
+</span><span>finish index: 15 res: 332833500
+</span><span>elapsed: 35.442368
+</span></code></pre>
+<p>具体的时间差异以后再来分析。</p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/rust/">#rust</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/async/">#async</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/tokio/">#tokio</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/stream/">#stream</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/iterator/">#iterator</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tokio-main-macro&#x2F;">‹ macro tokio::main</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;archlinux-base-devel&#x2F;">Arch Linux 安装 fakeroot ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

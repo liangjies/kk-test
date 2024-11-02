@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 针对接口编程</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/programming-program-to-an-interface/#wei-shi-yao-yao-zhen-dui-jie-kou-bian-cheng" class="toc-link">为什么要针对接口编程</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/programming-program-to-an-interface/#ju-ge-li-zi" class="toc-link">举个例子</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/programming-program-to-an-interface/#zhen-dui-shi-xian-bian-cheng" class="toc-link">针对实现编程</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/programming-program-to-an-interface/#zhen-dui-jie-kou-bian-cheng" class="toc-link">针对接口编程</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/programming-program-to-an-interface/#zong-jie" class="toc-link">总结</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;programming-program-to-an-interface&#x2F;">针对接口编程</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-02-06</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <blockquote>
+<p>Program to an interface, not an implementation.</p>
+</blockquote>
+<p>针对接口，而非实现编程 —— 出自 GoF《设计模式: 可复用面向对象软件基础》。<strong>接口</strong> 表示一组 <strong>协议</strong> 或 <strong>约定</strong>，是一组功能的集合。</p>
+<p>接口在不同的语言中，有不同的称呼:</p>
+<ul>
+<li><strong>rust</strong> 中的 <strong>trait</strong></li>
+<li><strong>go</strong> 中的 <strong>interface</strong></li>
+<li><strong>swift</strong> 中的 <strong>protocol</strong></li>
+<li><strong>java</strong> 中的 <strong>interface</strong></li>
+</ul>
+<p>但无论他们的名字是否相同，其作用都是表达一组 <strong>抽象的功能集合</strong>。</p>
+<p>以上字面意思很好理解，下面来详细说明。</p>
+<h2 id="wei-shi-yao-yao-zhen-dui-jie-kou-bian-cheng">为什么要针对接口编程</h2>
+<p>初级开发者在实现某一具体需求时，其思考的关注点在于需求本身，分析实现这个需求要经过哪些步骤，每个步骤又要做那些事情，以此类推。在经过逐层分析，想明白流程之后，这名开发者就会把解决步骤转化为代码。</p>
+<p>如果只看这个需求，这名开发者完成并交付了这个功能。但是，当需求发生变动时，需要修改功能，或增加功能时，由于上面的实现方式是面向过程的，步骤与步骤之间互相暴露实现的细节。因此，当修改了某一个步骤的代码时，就非常可能需要同步修改前后相邻步骤的代码，最坏的情况可能要修改全部的代码。结果就是不小的开发工作量与测试工作量。</p>
+<p>如果开发者使用针对接口编程的方式，封装不稳定的实现细节，暴露稳定的接口。当需求发生变化时，只需要修改相关的接口实现，而因为接口不变，所以无需改动其他代码。</p>
+<h2 id="ju-ge-li-zi">举个例子</h2>
+<p>产品给你分配了一个任务: 有一批保存在 <code>aws s3</code> 上的数据，需要你将它们同步到 <code>aliyun oss</code> 上。</p>
+<h3 id="zhen-dui-shi-xian-bian-cheng">针对实现编程</h3>
+<p>如果是使用针对实现编程方式，那么在收到这个需求之后，应该就会思考: 把 <code>aws s3</code> 的数据同步到 <code>aliyun oss</code> 上，步骤差不多是:</p>
+<ol>
+<li>想办法把数据从 <code>aws s3</code> 上下载到磁盘或者内存</li>
+<li>把磁盘或者内存中的数据上传到 <code>aliyun oss</code></li>
+</ol>
+<p>想到这里，感觉差不多可以写代码了:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">type </span><span>AwsS3 </span><span style="color:#b48ead;">struct </span><span>{}
+</span><span style="color:#b48ead;">type </span><span>AliyunOSS </span><span style="color:#b48ead;">struct </span><span>{}
+</span><span>
+</span><span style="color:#b48ead;">type </span><span>(s3 *</span><span style="color:#b48ead;">AwsS3</span><span>) </span><span style="color:#bf616a;">Sync</span><span>(</span><span style="color:#bf616a;">oss </span><span>*</span><span style="color:#bf616a;">AliyunOSS</span><span>, </span><span style="color:#bf616a;">names </span><span>[]</span><span style="color:#b48ead;">string</span><span>) {
+</span><span>  </span><span style="color:#b48ead;">for </span><span style="color:#bf616a;">_</span><span>, </span><span style="color:#bf616a;">name </span><span>:= </span><span style="color:#bf616a;">ranges names </span><span>{
+</span><span>    </span><span style="color:#bf616a;">data </span><span>:= </span><span style="color:#bf616a;">s3</span><span>.</span><span style="color:#bf616a;">Download</span><span>(</span><span style="color:#bf616a;">name</span><span>)
+</span><span>    </span><span style="color:#bf616a;">oss</span><span>.</span><span style="color:#bf616a;">Upload</span><span>(</span><span style="color:#bf616a;">name</span><span>, </span><span style="color:#bf616a;">data</span><span>)
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>经过测试确认无误后，发布上线，成功运行了几个月没出现 Bug。</p>
+<h4 id="xu-qiu-bian-geng">需求变更</h4>
+<p>后来呢，产品要求你有的数据要同步到 <code>aliyun oss</code>，有一些要同步到 <code>ceph s3</code> 上。你一看，这个需求简单啊，我会。然后，你把上面的代码复制了一份，稍加改动:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">type </span><span>CephS3 </span><span style="color:#b48ead;">struct </span><span>{}
+</span><span>
+</span><span style="color:#b48ead;">type </span><span>Meta </span><span style="color:#b48ead;">struct </span><span>{
+</span><span>  </span><span style="color:#bf616a;">Name     </span><span style="color:#b48ead;">string
+</span><span>  </span><span style="color:#bf616a;">ToOss    </span><span style="color:#b48ead;">bool
+</span><span>  </span><span style="color:#bf616a;">ToCephS3 </span><span style="color:#b48ead;">bool
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">type </span><span>(s3 *</span><span style="color:#b48ead;">AwsS3</span><span>) </span><span style="color:#bf616a;">syncToOss</span><span>(</span><span style="color:#bf616a;">oss </span><span>*</span><span style="color:#bf616a;">AliyunOSS</span><span>, </span><span style="color:#bf616a;">name string</span><span>) {
+</span><span>  </span><span style="color:#bf616a;">data </span><span>:= </span><span style="color:#bf616a;">s3</span><span>.</span><span style="color:#bf616a;">Download</span><span>(</span><span style="color:#bf616a;">name</span><span>)
+</span><span>  </span><span style="color:#bf616a;">oss</span><span>.</span><span style="color:#bf616a;">Upload</span><span>(</span><span style="color:#bf616a;">name</span><span>, </span><span style="color:#bf616a;">data</span><span>)
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">type </span><span>(s3 *</span><span style="color:#b48ead;">AwsS3</span><span>) </span><span style="color:#bf616a;">syncToCephS3</span><span>(</span><span style="color:#bf616a;">cephs3 </span><span>*</span><span style="color:#bf616a;">CephS3</span><span>, </span><span style="color:#bf616a;">name string</span><span>) {
+</span><span>  </span><span style="color:#bf616a;">data </span><span>:= </span><span style="color:#bf616a;">s3</span><span>.</span><span style="color:#bf616a;">Download</span><span>(</span><span style="color:#bf616a;">name</span><span>)
+</span><span>  </span><span style="color:#bf616a;">cephs3</span><span>.</span><span style="color:#bf616a;">Upload</span><span>(</span><span style="color:#bf616a;">name</span><span>, </span><span style="color:#bf616a;">data</span><span>)
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">type </span><span>(s3 *</span><span style="color:#b48ead;">AwsS3</span><span>) </span><span style="color:#bf616a;">Sync</span><span>(</span><span style="color:#bf616a;">oss </span><span>*</span><span style="color:#bf616a;">AliyunOSS</span><span>, </span><span style="color:#bf616a;">cephs3 </span><span>*</span><span style="color:#bf616a;">CephS3</span><span>, </span><span style="color:#bf616a;">metas </span><span>*</span><span style="color:#bf616a;">Meta</span><span>) {
+</span><span>  </span><span style="color:#b48ead;">for </span><span style="color:#bf616a;">_</span><span>, </span><span style="color:#bf616a;">meta </span><span>:= </span><span style="color:#bf616a;">ranges metas </span><span>{
+</span><span>    </span><span style="color:#bf616a;">data </span><span>:= </span><span style="color:#bf616a;">s3</span><span>.</span><span style="color:#bf616a;">Download</span><span>(</span><span style="color:#bf616a;">meta</span><span>.</span><span style="color:#bf616a;">Name</span><span>)
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">meta</span><span>.</span><span style="color:#bf616a;">ToOss </span><span>{
+</span><span>      </span><span style="color:#bf616a;">s3</span><span>.</span><span style="color:#bf616a;">syncToOss</span><span>(</span><span style="color:#bf616a;">oss</span><span>, </span><span style="color:#bf616a;">meta</span><span>.</span><span style="color:#bf616a;">Name</span><span>)
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">meta</span><span>.</span><span style="color:#bf616a;">ToCephS3 </span><span>{
+</span><span>      </span><span style="color:#bf616a;">s3</span><span>.</span><span style="color:#bf616a;">syncToCephS3</span><span>(</span><span style="color:#bf616a;">cephs3</span><span>, </span><span style="color:#bf616a;">meta</span><span>.</span><span style="color:#bf616a;">Name</span><span>)
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>不到一天的时间就完成了开发、测试，第二天就上线了。</p>
+<h3 id="zhen-dui-jie-kou-bian-cheng">针对接口编程</h3>
+<p>实现将数据从 <code>aws s3</code> 同步到 <code>aliyun oss</code> 上，可以提取到的信息包括 <code>aws s3</code>、<code>aliyun oss</code> 两种存储系统，同步是要实现的操作。</p>
+<p>由此引发思考，同步是一种动作，未来发生变化的可能性不大，或许有增加其他的动作可能，比如对比两个存储系统的内容，但这应该算作扩展需求，暂时无需考虑；但是存储系统就不好说了，现在是这样的要求，未来可能就会要求同步到 <code>minio</code> 上，或者同步到另一个 <code>aws s3</code> 上。</p>
+<p>至此，可以考虑将存储系统抽象为一组接口:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">type </span><span>Storage </span><span style="color:#b48ead;">interface </span><span>{
+</span><span>  </span><span style="color:#8fa1b3;">Upload</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#bf616a;">data </span><span>[]</span><span style="color:#b48ead;">byte</span><span>)
+</span><span>  </span><span style="color:#8fa1b3;">Download</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>) []</span><span style="color:#b48ead;">byte
+</span><span>}
+</span></code></pre>
+<p>再来思考，现在是要求从 <code>aws s3</code> 同步到 <code>aliyun oss</code> 上，既然上面已经认为未来有很大概率需要同步其他存储系统，由此提出问题: 如何确定同步的目标系统？先大胆猜测:</p>
+<ol>
+<li>一个服务只负责一种特定源到特定目标的同步任务</li>
+<li>在创建同步任务时指定，即在请求参数中，适用于本次任务的所有数据</li>
+<li>根据某种策略，或者是算法，确定每一个文件的源与目的分别是哪里</li>
+</ol>
+<p>那么接下来逐条分析:</p>
+<ul>
+<li>方法一，极其不灵活，如果有 <strong>n</strong> 个存储系统，那么一共需要启动 **nx(n-1)**个服务，无论是对于使用者，还是维护者来说，都可谓是灾难</li>
+<li>方法二，相比于方法一，极大地提高了灵活性，只需要一个服务就能替代上述 <strong>nx(n-1)</strong> 个服务</li>
+<li>方法三，相比于方法二，更进一步提高了灵活性，每一个文件都可以有独立的源与目标。但这种方法只是看起来很美好，很灵活，实际上可能并没有真实的使用场景。原因是，如果每一个文件都可以具有独立的目标，那么完全可以将目标相同的文件聚合到一起，作为一个批量的任务，这样就演变为了 <strong>方法二</strong></li>
+</ul>
+<p>综上所述，下面实现 <strong>方法二</strong>:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">type </span><span>Batch </span><span style="color:#b48ead;">struct </span><span>{
+</span><span>  </span><span style="color:#bf616a;">From    </span><span style="color:#b48ead;">string
+</span><span>  </span><span style="color:#bf616a;">Targets </span><span>[]</span><span style="color:#b48ead;">string
+</span><span>  </span><span style="color:#bf616a;">Names   </span><span>[]</span><span style="color:#b48ead;">string
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">func </span><span style="color:#8fa1b3;">Sync</span><span>(</span><span style="color:#bf616a;">batch </span><span>*</span><span style="color:#b48ead;">Batch</span><span>) {
+</span><span>  </span><span style="color:#bf616a;">from </span><span>:= </span><span style="color:#bf616a;">NewStorage</span><span>(</span><span style="color:#bf616a;">batch</span><span>.</span><span style="color:#bf616a;">From</span><span>)
+</span><span>  </span><span style="color:#bf616a;">targets </span><span>:= </span><span style="color:#bf616a;">NewStorages</span><span>(</span><span style="color:#bf616a;">batch</span><span>.</span><span style="color:#bf616a;">Targets</span><span>)
+</span><span>  </span><span style="color:#b48ead;">for </span><span style="color:#bf616a;">_</span><span>, </span><span style="color:#bf616a;">name </span><span>:= </span><span style="color:#b48ead;">range </span><span style="color:#bf616a;">batch</span><span>.</span><span style="color:#bf616a;">Names </span><span>{
+</span><span>    </span><span style="color:#bf616a;">data </span><span>:= </span><span style="color:#bf616a;">from</span><span>.</span><span style="color:#bf616a;">Download</span><span>(</span><span style="color:#bf616a;">name</span><span>)
+</span><span>    </span><span style="color:#b48ead;">for </span><span style="color:#bf616a;">_</span><span>, </span><span style="color:#bf616a;">target </span><span>:= </span><span style="color:#b48ead;">range </span><span style="color:#bf616a;">targets </span><span>{
+</span><span>      </span><span style="color:#bf616a;">target</span><span>.</span><span style="color:#bf616a;">Upload</span><span>(</span><span style="color:#bf616a;">name</span><span>, </span><span style="color:#bf616a;">data</span><span>)
+</span><span>    }
+</span><span>  }
+</span><span>} 
+</span></code></pre>
+<p>到此为止，所有代码都是面向接口编程，需求中提到的 <code>aws s3</code> 与 <code>aliyun oss</code> 还没有出现:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">type </span><span>AwsS3 </span><span style="color:#b48ead;">struct </span><span>{}
+</span><span>
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">s3 </span><span>*</span><span style="color:#b48ead;">AwsS3</span><span>) </span><span style="color:#8fa1b3;">Upload</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#bf616a;">data </span><span>[]</span><span style="color:#b48ead;">byte</span><span>) {}
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">s3 </span><span>*</span><span style="color:#b48ead;">AwsS3</span><span>) </span><span style="color:#8fa1b3;">Download</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>) []</span><span style="color:#b48ead;">byte </span><span>{}
+</span><span>
+</span><span style="color:#b48ead;">type </span><span>AliyunOSS </span><span style="color:#b48ead;">struct </span><span>{}
+</span><span>
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">s3 </span><span>*</span><span style="color:#b48ead;">AwsS3</span><span>) </span><span style="color:#8fa1b3;">Upload</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#bf616a;">data </span><span>[]</span><span style="color:#b48ead;">byte</span><span>) {}
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">s3 </span><span>*</span><span style="color:#b48ead;">AwsS3</span><span>) </span><span style="color:#8fa1b3;">Download</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>) []</span><span style="color:#b48ead;">byte </span><span>{}
+</span></code></pre>
+<p>然后，需要实现两个函数:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">func </span><span style="color:#8fa1b3;">NewStorage</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>) </span><span style="color:#b48ead;">Storage </span><span>{
+</span><span>  </span><span style="color:#b48ead;">switch </span><span style="color:#bf616a;">name </span><span>{
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&quot;</span><span style="color:#a3be8c;">awss3</span><span>&quot;:
+</span><span>      </span><span style="color:#b48ead;">return </span><span>&amp;</span><span style="color:#bf616a;">AwsS3</span><span>{}
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&quot;</span><span style="color:#a3be8c;">aliyunoss</span><span>&quot;:
+</span><span>      </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">AliyunOSS</span><span>{}
+</span><span>    </span><span style="color:#b48ead;">default</span><span>:
+</span><span>      </span><span style="color:#96b5b4;">panic</span><span>(&quot;</span><span style="color:#a3be8c;">unknown name: </span><span style="color:#d08770;">%s</span><span>&quot;, </span><span style="color:#bf616a;">name</span><span>) </span><span style="color:#65737e;">// 只作为演示 
+</span><span>  }
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">func </span><span style="color:#8fa1b3;">NewStorages</span><span>(</span><span style="color:#bf616a;">names </span><span style="color:#b48ead;">string</span><span>) []</span><span style="color:#b48ead;">Storage </span><span>{
+</span><span>  </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">results </span><span>[]</span><span style="color:#b48ead;">Storage
+</span><span>  </span><span style="color:#b48ead;">for </span><span style="color:#bf616a;">_</span><span>, </span><span style="color:#bf616a;">name </span><span>:= </span><span style="color:#b48ead;">range </span><span style="color:#bf616a;">names </span><span>{
+</span><span>    </span><span style="color:#bf616a;">results </span><span>= </span><span style="color:#96b5b4;">append</span><span>(</span><span style="color:#bf616a;">results</span><span>, </span><span style="color:#bf616a;">NewStorage</span><span>(</span><span style="color:#bf616a;">name</span><span>))
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">results
+</span><span>}
+</span></code></pre>
+<p>到此为止，才终于完成了原始需求。使用面向实现方式的同学会说: 你这代码量要比面向实现的方法多很多，你实现了一个需求，我都实现好几个了。</p>
+<p>对此，我是不慌的。</p>
+<p>当产品要求将数据同步到 <code>cephs3</code>，<code>minio</code> 时，或者是从 <code>tencent cos</code>，本地磁盘同步到其他地方时，<code>func Sync</code> 是完全不需要改动的，代码的改动只有:</p>
+<ol>
+<li>增加对应的类型实现 <strong>Storage</strong> 接口:</li>
+</ol>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">type </span><span>CephS3 </span><span style="color:#b48ead;">struct </span><span>{}
+</span><span>
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">ceph </span><span>*</span><span style="color:#b48ead;">CephS3</span><span>) </span><span style="color:#8fa1b3;">Upload</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#bf616a;">data </span><span>[]</span><span style="color:#b48ead;">byte</span><span>) {}
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">ceph </span><span>*</span><span style="color:#b48ead;">CephS3</span><span>) </span><span style="color:#8fa1b3;">Download</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>) []</span><span style="color:#b48ead;">byte </span><span>{}
+</span><span>
+</span><span style="color:#b48ead;">type </span><span>MinIO </span><span style="color:#b48ead;">struct </span><span>{}
+</span><span>
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">minio </span><span>*</span><span style="color:#b48ead;">MinIO</span><span>) </span><span style="color:#8fa1b3;">Upload</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#bf616a;">data </span><span>[]</span><span style="color:#b48ead;">byte</span><span>) {}
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">minio </span><span>*</span><span style="color:#b48ead;">MinIO</span><span>) </span><span style="color:#8fa1b3;">Download</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>) []</span><span style="color:#b48ead;">byte </span><span>{}
+</span><span>
+</span><span style="color:#b48ead;">type </span><span>Posix </span><span style="color:#b48ead;">struct </span><span>{}
+</span><span>
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">fs </span><span>*</span><span style="color:#b48ead;">Posix</span><span>) </span><span style="color:#8fa1b3;">Upload</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#bf616a;">data </span><span>[]</span><span style="color:#b48ead;">byte</span><span>) {}
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">fs </span><span>*</span><span style="color:#b48ead;">Posix</span><span>) </span><span style="color:#8fa1b3;">Download</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>) []</span><span style="color:#b48ead;">byte </span><span>{}
+</span><span>
+</span><span style="color:#b48ead;">type </span><span>TencentOSS </span><span style="color:#b48ead;">struct </span><span>{}
+</span><span>
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">oss </span><span>*</span><span style="color:#b48ead;">TencentOSS</span><span>) </span><span style="color:#8fa1b3;">Upload</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#bf616a;">data </span><span>[]</span><span style="color:#b48ead;">byte</span><span>) {}
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">oss </span><span>*</span><span style="color:#b48ead;">TencentOSS</span><span>) </span><span style="color:#8fa1b3;">Download</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>) []</span><span style="color:#b48ead;">byte </span><span>{}
+</span></code></pre>
+<ol>
+<li>修改 <strong>func NewStorage</strong>:</li>
+</ol>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">func </span><span style="color:#8fa1b3;">NewStorage</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>) </span><span style="color:#b48ead;">Storage </span><span>{
+</span><span>  </span><span style="color:#b48ead;">switch </span><span style="color:#bf616a;">name </span><span>{
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&quot;</span><span style="color:#a3be8c;">awss3</span><span>&quot;:
+</span><span>      </span><span style="color:#b48ead;">return </span><span>&amp;</span><span style="color:#bf616a;">AwsS3</span><span>{}
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&quot;</span><span style="color:#a3be8c;">aliyunoss</span><span>&quot;:
+</span><span>      </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">AliyunOSS</span><span>{}
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&quot;</span><span style="color:#a3be8c;">cephs3</span><span>&quot;:
+</span><span>      </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">CephS3</span><span>{}
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&quot;</span><span style="color:#a3be8c;">minio</span><span>&quot;:
+</span><span>      </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">MinIO</span><span>{}
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&quot;</span><span style="color:#a3be8c;">posix</span><span>&quot;:
+</span><span>      </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">Posix</span><span>{}
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&quot;</span><span style="color:#a3be8c;">tencentoss</span><span>&quot;:
+</span><span>      </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">TencentOSS</span><span>{}
+</span><span>    </span><span style="color:#b48ead;">default</span><span>:
+</span><span>      </span><span style="color:#96b5b4;">panic</span><span>(&quot;</span><span style="color:#a3be8c;">unknown name: </span><span style="color:#d08770;">%s</span><span>&quot;, </span><span style="color:#bf616a;">name</span><span>) </span><span style="color:#65737e;">// 只作为演示 
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>就完成所有的修改了。如果是面向实现的方式，算了，我不想了。</p>
+<h2 id="zong-jie">总结</h2>
+<p>抽象会提升思维上的难度，但却能提高代码的灵活性。而且，灵活性还会随着抽象程度的提升一起提高。优秀的代码设计，不但能满足于眼前的需求，还提供了在不改变已有设计的前提支持对未来可能变化的需求的能力。</p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/programming/">#programming</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;the-code-quality-metrics&#x2F;">‹ 代码质量衡量标准</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;programming-single-responsibility-principle&#x2F;">单一职责原则 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

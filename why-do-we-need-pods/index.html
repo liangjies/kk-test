@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - Pod 的意义</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/why-do-we-need-pods/#rong-qi-de-ju-xian-xing" class="toc-link">容器的局限性</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/why-do-we-need-pods/#pod-shi-xian-yuan-li" class="toc-link">Pod 实现原理</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/why-do-we-need-pods/#rong-qi-she-ji-mo-shi" class="toc-link">容器设计模式</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/why-do-we-need-pods/#can-kao-wen-dang" class="toc-link">参考文档</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;why-do-we-need-pods&#x2F;">Pod 的意义</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-08-31</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <h2 id="rong-qi-de-ju-xian-xing">容器的局限性</h2>
+<p>既然要讨论 <code>Pod</code> 的意义，或许可以想象一个如果没有 <code>Pod</code> 会是什么样子。</p>
+<p>假设，有如下需求: 使用容器化来部署一个支持自动更新数据的文件服务。可以使用如下方法解决:</p>
+<ol>
+<li>在一个容器中，同时运行两个进程，一个进程提供文件服务，一个进程定时更新数据。
+<ul>
+<li>优点:
+<ol>
+<li>无论是编码，还是部署都十分的容易，就像在物理机或者虚拟机里面一样</li>
+</ol>
+</li>
+<li>缺点:
+<ol>
+<li>容器的本质是进程，对操作系统而言是那个由 <code>entrypoint</code> 指定的进程，其他进程都是其子进程，或子进程的子进程等。而且，<code>entrypoint</code> 没有回收僵尸进程的能力。</li>
+<li>耦合严重</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>每个进程分别位于各自的容器，两个容器之间通过挂载相同的外部 <code>volume</code> 实现容器间共享文件系统。
+<ul>
+<li>优点:
+<ol>
+<li>将两个容器解耦，保证功能单一性</li>
+</ol>
+</li>
+<li>缺点:
+<ol>
+<li>通过共享外部 <code>volume</code> 的方式无法保证数据安全性，其他容器，或宿主机也能直接访问 <code>volume</code></li>
+</ol>
+</li>
+</ul>
+</li>
+<li>在上一个方法的基础上，通过 <code>--volume-from</code> 指定从其他的 <code>container</code> 挂载 <code>volume</code>。
+<ul>
+<li>优点:
+<ol>
+<li>避免对外直接暴露 <code>volume</code></li>
+</ol>
+</li>
+</ul>
+</li>
+</ol>
+<p>到此为止，一切似乎很顺利，没有在创建 <code>Pod</code> 这样一个新的概念。</p>
+<p>但上述方案有一个局限性，<code>--volume-from</code> 的目标容器只能是本地的其他 <code>container</code>。</p>
+<p>假设，使用 <code>Docker Swarm</code> 部署服务。为了便于叙述，做出如下定义:</p>
+<ul>
+<li>集群中存在两个节点。<strong><code>node-0</code></strong> 剩余 <code>2G</code> 内存，<strong><code>node-1</code></strong> 剩余 <code>1.5G</code> 内存</li>
+<li>两个容器 <code>container-0</code> 与 <code>container-1</code> 各需要 <code>1G</code> 内存</li>
+<li>部署过程，先启动 <code>container-0</code>，后启动 <code>container-1</code></li>
+</ul>
+<p>因此，为了让两个容器能够运行在同一个 <code>Node</code> 上，需要在启动 <code>container-1</code> 时增加限制 <code>affinity=container-0</code>。</p>
+<p>此时，如果 <code>container-0</code> 被调度到了 <code>node-1</code> 上，<code>node-1</code> 将剩余 <code>0.5G</code> 内存。接下来，调度 <code>container-1</code> 时，<code>Docker Swarm</code> 就会发现无法找到一个合适的 <code>Node</code> 来启动 <code>container-1</code>。</p>
+<p>以上问题被称作 <a href="https://en.wikipedia.org/wiki/Gang_scheduling">Gang Scheduling</a>。</p>
+<p>而 <code>Kuberntes</code> 则通过 <code>Pod</code> 解决了这个问题。</p>
+<p><code>Pod</code> 是 <code>Kubernetes</code> 中最小的可调度计算单元。在处理上述问题中，如果将 <code>container-0</code> 与 <code>container-1</code> 同时包含在一个 <code>Pod</code> 中，<code>Kubernetes</code> 在调度这个 <code>Pod</code> 时就只会考虑剩余内存不小于 <code>2G</code> 的 <code>node-0</code>。</p>
+<p>对于上面这种，相互之间直接访问文件系统、使用 <code>localhost</code> 或 <code>socket</code> 文件进行本地通信，共享某些 <code>Namespace</code> 的一组容器，称之为 <strong>超亲密关系</strong>。</p>
+<h2 id="pod-shi-xian-yuan-li">Pod 实现原理</h2>
+<p><code>Pod</code> 是一个逻辑概念。其本质是一组共享了 <code>Network Namespace</code>，并且可以声明共享同一个 <code>Volume</code> 的容器。</p>
+<p>比如，一个包含了 <code>A</code> 与 <code>B</code> 两个容器的 <code>Pod</code>，按照 <a href="https://kubernetes.io/docs/concepts/workloads/pods/#what-is-a-pod">定义</a> 的描述，可以使用如下 <code>Docker</code> 命令模拟:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#65737e;"># start container A
+</span><span style="color:#bf616a;">$</span><span> docker run</span><span style="color:#bf616a;"> --net</span><span>=B</span><span style="color:#bf616a;"> --volumes-from</span><span>=B</span><span style="color:#bf616a;"> --name</span><span>=A image-A ...
+</span></code></pre>
+<p>但此时会发现，<code>Pod</code> 内的一组容器要遵循某个特定的顺序启动，容器与容器之间不再是对等关系，而是拓扑关系。</p>
+<p>所以，在 <code>Kubernetes</code> 项目里，通过增加一个被称作 <code>Infra</code> 的容器作为 <code>Pod</code> 里第一个启动的容器。用户定义的其他容器通过 <code>Join Network Namespace</code> 的方式，关联到 <code>Infra</code> 容器。这样的组织关系，可以用下面这样一个示意图来表达:</p>
+<p><img src="/images/why-do-we-need-pods/01.png" alt="pause container" /></p>
+<p>如上图所示，这个 <code>Pod</code> 里有两个用户容器 <code>A</code> 和 <code>B</code>，还有一个 <code>Infra</code> 容器。这个特殊容器的镜像地址为 <code>k8s.gcr.io/pause</code>，源代码位于 <a href="https://github.com/kubernetes/kubernetes/blob/master/build/pause/pause.c">github</a>。同时，<code>kubelet</code> 提供参数 <code>--pod-infra-container-image</code> 支持自定义镜像。</p>
+<p>所以，当容器 <code>A</code>、<code>B</code> 加入到 <code>Infra</code> 容器的 <code>Network Namespace</code> 后，对于容器 <code>A</code>、<code>B</code> 而言:</p>
+<ul>
+<li>可以直接使用 <code>localhost</code> 进行通信</li>
+<li>看到的网络设备跟 <code>Infra</code> 容器看到的完全一样</li>
+<li>一个 <code>Pod</code> 只有一个 <code>IP</code> 地址，也就是这个 <code>Pod</code> 的 <code>Network Namespace</code> 对应的 <code>IP</code> 地址</li>
+<li>其他的所有网络资源，都是一个 <code>Pod</code> 一份，并且被该 <code>Pod</code> 中的所有容器共享</li>
+<li><code>Pod</code> 的生命周期只跟 <code>Infra</code> 容器一致，而与容器 <code>A</code>、<code>B</code> 无关。</li>
+</ul>
+<p>而对于同一个 <code>Pod</code> 里面的所有用户容器来说，它们的进出流量，也可以认为都是通过 <code>Infra</code> 容器完成的。这一点很重要，因此为 <code>Kubernetes</code> 开发网络插件时，应该重点考虑的是如何配置这个 <code>Pod</code> 的 <code>Network Namespace</code>，而不是每一个用户容器如何使用网络配置。</p>
+<p>而且，在这这个设计模型之下，可以方便的共享 <code>volume</code>: <code>Kubernetes</code> 项目只要把所有 <code>volume</code> 的定义都设计在 <code>Pod</code> 层级即可。之后，<code>Pod</code> 内的容器再声明挂载这个 <code>volume</code> 从而达到共享 <code>volume</code> 的目的。</p>
+<pre data-lang="yml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yml "><code class="language-yml" data-lang="yml"><span>
+</span><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Pod
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">two-containers
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">restartPolicy</span><span>: </span><span style="color:#a3be8c;">Never
+</span><span>  </span><span style="color:#bf616a;">volumes</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">shared-data
+</span><span>    </span><span style="color:#bf616a;">hostPath</span><span>:
+</span><span>      </span><span style="color:#bf616a;">path</span><span>: </span><span style="color:#a3be8c;">/data
+</span><span>  </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx-container
+</span><span>    </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>    </span><span style="color:#bf616a;">volumeMounts</span><span>:
+</span><span>    - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">shared-data
+</span><span>      </span><span style="color:#bf616a;">mountPath</span><span>: </span><span style="color:#a3be8c;">/usr/share/nginx/html
+</span><span>  - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">debian-container
+</span><span>    </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">debian
+</span><span>    </span><span style="color:#bf616a;">volumeMounts</span><span>:
+</span><span>    - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">shared-data
+</span><span>      </span><span style="color:#bf616a;">mountPath</span><span>: </span><span style="color:#a3be8c;">/pod-data
+</span><span>    </span><span style="color:#bf616a;">command</span><span>: [&quot;</span><span style="color:#a3be8c;">/bin/sh</span><span>&quot;]
+</span><span>    </span><span style="color:#bf616a;">args</span><span>: [&quot;</span><span style="color:#a3be8c;">-c</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">echo Hello from the debian container &gt; /pod-data/index.html</span><span>&quot;]
+</span></code></pre>
+<h2 id="rong-qi-she-ji-mo-shi">容器设计模式</h2>
+<p><code>Pod</code> 这种 <strong>超亲密关系</strong> 容器的设计思想，实际上就是希望，当用户想在一个容器里运行多个功能并不相关的应用时，应该优先考虑它们是不是更应该被描述成一个 <code>Pod</code> 里的多个容器。</p>
+<p>要理解这个概念，也很容易。只需要将 <code>Pod</code> 理解为原来的虚拟机即可。</p>
+<p>在虚拟机时代，服务之间也存在一定的关系。有上述那样需要共享本地文件系统的关系，也有 <code>API Service</code> 与 <code>DB</code> 之间的关系。</p>
+<p>当需要考虑是否需要将多个容器描述成一个 <code>Pod</code> 时，可以想象一下: 如果使用虚拟机部署，是否应该将这些服务部署在同一台虚拟机上。如果需要部署在一台虚拟机才能工作，那么就需要描述为一个 <code>Pod</code>。</p>
+<h2 id="can-kao-wen-dang">参考文档</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/pods/">Kuberntes Documentation: Pod</a></li>
+<li><a href="https://cloud.tencent.com/developer/article/1513369">为什么说容器是单进程模型</a></li>
+<li><a href="https://forums.docker.com/t/use-affinity-filter-in-docker-service-create/78402">Use “affinity filter” in “docker service create”</a></li>
+<li><a href="https://www.ianlewis.org/en/almighty-pause-container">The Almighty Pause Container</a></li>
+<li><a href="https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods/">Podman: Managing pods and containers in a local container runtime</a></li>
+<li><a href="https://www.usenix.org/system/files/conference/hotcloud16/hotcloud16_burns.pdf">Design patterns for container-based distributed systems</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/kubernetes/">#kubernetes</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/pod/">#pod</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;log-structured-merge-trees&#x2F;">‹ Log Structured Merge Trees</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;enable-rss-on-hexo&#x2F;">让你的 Hexo 博客支持 RSS ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

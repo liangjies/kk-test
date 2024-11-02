@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - &#x2F;opt&#x2F;cni - readonly filesystem</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;opt-cni-is-readonly-directory&#x2F;">&#x2F;opt&#x2F;cni - readonly filesystem</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-10-26</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>在部署 <a href="https://docs.projectcalico.org/getting-started/kubernetes/flannel/flannel">Canal</a> 时遇到如下错误:</p>
+<ol>
+<li>查看 <strong>Pod</strong> 状态:</li>
+</ol>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> kubectl get pods</span><span style="color:#bf616a;"> --all-namespaces
+</span><span>
+</span><span style="color:#bf616a;">NAMESPACE</span><span>     NAME                                                              READY   STATUS                   RESTARTS   AGE
+</span><span style="color:#bf616a;">kube-system</span><span>   canal-5qk26                                                       0/2     Init:RunContainerError   0          10m
+</span><span style="color:#bf616a;">kube-system</span><span>   kube-proxy-tt2qn                                                  0/1     CrashLoopBackOff         10         11m
+</span></code></pre>
+<ol>
+<li>查看 <strong>canal-5qk26</strong> 事件:</li>
+</ol>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> kubectl</span><span style="color:#bf616a;"> -n</span><span> kube-system describe pod canal-5qk26
+</span><span>
+</span><span style="color:#bf616a;">Events:
+</span><span>  </span><span style="color:#bf616a;">Type</span><span>     Reason          Age                     From                Message
+</span><span>  </span><span style="color:#bf616a;">----</span><span>     ------          ----                    ----                -------
+</span><span>  </span><span style="color:#bf616a;">Normal</span><span>   Scheduled       6m41s                   default-scheduler   Successfully assigned kube-system/canal-5qk26 to ubuntu-01
+</span><span>  </span><span style="color:#bf616a;">Warning</span><span>  Failed          6m40s                   kubelet, ubuntu-01  Error: failed to start container &quot;</span><span style="color:#a3be8c;">install-cni</span><span>&quot;: Error response from daemon: can&#39;</span><span style="color:#a3be8c;">t join IPC of container 1f3affaa9eba3f1087ac2309f7c4147a54e2cbad09be733e9c394ce7a8ba583b: container 1f3affaa9eba3f1087ac2309f7c4147a54e2cbad09be733e9c394ce7a8ba583b is not running
+</span><span style="color:#a3be8c;">  Warning  Failed          6m39s                   kubelet, ubuntu-01  Error: failed to start container &quot;install-cni&quot;: Error response from daemon: cannot join network of a non running container: 1861c340dfadba101b333af1163329a88a8e02fd25e5d657b4e0954acd09d3d5
+</span><span style="color:#a3be8c;">  Warning  Failed          6m37s                   kubelet, ubuntu-01  Error: failed to start container &quot;install-cni&quot;: Error response from daemon: error while creating mount source path </span><span>&#39;/opt/cni/bin&#39;</span><span style="color:#a3be8c;">: mkdir /opt/cni: read-only file system
+</span><span style="color:#a3be8c;">  Warning  BackOff         6m34s (x3 over 6m38s)   kubelet, ubuntu-01  Back-off restarting failed container
+</span><span style="color:#a3be8c;">  Normal   Pulled          6m33s (x5 over 6m40s)   kubelet, ubuntu-01  Container image &quot;calico/cni:v3.16.4&quot; already present on machine
+</span><span style="color:#a3be8c;">  Normal   Created         6m33s (x5 over 6m40s)   kubelet, ubuntu-01  Created container install-cni
+</span><span style="color:#a3be8c;">
+</span><span style="color:#a3be8c;">  Normal   SandboxChanged  100s (x269 over 6m39s)  kubelet, ubuntu-01  Pod sandbox changed, it will be killed and re-created.
+</span></code></pre>
+<ol>
+<li>查看 <strong>kube-proxy-tt2qn</strong> 事件:</li>
+</ol>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> kubectl</span><span style="color:#bf616a;"> -n</span><span> kube-system describe pod kube-proxy-tt2qn
+</span><span>
+</span><span style="color:#bf616a;">Events:
+</span><span>  </span><span style="color:#bf616a;">Type</span><span>     Reason          Age                      From                Message
+</span><span>  </span><span style="color:#bf616a;">----</span><span>     ------          ----                     ----                -------
+</span><span>  </span><span style="color:#bf616a;">Normal</span><span>   Scheduled       11m                      default-scheduler   Successfully assigned kube-system/kube-proxy-tt2qn to ubuntu-01
+</span><span>  </span><span style="color:#bf616a;">Normal</span><span>   Pulled          11m (x2 over 11m)        </span><span style="color:#bf616a;">kubelet,</span><span> ubuntu-01  Container image &quot;</span><span style="color:#a3be8c;">registry.aliyuncs.com/google_containers/kube-proxy:v1.19.3</span><span>&quot; already present on machine
+</span><span>  </span><span style="color:#bf616a;">Normal</span><span>   Created         11m (x2 over 11m)        </span><span style="color:#bf616a;">kubelet,</span><span> ubuntu-01  Created container kube-proxy
+</span><span>  </span><span style="color:#bf616a;">Warning</span><span>  Failed          11m                      kubelet, ubuntu-01  Error: failed to start container &quot;</span><span style="color:#a3be8c;">kube-proxy</span><span>&quot;: Error response from daemon: cannot join network of a non running container: 119388927b173ad23226c1049db0c1269ada343b133774807a1615cc79442246
+</span><span>  </span><span style="color:#bf616a;">Warning</span><span>  BackOff         11m (x9 over 11m)        </span><span style="color:#bf616a;">kubelet,</span><span> ubuntu-01  Back-off restarting failed container
+</span><span>  </span><span style="color:#bf616a;">Normal</span><span>   SandboxChanged  11m (x10 over 11m)       </span><span style="color:#bf616a;">kubelet,</span><span> ubuntu-01  Pod sandbox changed, it will be killed and re-created.
+</span></code></pre>
+<ol>
+<li>查看 <strong>Worker</strong> 节点上 <strong>Kubelet</strong> 与 <strong>Docker</strong> 日志:</li>
+</ol>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> journalctl</span><span style="color:#bf616a;"> -f
+</span><span>
+</span><span style="color:#bf616a;">--</span><span> Logs begin at Mon 2020-10-19 10:09:50 UTC. --
+</span><span style="color:#bf616a;">Oct</span><span> 26 02:31:35 ubuntu-01 docker.dockerd</span><span style="color:#b48ead;">[</span><span>1781</span><span style="color:#b48ead;">]</span><span>: time=&quot;</span><span style="color:#a3be8c;">2020-10-26T02:31:35.429587085Z</span><span>&quot; level=error msg=&quot;</span><span style="color:#a3be8c;">Handler for POST /v1.40/containers/aef879b89cd75d23249e76091a4716c1303855b904979e983920aae02da01d18/start returned error: error while creating mount source path &#39;/opt/cni/bin&#39;: mkdir /opt/cni: read-only file system</span><span>&quot;
+</span><span style="color:#bf616a;">Oct</span><span> 26 02:31:35 ubuntu-01 kubelet</span><span style="color:#b48ead;">[</span><span>281110</span><span style="color:#b48ead;">]</span><span>: E1026 02:31:35.474035  281110 remote_runtime.go:248] StartContainer &quot;</span><span style="color:#a3be8c;">aef879b89cd75d23249e76091a4716c1303855b904979e983920aae02da01d18</span><span>&quot; from runtime service failed: rpc error: code = Unknown desc = failed to start container &quot;</span><span style="color:#a3be8c;">aef879b89cd75d23249e76091a4716c1303855b904979e983920aae02da01d18</span><span>&quot;: Error response from daemon: error while creating mount source path &#39;</span><span style="color:#a3be8c;">/opt/cni/bin</span><span>&#39;: mkdir /opt/cni: read-only file system
+</span><span style="color:#bf616a;">Oct</span><span> 26 02:31:35 ubuntu-01 kubelet</span><span style="color:#b48ead;">[</span><span>281110</span><span style="color:#b48ead;">]</span><span>: E1026 02:31:35.474175  281110 pod_workers.go:191] Error syncing pod 5f45d450-c4e9-45dc-b2c6-52a95570ba71 (&quot;</span><span style="color:#a3be8c;">canal-5qk26_kube-system(5f45d450-c4e9-45dc-b2c6-52a95570ba71)</span><span>&quot;)</span><span style="color:#bf616a;">,</span><span> skipping: failed to &quot;</span><span style="color:#a3be8c;">StartContainer</span><span>&quot; for &quot;</span><span style="color:#a3be8c;">install-cni</span><span>&quot; with RunContainerError: &quot;</span><span style="color:#a3be8c;">failed to start container </span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;">aef879b89cd75d23249e76091a4716c1303855b904979e983920aae02da01d18</span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;">: Error response from daemon: error while creating mount source path &#39;/opt/cni/bin&#39;: mkdir /opt/cni: read-only file system</span><span>&quot;
+</span><span style="color:#bf616a;">Oct</span><span> 26 02:31:36 ubuntu-01 audit</span><span style="color:#b48ead;">[</span><span>315954</span><span style="color:#b48ead;">]</span><span>: AVC apparmor=&quot;</span><span style="color:#a3be8c;">DENIED</span><span>&quot; operation=&quot;</span><span style="color:#a3be8c;">exec</span><span>&quot; info=&quot;</span><span style="color:#a3be8c;">no new privs</span><span>&quot; error=-1 profile=&quot;</span><span style="color:#a3be8c;">snap.docker.dockerd</span><span>&quot; name=&quot;</span><span style="color:#a3be8c;">/pause</span><span>&quot; pid=315954 comm=&quot;</span><span style="color:#a3be8c;">runc:[2:INIT]</span><span>&quot; requested_mask=&quot;</span><span style="color:#a3be8c;">x</span><span>&quot; denied_mask=&quot;</span><span style="color:#a3be8c;">x</span><span>&quot; fsuid=0 ouid=0 target=&quot;</span><span style="color:#a3be8c;">docker-default</span><span>&quot;
+</span><span style="color:#bf616a;">Oct</span><span> 26 02:31:36 ubuntu-01 kernel: audit: type=1400 audit(1603679496.465:6039)</span><span style="color:#96b5b4;">:</span><span> apparmor=&quot;</span><span style="color:#a3be8c;">DENIED</span><span>&quot; operation=&quot;</span><span style="color:#a3be8c;">exec</span><span>&quot; info=&quot;</span><span style="color:#a3be8c;">no new privs</span><span>&quot; error=-1 profile=&quot;</span><span style="color:#a3be8c;">snap.docker.dockerd</span><span>&quot; name=&quot;</span><span style="color:#a3be8c;">/pause</span><span>&quot; pid=315954 comm=&quot;</span><span style="color:#a3be8c;">runc:[2:INIT]</span><span>&quot; requested_mask=&quot;</span><span style="color:#a3be8c;">x</span><span>&quot; denied_mask=&quot;</span><span style="color:#a3be8c;">x</span><span>&quot; fsuid=0 ouid=0 target=&quot;</span><span style="color:#a3be8c;">docker-default</span><span>&quot;
+</span><span style="color:#bf616a;">Oct</span><span> 26 02:31:36 ubuntu-01 kubelet</span><span style="color:#b48ead;">[</span><span>281110</span><span style="color:#b48ead;">]</span><span>: W1026 02:31:36.635730  281110 cni.go:239] Unable to update cni config: no networks found in /etc/cni/net.d
+</span></code></pre>
+<p>根据上述日志信息，可以确认根本错误出现在 <strong>Docker</strong> 中:</p>
+<pre data-lang="text" style="background-color:#2b303b;color:#c0c5ce;" class="language-text "><code class="language-text" data-lang="text"><span>error while creating mount source path &#39;/opt/cni/bin&#39;: mkdir /opt/cni: read-only file system
+</span></code></pre>
+<p>但宿主机目录 <strong>/opt/cni</strong> 的权限为:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> stat /opt/cni/
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">File:</span><span> /opt/cni/
+</span><span>  </span><span style="color:#bf616a;">Size:</span><span> 4096            Blocks: 8          IO Block: 4096   directory
+</span><span style="color:#bf616a;">Device:</span><span> fd00h/64768d    Inode: 917533      Links: 3
+</span><span style="color:#bf616a;">Access:</span><span> (0755/drwxr-xr-x)  </span><span style="color:#bf616a;">Uid:</span><span> (    0/    root)   </span><span style="color:#bf616a;">Gid:</span><span> (    0/    root)
+</span><span style="color:#bf616a;">Access:</span><span> 2020-10-26 01:41:07.222221020 +0000
+</span><span style="color:#bf616a;">Modify:</span><span> 2020-10-20 13:00:36.461719609 +0000
+</span><span style="color:#bf616a;">Change:</span><span> 2020-10-20 13:00:36.461719609 +0000
+</span><span> </span><span style="color:#bf616a;">Birth:</span><span> -
+</span></code></pre>
+<p>因此，推测为 <strong>Docker</strong> 服务的问题。最终，通过重启 <strong>Docker</strong> 解决问题:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> systemctl restart docker.service
+</span></code></pre>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/kubernetes/">#kubernetes</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/faq/">#faq</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;mpi-operator&#x2F;">‹ MPI Operator</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-deployment&#x2F;">Kubernetes Deployment ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

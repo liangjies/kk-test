@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - nvidia</title>
+	<link href="https://blog.kiyoko.io/tags/nvidia/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-12-08T10:46:02+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/nvidia/atom.xml</id>
+	<entry xml:lang="en">
+		<title>安装 NVIDIA Driver 和 CUDA</title>
+		<published>2020-12-08T10:46:02+00:00</published>
+		<updated>2020-12-08T10:46:02+00:00</updated>
+		<link href="https://blog.kiyoko.io/install-nvidia-driver-and-cuda/" type="text/html"/>
+		<id>https://blog.kiyoko.io/install-nvidia-driver-and-cuda/</id>
+		<content type="html">&lt;h2 id=&quot;xi-tong-huan-jing&quot;&gt;系统环境&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;home&#x2F;sihao$ cat &#x2F;etc&#x2F;os-release
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;NAME&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Ubuntu&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;VERSION&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;18.04.4 LTS (Bionic Beaver)&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ID&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ubuntu
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ID_LIKE&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;debian
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;PRETTY_NAME&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Ubuntu 18.04.4 LTS&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;VERSION_ID&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;18.04&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;HOME_URL&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;https:&#x2F;&#x2F;www.ubuntu.com&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;SUPPORT_URL&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;https:&#x2F;&#x2F;help.ubuntu.com&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;BUG_REPORT_URL&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;https:&#x2F;&#x2F;bugs.launchpad.net&#x2F;ubuntu&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;PRIVACY_POLICY_URL&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;https:&#x2F;&#x2F;www.ubuntu.com&#x2F;legal&#x2F;terms-and-policies&#x2F;privacy-policy&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;VERSION_CODENAME&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;bionic
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;UBUNTU_CODENAME&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;bionic
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;strong&gt;GPU: GTX 2080Ti&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;xia-zai-an-zhuang-cheng-xu&quot;&gt;下载安装程序&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;cuda&lt;&#x2F;strong&gt; 版本为 &lt;a href=&quot;https:&#x2F;&#x2F;developer.nvidia.com&#x2F;cuda-10.0-download-archive?target_os=Linux&amp;amp;target_arch=x86_64&amp;amp;target_distro=Ubuntu&amp;amp;target_version=1804&amp;amp;target_type=runfilelocal&quot;&gt;cuda10.0&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;NVIDIA Driver&lt;&#x2F;strong&gt; 版本为 440.82&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;an-zhuang-cuda&quot;&gt;安装 CUDA&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; sh cuda_10.0.130_410.48_linux.run
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;pei-zhi-huan-jing&quot;&gt;配置环境&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; ln&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -s&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;usr&#x2F;local&#x2F;cuda-10.0 &#x2F;usr&#x2F;local&#x2F;cuda
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;PATH&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;usr&#x2F;local&#x2F;cuda&#x2F;bin:&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;PATH&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;LD_LIBRARY_PATH&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;usr&#x2F;local&#x2F;cuda&#x2F;lib64:&#x2F;usr&#x2F;local&#x2F;cuda&#x2F;extras&#x2F;CUPTI&#x2F;lib64:&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;LD_LIBRARY_PATH&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; echo &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;usr&#x2F;local&#x2F;cuda&#x2F;lib64&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &amp;gt;&amp;gt; &#x2F;etc&#x2F;ld.so.conf
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; ldconfig
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;an-zhuang-nvidia-driver&quot;&gt;安装 NVIDIA Driver&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;xie-zai-yi-you-nvidia-driver&quot;&gt;卸载已有 NVIDIA Driver&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;usr&#x2F;bin&#x2F;nvidia-uninstall
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; reboot
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;an-zhuang-xin-nvidia-driver&quot;&gt;安装新 NVIDIA Driver&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; sh NVIDIA-Linux-x86_64-440.82.run
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;yan-zheng&quot;&gt;验证&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nvidia-smi
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;can-kao-wen-dang&quot;&gt;参考文档&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;forums.developer.nvidia.com&#x2F;t&#x2F;libcublas-so-10-0-cannot-be-found&#x2F;69629&quot;&gt;libcublas-so-10-0-cannot-be-found&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Nvidia Docker</title>
+		<published>2020-11-14T18:21:01+00:00</published>
+		<updated>2020-11-14T18:21:01+00:00</updated>
+		<link href="https://blog.kiyoko.io/nvidia-docker/" type="text/html"/>
+		<id>https://blog.kiyoko.io/nvidia-docker/</id>
+		<content type="html">&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;nvidia-docker&#x2F;nvidia-container-toolkit.png&quot; alt=&quot;nvidia-container-toolkit.png&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Nvidia Container Toolkit 包含容器运行时库和一些工具，用于自动配置容器使用 GPU 资源。并且，支持多种不同的容器引擎，如 Docker、LXC、Podman 等。用户根据需要可以自行选择使用哪种引擎。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-architecture-overview-of-nvidia-container-toolkit&quot;&gt;The Architecture Overview of Nvidia Container Toolkit&lt;&#x2F;h2&gt;
+&lt;p&gt;Nvidia Container Toolkit 的架构允许其支持任何容器运行时。若以 Docker 为例，其由以下组件，以从上到下的层次结构组成:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;nvidia-docker2&lt;&#x2F;li&gt;
+&lt;li&gt;nvidia-container-runtime&lt;&#x2F;li&gt;
+&lt;li&gt;nvidia-container-toolkit&lt;&#x2F;li&gt;
+&lt;li&gt;libnvidia-container&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;下图为各个组件的关系:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;nvidia-docker&#x2F;nvidia-docker-arch.png&quot; alt=&quot;nvidia-docker-arch.png&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;components-and-packages&quot;&gt;Components and Packages&lt;&#x2F;h3&gt;
+&lt;h4 id=&quot;libnvidia-container&quot;&gt;libnvidia-container&lt;&#x2F;h4&gt;
+&lt;p&gt;提供库与 CLI 程序，实现自动化配置 GNU&#x2F;Linux 容器使用 NVIDIA GPU 资源，其实现依赖于内核基础功能，且在设计上与容器运行时解耦。&lt;&#x2F;p&gt;
+&lt;p&gt;libnvidia-container 提供了一个定义良好的 API 和一个封装好的 CLI 程序(nvidia-container-cli)，任何容器运行时都可以调用它来支持 NVIDIA GPU。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;nvidia-container-toolkit&quot;&gt;nvidia-container-toolkit&lt;&#x2F;h4&gt;
+&lt;p&gt;实现了 runC prestart hook 需要的接口的脚本。该脚本在容器被创建之后，启动之前被 runC 调用，且被赋予访问与容器相关联的 config.json 的权限。脚本根据 config.json 中的信息作为合适的命令行参数 (an appropriate set of flags) 来调用 libnvidia-container CLI。其中，“指定哪些 GPU 设备在容器中使用” 是最重要的参数。&lt;&#x2F;p&gt;
+&lt;p&gt;该组件之前的名字是 nvidia-container-runtime-hook，现在系统上的 nvidia-container-runtime-hook 是 nvidia-container-toolkit 的符号链接。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;nvidia-container-runtime&quot;&gt;nvidia-container-runtime&lt;&#x2F;h4&gt;
+&lt;p&gt;曾经，nvidia-container-runtime 以 runC 作为基础，添加了 NVIDIA 特定的代码。2019 年，更改为对宿主机上原生 runC 做简单的封装。nvidia-container-runtime 将 runC spec 作为输入，将 nvidia-container-toolkit 脚本作为 prestart hook 注入到 runC spec 中。然后，将修改后的带有该 hook set 的 runC spec 传递给原生 runC 并调用 runC。需要注意的是，该组件不一定是针对 docker 的(但它是针对runC的)。&lt;&#x2F;p&gt;
+&lt;p&gt;当该 package 完成安装后，Docker 的 daemon.json 文件会被更新为指向这个二进制文件:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cat &#x2F;etc&#x2F;docker&#x2F;daemon.json
+&lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;  &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;exec-opts&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;native.cgroupdriver=systemd&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;]&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;  &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;default-runtime&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nvidia&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;  &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;runtimes&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nvidia&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: {
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;usr&#x2F;bin&#x2F;nvidia-container-runtime&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;runtimeArgs&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;[]
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;  }
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;nvidia-docker2&quot;&gt;nvidia-docker2&lt;&#x2F;h4&gt;
+&lt;p&gt;这个 package 是架构中唯一的 docker 专用包。它采用与 nvidia-container-runtime 相关的脚本，并将其安装到 docker 的 &#x2F;etc&#x2F;docker&#x2F;daemon.json 文件中。这样，使用者就可以运行 &lt;strong&gt;docker run --runtime=nvidia ...&lt;&#x2F;strong&gt; 来自动为容器添加对 GPU 的支持。这个 package 还安装了一个封装了原生 docker CLI 的脚本，名为 nvidia-docker，避免每次都指定 --runtime=nvidia 来调用 docker。它还允许用户在宿主机上设置环境变量 NV_GPU 来指定将哪些 GPU 注入到容器中。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;installation&quot;&gt;Installation&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;pre-requisites&quot;&gt;Pre-Requisites&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.nvidia.com&#x2F;Download&#x2F;index.aspx?lang=en-us&quot;&gt;NVIDIA Drivers&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;Platform Requirements:
+&lt;ol&gt;
+&lt;li&gt;GNU&#x2F;Linux x86_64 with kernel version &amp;gt; 3.10&lt;&#x2F;li&gt;
+&lt;li&gt;Docker &amp;gt;= 19.03 (recommended, but some distributions may include older versions of Docker. The minimum supported version is 1.12)&lt;&#x2F;li&gt;
+&lt;li&gt;NVIDIA GPU with Architecture &amp;gt; Fermi (or compute capability 2.1)&lt;&#x2F;li&gt;
+&lt;li&gt;NVIDIA drivers ~= 361.93 (untested on older versions)&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;Docker CE&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;setting-up-nvidia-container-toolkit&quot;&gt;Setting up NVIDIA Container Toolkit&lt;&#x2F;h3&gt;
+&lt;p&gt;安装软件源与 GPG key:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; distribution=$(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;etc&#x2F;os-release;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;echo &lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ID&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;VERSION_ID&lt;&#x2F;span&gt;&lt;span&gt;) \
+&lt;&#x2F;span&gt;&lt;span&gt;   &amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;curl -s -L&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;nvidia.github.io&#x2F;nvidia-docker&#x2F;gpgkey | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; apt-key add - \
+&lt;&#x2F;span&gt;&lt;span&gt;   &amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;curl -s -L&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;nvidia.github.io&#x2F;nvidia-docker&#x2F;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;distribution&lt;&#x2F;span&gt;&lt;span&gt;&#x2F;nvidia-docker.list | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; tee &#x2F;etc&#x2F;apt&#x2F;sources.list.d&#x2F;nvidia-docker.list
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;安装 nvidia-docker2 并重启 Docker Daemon:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; sudo apt-get update \
+&lt;&#x2F;span&gt;&lt;span&gt;   &amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; apt-get install&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -y&lt;&#x2F;span&gt;&lt;span&gt; nvidia-docker2 \
+&lt;&#x2F;span&gt;&lt;span&gt;   &amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; systemctl restart docker
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;启动容器测试，如果得到类似如下的输出则安装成功:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; sudo docker run&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --rm --gpus&lt;&#x2F;span&gt;&lt;span&gt; all nvidia&#x2F;cuda:11.0-base nvidia-smi
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;+-----------------------------------------------------------------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;NVIDIA-SMI&lt;&#x2F;span&gt;&lt;span&gt; 450.51.06    Driver Version: 450.51.06    CUDA Version: 11.0     |
+&lt;&#x2F;span&gt;&lt;span&gt;|&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;-------------------------------+----------------------+----------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;GPU&lt;&#x2F;span&gt;&lt;span&gt;  Name        Persistence-M| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Bus-Id&lt;&#x2F;span&gt;&lt;span&gt;        Disp.A | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Volatile&lt;&#x2F;span&gt;&lt;span&gt; Uncorr. ECC |
+&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Fan&lt;&#x2F;span&gt;&lt;span&gt;  Temp  Perf  Pwr:Usage&#x2F;Cap|         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Memory-Usage &lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;GPU-Util&lt;&#x2F;span&gt;&lt;span&gt;  Compute M. |
+&lt;&#x2F;span&gt;&lt;span&gt;|                               |                      |               &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;MIG&lt;&#x2F;span&gt;&lt;span&gt; M. |
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;|===============================+======================+======================&lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;|   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;  Tesla T4            On   | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;00000000:00:1E.0&lt;&#x2F;span&gt;&lt;span&gt; Off |                    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;N&#x2F;A&lt;&#x2F;span&gt;&lt;span&gt;   34C    P8     9W &#x2F;  70W |      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;0MiB&lt;&#x2F;span&gt;&lt;span&gt; &#x2F; 15109MiB |      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;%      Default |
+&lt;&#x2F;span&gt;&lt;span&gt;|                               |                      |                  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;N&#x2F;A &lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;+-------------------------------+----------------------+----------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;+-----------------------------------------------------------------------------+
+&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Processes:                                                                  &lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;|  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;GPU&lt;&#x2F;span&gt;&lt;span&gt;   GI   CI        PID   Type   Process name                  GPU Memory |
+&lt;&#x2F;span&gt;&lt;span&gt;|        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ID&lt;&#x2F;span&gt;&lt;span&gt;   ID                                                   Usage      |
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;|=============================================================================&lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;|  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;No&lt;&#x2F;span&gt;&lt;span&gt; running processes found                                                 |
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;+-----------------------------------------------------------------------------+
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;can-kao-wen-dang&quot;&gt;参考文档&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.nvidia.com&#x2F;datacenter&#x2F;cloud-native&#x2F;index.html&quot;&gt;NVIDIA Cloud Native Technologies&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.nvidia.com&#x2F;datacenter&#x2F;cloud-native&#x2F;container-toolkit&#x2F;install-guide.html&quot;&gt;Container Toolkit Installation Guide&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+</feed>

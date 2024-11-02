@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 在非 async 函数中执行 async 语句块</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/run-async-block-in-non-async-function/#chuang-jian-yi-ge-xin-de-runtime" class="toc-link">创建一个新的 Runtime</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/run-async-block-in-non-async-function/#shi-yong-dang-qian-de-runtime" class="toc-link">使用当前的 Runtime</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/run-async-block-in-non-async-function/#liang" class="toc-link">惊</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/run-async-block-in-non-async-function/#tong-guo-xin-de-xian-cheng-zhi-xing-async-han-shu" class="toc-link">通过新的线程执行 async 函数</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/run-async-block-in-non-async-function/#can-kao" class="toc-link">参考</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;run-async-block-in-non-async-function&#x2F;">在非 async 函数中执行 async 语句块</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-05-29</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>在使用 <code>mongodb</code>，在未启用 <code>#[feature = &quot;sync&quot;]</code> 时，解析 <code>url</code> 的函数是一个 <code>async</code> 函数:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#65737e;">/// crate: mongodb::options
+</span><span style="color:#b48ead;">impl </span><span>ClientOptions {
+</span><span>    #[</span><span style="color:#bf616a;">cfg</span><span>(</span><span style="color:#bf616a;">not</span><span>(feature = &quot;</span><span style="color:#a3be8c;">sync</span><span>&quot;))]
+</span><span>    </span><span style="color:#b48ead;">pub</span><span> async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">parse</span><span>(</span><span style="color:#bf616a;">s</span><span>: impl AsRef&lt;</span><span style="color:#b48ead;">str</span><span>&gt;) -&gt; Result&lt;</span><span style="color:#b48ead;">Self</span><span>&gt; {
+</span><span>        </span><span style="color:#b48ead;">Self</span><span>::parse_uri(s, None).await
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>个人习惯，在业务项目中定义一个专属的配置类型:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">pub struct </span><span>ClientOptions {
+</span><span>    </span><span style="color:#b48ead;">pub </span><span style="color:#bf616a;">uri</span><span>: Option&lt;String&gt;,
+</span><span>    </span><span style="color:#b48ead;">pub </span><span style="color:#bf616a;">database</span><span>: Option&lt;String&gt;,
+</span><span>    </span><span style="color:#b48ead;">pub </span><span style="color:#bf616a;">collection</span><span>: Option&lt;String&gt;,
+</span><span>}
+</span></code></pre>
+<p>并为该类型实现 <code>From Trait</code>:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">impl </span><span>From&lt;ClientOptions&gt; </span><span style="color:#b48ead;">for </span><span>mongodb::options::ClientOptions {
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">from</span><span>(</span><span style="color:#bf616a;">opts</span><span>: ClientOptions) -&gt; </span><span style="color:#b48ead;">Self </span><span>{
+</span><span>        todo!()
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>由于，<code>Trait</code> 的函数签名是无法改动的，就导致需要在 <code>non-async</code> 函数中调用 <code>async</code> 函数。</p>
+<h2 id="chuang-jian-yi-ge-xin-de-runtime">创建一个新的 Runtime</h2>
+<p>通过查阅<a href="https://docs.rs/tokio/1.6.1/tokio/">文档</a>，根据关键字 <code>current</code> 查找到 <a href="https://docs.rs/tokio/1.6.1/tokio/runtime/struct.Builder.html#method.new_current_thread">tokio::runtime::Builder::new_current_thread</a>:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">impl </span><span>Builder {
+</span><span>    </span><span style="color:#65737e;">/// Returns a new builder with the current thread scheduler selected.
+</span><span>    </span><span style="color:#65737e;">///
+</span><span>    </span><span style="color:#65737e;">/// Configuration methods can be chained on the return value.
+</span><span>    </span><span style="color:#65737e;">///
+</span><span>    </span><span style="color:#65737e;">/// To spawn non-`Send` tasks on the resulting runtime, combine it with a
+</span><span>    </span><span style="color:#65737e;">/// [`LocalSet`].
+</span><span>    </span><span style="color:#65737e;">///
+</span><span>    </span><span style="color:#65737e;">/// [`LocalSet`]: crate::task::LocalSet
+</span><span>    </span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">new_current_thread</span><span>() -&gt; Builder {
+</span><span>        Builder::new(Kind::CurrentThread)
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>使用当前线程创建一个调度器，看起来靠谱。由此，<code>from</code> 的实现如下:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>tokio::runtime::Builder as RuntimeBuilder
+</span><span>
+</span><span style="color:#b48ead;">impl </span><span>From&lt;ClientOptions&gt; </span><span style="color:#b48ead;">for </span><span>mongodb::options::ClientOptions {
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">from</span><span>(</span><span style="color:#bf616a;">opts</span><span>: ClientOptions) -&gt; </span><span style="color:#b48ead;">Self </span><span>{
+</span><span>        RuntimeBuilder::new_current_thread()
+</span><span>            .</span><span style="color:#96b5b4;">build</span><span>()
+</span><span>            .</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>            .</span><span style="color:#96b5b4;">block_on</span><span>(async {
+</span><span>                mongodb::options::ClientOptions::parse(opts.uri.</span><span style="color:#96b5b4;">as_ref</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>())
+</span><span>                    .await
+</span><span>                    .</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>            })
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>但是，在执行时遇到一个错误:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">thread </span><span>&#39;</span><span style="color:#a3be8c;">main</span><span>&#39; panicked at &#39;</span><span style="color:#a3be8c;">Cannot start a runtime from within a runtime. This happens because a function (like `block_on`) attempted to block the current thread while the thread is being used to drive asynchronous tasks.</span><span>&#39;, /home/divinerapier/.cargo/registry/src/github.com-1ecc6299db9ec823/tokio-1.6.0/src/runtime/enter.rs:39:9
+</span></code></pre>
+<p>提示，不能在 <code>Runtime</code> 中执行另一个 <code>Runtime</code>。这里的第一个 <code>Runtime</code> 应该就是由 <code>#[tokio::main]</code> 自动创建的。</p>
+<h2 id="shi-yong-dang-qian-de-runtime">使用当前的 Runtime</h2>
+<p>在根据关键字 <code>current</code> 查找文档是，还存在另一个结果 <a href="https://docs.rs/tokio/1.6.1/tokio/runtime/struct.Handle.html#method.current">tokio::runtime::Handle::current</a>:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">impl </span><span>Handle {
+</span><span>    </span><span style="color:#65737e;">/// Returns a `Handle` view over the currently running `Runtime`
+</span><span>    </span><span style="color:#65737e;">///
+</span><span>    </span><span style="color:#65737e;">/// # Panic
+</span><span>    </span><span style="color:#65737e;">///
+</span><span>    </span><span style="color:#65737e;">/// This will panic if called outside the context of a Tokio runtime. That means that you must
+</span><span>    </span><span style="color:#65737e;">/// call this on one of the threads **being run by the runtime**. Calling this from within a
+</span><span>    </span><span style="color:#65737e;">/// thread created by `std::thread::spawn` (for example) will cause a panic.
+</span><span>    </span><span style="color:#65737e;">///
+</span><span>    </span><span style="color:#65737e;">/// # Examples
+</span><span>    </span><span style="color:#65737e;">///
+</span><span>    </span><span style="color:#65737e;">/// This can be used to obtain the handle of the surrounding runtime from an async
+</span><span>    </span><span style="color:#65737e;">/// block or function running on that runtime.
+</span><span>    </span><span style="color:#65737e;">///
+</span><span>    </span><span style="color:#65737e;">///
+</span><span>    </span><span style="color:#65737e;">/// # use std::thread;
+</span><span>    </span><span style="color:#65737e;">/// # use tokio::runtime::Runtime;
+</span><span>    </span><span style="color:#65737e;">/// # fn dox() {
+</span><span>    </span><span style="color:#65737e;">/// # let rt = Runtime::new().unwrap();
+</span><span>    </span><span style="color:#65737e;">/// # rt.spawn(async {
+</span><span>    </span><span style="color:#65737e;">/// use tokio::runtime::Handle;
+</span><span>    </span><span style="color:#65737e;">///
+</span><span>    </span><span style="color:#65737e;">/// // Inside an async block or function.
+</span><span>    </span><span style="color:#65737e;">/// let handle = Handle::current();
+</span><span>    </span><span style="color:#65737e;">/// handle.spawn(async {
+</span><span>    </span><span style="color:#65737e;">///     println!(&quot;now running in the existing Runtime&quot;);
+</span><span>    </span><span style="color:#65737e;">/// });
+</span><span>    </span><span style="color:#65737e;">///
+</span><span>    </span><span style="color:#65737e;">/// # let handle =
+</span><span>    </span><span style="color:#65737e;">/// thread::spawn(move || {
+</span><span>    </span><span style="color:#65737e;">///     // Notice that the handle is created outside of this thread and then moved in
+</span><span>    </span><span style="color:#65737e;">///     handle.spawn(async { /* ... */ })
+</span><span>    </span><span style="color:#65737e;">///     // This next line would cause a panic
+</span><span>    </span><span style="color:#65737e;">///     // let handle2 = Handle::current();
+</span><span>    </span><span style="color:#65737e;">/// });
+</span><span>    </span><span style="color:#65737e;">/// # handle.join().unwrap();
+</span><span>    </span><span style="color:#65737e;">/// # });
+</span><span>    </span><span style="color:#65737e;">/// # }
+</span><span>    </span><span style="color:#65737e;">///
+</span><span>    </span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">current</span><span>() -&gt; </span><span style="color:#b48ead;">Self </span><span>{
+</span><span>        context::current().</span><span style="color:#96b5b4;">expect</span><span>(</span><span style="color:#d08770;">CONTEXT_MISSING_ERROR</span><span>)
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>通过 <code>Handle::current</code> 函数可以获得当前的 <code>Runtime</code> 对象。</p>
+<p>但是，需要注意，如下方式直接通过 <code>Handle</code> 调用 <code>Handle::block_on</code> 函数同样会遇到上面的错误。</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">impl </span><span>From&lt;ClientOptions&gt; </span><span style="color:#b48ead;">for </span><span>mongodb::options::ClientOptions {
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">from</span><span>(</span><span style="color:#bf616a;">opts</span><span>: ClientOptions) -&gt; </span><span style="color:#b48ead;">Self </span><span>{
+</span><span>        </span><span style="color:#b48ead;">let</span><span> handle = Handle::current();
+</span><span>        handle.</span><span style="color:#96b5b4;">enter</span><span>();
+</span><span>        handle.</span><span style="color:#96b5b4;">block_on</span><span>(async {})
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>应通过 <code>futures::executor::block_on</code> 函数来执行 <code>async</code> 函数。</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">impl </span><span>From&lt;ClientOptions&gt; </span><span style="color:#b48ead;">for </span><span>mongodb::options::ClientOptions {
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">from</span><span>(</span><span style="color:#bf616a;">opts</span><span>: ClientOptions) -&gt; </span><span style="color:#b48ead;">Self </span><span>{
+</span><span>        </span><span style="color:#b48ead;">let</span><span> handle = Handle::current();
+</span><span>        handle.</span><span style="color:#96b5b4;">enter</span><span>();
+</span><span>        futures::executor::block_on(async {
+</span><span>            mongodb::options::ClientOptions::parse(opts.uri.</span><span style="color:#96b5b4;">as_ref</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>())
+</span><span>                .await
+</span><span>                .</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>        })
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h3 id="liang">惊</h3>
+<p>通过实验，只需要 <code>futures::executor::block_on</code> 函数就可以完成对 <code>async</code> 函数的调用。</p>
+<p>上面就不改了，当做备忘录，避免以后采坑。</p>
+<h2 id="tong-guo-xin-de-xian-cheng-zhi-xing-async-han-shu">通过新的线程执行 async 函数</h2>
+<p>上面的一系列想法都是基于 <strong>复用当前线程</strong>，下面来尝试通过创建新的线程解决问题。</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>tokio::runtime::Builder as RuntimeBuilder;
+</span><span>
+</span><span style="color:#b48ead;">impl </span><span>From&lt;ClientOptions&gt; </span><span style="color:#b48ead;">for </span><span>mongodb::options::ClientOptions {
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">from</span><span>(</span><span style="color:#bf616a;">opts</span><span>: ClientOptions) -&gt; </span><span style="color:#b48ead;">Self </span><span>{
+</span><span>        std::thread::spawn(</span><span style="color:#b48ead;">move </span><span>|| {
+</span><span>            RuntimeBuilder::new_current_thread()
+</span><span>                .</span><span style="color:#96b5b4;">build</span><span>()
+</span><span>                .</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>                .</span><span style="color:#96b5b4;">block_on</span><span>(async {
+</span><span>                    mongodb::options::ClientOptions::parse(opts.uri.</span><span style="color:#96b5b4;">as_ref</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>())
+</span><span>                        .await
+</span><span>                        .</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>                })
+</span><span>        })
+</span><span>        .</span><span style="color:#96b5b4;">join</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>确认同样可以解决问题。</p>
+<p>同样地，在新的线程中使用 <code>futures::executor::block_on</code> 同样可以解决问题。</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">impl </span><span>From&lt;ClientOptions&gt; </span><span style="color:#b48ead;">for </span><span>mongodb::options::ClientOptions {
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">from</span><span>(</span><span style="color:#bf616a;">opts</span><span>: ClientOptions) -&gt; </span><span style="color:#b48ead;">Self </span><span>{
+</span><span>        std::thread::spawn(</span><span style="color:#b48ead;">move </span><span>|| {
+</span><span>            futures::executor::block_on(async {
+</span><span>                mongodb::options::ClientOptions::parse(opts.uri.</span><span style="color:#96b5b4;">as_ref</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>())
+</span><span>                    .await
+</span><span>                    .</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>            })
+</span><span>        })
+</span><span>        .</span><span style="color:#96b5b4;">join</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h2 id="can-kao">参考</h2>
+<ul>
+<li><a href="https://stackoverflow.com/a/66280983">how-do-i-await-a-future-inside-a-non-async-method-which-was-called-from-an-async</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/rust/">#rust</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/async/">#async</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/tokio/">#tokio</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;thundering-herd-problem&#x2F;">‹ 惊群效应问题</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tokio-main-macro&#x2F;">macro tokio::main ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

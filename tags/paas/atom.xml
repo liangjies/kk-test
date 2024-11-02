@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - paas</title>
+	<link href="https://blog.kiyoko.io/tags/paas/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-08-16T20:49:59+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/paas/atom.xml</id>
+	<entry xml:lang="en">
+		<title>Docker - 概述</title>
+		<published>2020-08-16T20:49:59+00:00</published>
+		<updated>2020-08-16T20:49:59+00:00</updated>
+		<link href="https://blog.kiyoko.io/what-is-the-docker/" type="text/html"/>
+		<id>https://blog.kiyoko.io/what-is-the-docker/</id>
+		<content type="html">&lt;h2 id=&quot;paas-de-fa-zhan-guo-cheng&quot;&gt;PaaS 的发展过程&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;容器&lt;&#x2F;strong&gt; 这个概念从来就不是什么新鲜的东西，也不是 &lt;code&gt;Docker&lt;&#x2F;code&gt; 公司发明的。在红极一时的 &lt;code&gt;PaaS&lt;&#x2F;code&gt; 项目 &lt;code&gt;Cloud Foundry&lt;&#x2F;code&gt; 中，也同样使用到了容器技术，只不过容器只是其最底层、最没人关注的那一部分。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;PaaS&lt;&#x2F;code&gt; 项目被大家接纳的一个主要原因，就是它提供了一种名叫 &lt;strong&gt;应用托管&lt;&#x2F;strong&gt; 的能力。在当时，虚拟机和云计算已经是比较普遍的技术和服务，主流用户的普遍用法，就是租一批 &lt;code&gt;AWS&lt;&#x2F;code&gt; 或者 &lt;code&gt;OpenStack&lt;&#x2F;code&gt; 的虚拟机，然后像以前管理物理服务器那样，用脚本或者手工的方式在这些机器上部署应用。&lt;&#x2F;p&gt;
+&lt;p&gt;但是，在部署过程中，难免会碰到云端虚拟机和本地环境不一致的问题。所以当时的云计算服务，比的就是谁能更好地模拟本地服务器环境，能带来更好的 &lt;strong&gt;上云&lt;&#x2F;strong&gt; 体验。而 &lt;code&gt;PaaS&lt;&#x2F;code&gt; 开源项目 &lt;code&gt;Cloud Foundry&lt;&#x2F;code&gt; 就是当时解决这个问题的一个最佳方案。&lt;&#x2F;p&gt;
+&lt;p&gt;举个栗子，创建好虚拟机之后，运维人员只需要在这些机器上部署 &lt;code&gt;Cloud Foundry Agent&lt;&#x2F;code&gt;，随后开发者只要执行一条命令就能把本地的应用部署到云上:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cf&lt;&#x2F;span&gt;&lt;span&gt; push &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;我的应用&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;事实上，&lt;code&gt;Cloud Foundry&lt;&#x2F;code&gt; 最核心的组件就是一套应用的打包和分发机制。&lt;code&gt;Cloud Foundry&lt;&#x2F;code&gt; 为每种主流编程语言都定义了一种打包格式。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;cf push&lt;&#x2F;code&gt; 的作用是把应用的可执行文件和启动脚本打进一个压缩包内，上传到云上 &lt;code&gt;Cloud Foundry&lt;&#x2F;code&gt; 的存储中。接着，&lt;code&gt;Cloud Foundry&lt;&#x2F;code&gt; 会通过调度器选择一个可以运行这个应用的虚拟机，然后通知这个机器上的 &lt;code&gt;Agent&lt;&#x2F;code&gt; 把应用压缩包下载下来启动。&lt;&#x2F;p&gt;
+&lt;p&gt;这时候关键来了，由于需要在一个虚拟机上启动很多个来自不同用户的应用，&lt;code&gt;Cloud Foundry&lt;&#x2F;code&gt; 通过操作系统的 &lt;code&gt;cgroups&lt;&#x2F;code&gt; 和 &lt;code&gt;namespace&lt;&#x2F;code&gt; 机制为每一个应用单独创建一个称作 &lt;strong&gt;沙盒&lt;&#x2F;strong&gt; 的隔离环境，然后在 &lt;strong&gt;沙盒&lt;&#x2F;strong&gt; 中启动这些应用进程。这样，就实现了把多个用户的应用互不干涉地在虚拟机里批量地、自动地运行起来的目的。而这个 &lt;strong&gt;沙盒&lt;&#x2F;strong&gt; 就是所谓的 &lt;strong&gt;容器&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;而本文的主角 &lt;code&gt;Docker&lt;&#x2F;code&gt; 项目，与 &lt;code&gt;Cloud Foundry&lt;&#x2F;code&gt; 的容器并没有本质上的差异。因此在它发布后不久，&lt;code&gt;Cloud Foundry&lt;&#x2F;code&gt; 的首席产品经理 &lt;code&gt;James Bayer&lt;&#x2F;code&gt; 就在社区里做了一次详细对比，告诉用户 &lt;code&gt;Docker&lt;&#x2F;code&gt; 只是一个同样使用 &lt;code&gt;cgroups&lt;&#x2F;code&gt; 和 &lt;code&gt;namespace&lt;&#x2F;code&gt; 实现的 &lt;strong&gt;沙盒&lt;&#x2F;strong&gt; 而已，没有什么特别的黑科技，也不需要特别关注。&lt;&#x2F;p&gt;
+&lt;p&gt;然而，短短几个月，&lt;code&gt;Docker&lt;&#x2F;code&gt; 项目就迅速崛起了。它的崛起速度如此之快，以至于 &lt;code&gt;Cloud Foundry&lt;&#x2F;code&gt; 以及所有的 &lt;code&gt;PaaS&lt;&#x2F;code&gt; 社区还没来得及成为它的竞争对手，就直接被宣告出局了，堪称 &lt;strong&gt;降维打击&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;docker-jing-xiang&quot;&gt;Docker 镜像&lt;&#x2F;h2&gt;
+&lt;p&gt;究其根本原因，虽然 &lt;code&gt;Docker&lt;&#x2F;code&gt; 与 &lt;code&gt;Cloud Foundry&lt;&#x2F;code&gt; 无论是在核心原理还是在技术实现上大部分相同，但正是被大家忽视的那一小部分成为 &lt;code&gt;Docker&lt;&#x2F;code&gt; 的制胜法宝——&lt;code&gt;Docker&lt;&#x2F;code&gt; 镜像。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;Cloud Fondry&lt;&#x2F;code&gt; 成也“打包”，败萧“打包”。其一，每种语言，每种框架的打包方式都不甚相同，甚至于每个版本都需要打包；其二，虽然打包之后可以在云上直接使用，但在从本地上云的过程中，可能仍旧需要反复修改、配置，甚至于在不断试错中体会&lt;strong&gt;玄学调参&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;结果大家发现，虽然 &lt;code&gt;cf push&lt;&#x2F;code&gt; 可以一键部署，但是为了实现&lt;strong&gt;一键部署&lt;&#x2F;strong&gt;这一目的的过程却需要费尽心机。&lt;&#x2F;p&gt;
+&lt;p&gt;而 &lt;code&gt;Docker&lt;&#x2F;code&gt; 镜像却从根本上解决了这一问题。&lt;code&gt;Docker&lt;&#x2F;code&gt; 镜像，实际上也是一个压缩包，但是内容却要比 &lt;code&gt;Cloud Foundry&lt;&#x2F;code&gt; 的丰富的多。它不但包含可执行文件与启动脚本，更是包含了一个完整的操作系统，所以这个压缩包的内容可以与开发环境、测试环境的完全一样。&lt;&#x2F;p&gt;
+&lt;p&gt;假设，开发时使用 &lt;code&gt;centos 8&lt;&#x2F;code&gt; 作为开发环境，此时，只需要使用 &lt;code&gt;centos 8&lt;&#x2F;code&gt; 的 &lt;code&gt;iso&lt;&#x2F;code&gt; 连同可执行文件一起制作一个压缩包，那么，无论在哪里解压这个压缩包，都可以为可执行文件提供完全一致的运行环境。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;rong-qi-yu-xu-ni-hua&quot;&gt;容器与虚拟化&lt;&#x2F;h2&gt;
+&lt;p&gt;虚拟化允许多个操作系统 &lt;code&gt;(Windows&#x2F;Linux)&lt;&#x2F;code&gt; 同时在单个硬件系统上运行。&lt;&#x2F;p&gt;
+&lt;p&gt;容器可共享同一个操作系统内核，将应用进程与系统其他部分隔离开。例如：&lt;code&gt;ARM Linux&lt;&#x2F;code&gt; 系统运行 &lt;code&gt;ARM Linux&lt;&#x2F;code&gt; 容器，&lt;code&gt;x86 Linux&lt;&#x2F;code&gt; 系统运行 &lt;code&gt;x86 Linux&lt;&#x2F;code&gt; 容器，&lt;code&gt;x86 Windows&lt;&#x2F;code&gt; 系统运行 &lt;code&gt;x86 Windows&lt;&#x2F;code&gt; 容器。&lt;code&gt;Linux&lt;&#x2F;code&gt; 容器具有极佳的可移植性，但前提是它们必须与底层系统兼容。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;what-is-the-docker&#x2F;virtualization-vs-containers.png&quot; alt=&quot;virtualization-vs-containers&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;这意味着，虚拟化会使用虚拟机监控程序模拟硬件，从而使多个操作系统能够并行运行。但这不如容器轻便。&lt;code&gt;Linux&lt;&#x2F;code&gt; 容器在本机操作系统上运行，与所有容器共享该操作系统，因此应用和服务能够保持轻巧，并行化快速运行。&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>

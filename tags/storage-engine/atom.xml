@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - storage engine</title>
+	<link href="https://blog.kiyoko.io/tags/storage-engine/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-09-10T19:29:43+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/storage-engine/atom.xml</id>
+	<entry xml:lang="en">
+		<title>B 树</title>
+		<published>2020-09-10T19:29:43+00:00</published>
+		<updated>2020-09-10T19:29:43+00:00</updated>
+		<link href="https://blog.kiyoko.io/b-tree/" type="text/html"/>
+		<id>https://blog.kiyoko.io/b-tree/</id>
+		<content type="html">&lt;h2 id=&quot;gai-shu&quot;&gt;概述&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;B-Tree&lt;&#x2F;strong&gt; 属于&lt;strong&gt;自平衡树&lt;&#x2F;strong&gt;的一种。其他种类的自平衡树，比如，&lt;strong&gt;AVL&lt;&#x2F;strong&gt;、&lt;strong&gt;Red-Black Tree&lt;&#x2F;strong&gt; 等，都是假设所有数据均保存在内存中。而 &lt;strong&gt;B-Tree&lt;&#x2F;strong&gt; 是用于内存无法保存所有数据的超大数据量场景。&lt;&#x2F;p&gt;
+&lt;p&gt;当 &lt;strong&gt;key&lt;&#x2F;strong&gt; 的数量庞大，需要以 &lt;strong&gt;block&lt;&#x2F;strong&gt; 的形式从磁盘中读取数据时，相较于从内存中读取数据而言，访问磁盘需要很长的时间。&lt;strong&gt;B-Tree&lt;&#x2F;strong&gt; 的主要目标，或者说核心思想就是为了减少访问磁盘的次数。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;shi-jian-fu-za-du&quot;&gt;时间复杂度&lt;&#x2F;h2&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th align=&quot;left&quot;&gt;ALGORITHM&lt;&#x2F;th&gt;&lt;th align=&quot;left&quot;&gt;TIME COMPLEXITY&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Search&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;O(log n)&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Insert&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;O(log n)&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Delete&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;O(log n)&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;n&lt;&#x2F;strong&gt;: &lt;strong&gt;B-Tree&lt;&#x2F;strong&gt; 的节点总数。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h2 id=&quot;xing-zhi&quot;&gt;性质&lt;&#x2F;h2&gt;
+&lt;ol&gt;
+&lt;li&gt;所有的叶子节点在同一级。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;B-Tree&lt;&#x2F;strong&gt; 的 &lt;strong&gt;度(degree)&lt;&#x2F;strong&gt; 取决于磁盘块大小。&lt;&#x2F;li&gt;
+&lt;li&gt;除根节点之外，其余节点必须至少包含 &lt;strong&gt;t-1&lt;&#x2F;strong&gt; 个 &lt;strong&gt;key&lt;&#x2F;strong&gt;；跟节点至少包含 &lt;strong&gt;1&lt;&#x2F;strong&gt; 个 &lt;strong&gt;key&lt;&#x2F;strong&gt;。&lt;&#x2F;li&gt;
+&lt;li&gt;包括根节点在内，所有节点至多包含 &lt;strong&gt;2t-1&lt;&#x2F;strong&gt; 个 &lt;strong&gt;key&lt;&#x2F;strong&gt;。&lt;&#x2F;li&gt;
+&lt;li&gt;节点的子节点数量等于节点中 &lt;strong&gt;key&lt;&#x2F;strong&gt; 的数量 &lt;strong&gt;+1&lt;&#x2F;strong&gt;。&lt;&#x2F;li&gt;
+&lt;li&gt;节点的所有 &lt;strong&gt;key&lt;&#x2F;strong&gt; 按照升序排列，在 &lt;strong&gt;key: k1, k2&lt;&#x2F;strong&gt; 之间的所有子节点包含 &lt;strong&gt;[k1, k2]&lt;&#x2F;strong&gt; 范围内的所有 &lt;strong&gt;key&lt;&#x2F;strong&gt;。&lt;&#x2F;li&gt;
+&lt;li&gt;不同于 &lt;strong&gt;BST&lt;&#x2F;strong&gt; 向下生长，向下收缩。&lt;strong&gt;B-Tree&lt;&#x2F;strong&gt; 从根节点开始生长和收缩。&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h3 id=&quot;yi-ge-jian-dan-de-li-zi&quot;&gt;一个简单的例子&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;b-tree&#x2F;01.PNG&quot; alt=&quot;01.png&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;在上面的例子中，可以观察到:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;所有的叶子结点均处于同一级别&lt;&#x2F;li&gt;
+&lt;li&gt;所有非叶子节点都没有空的子树&lt;&#x2F;li&gt;
+&lt;li&gt;所有非叶子节点 &lt;strong&gt;key&lt;&#x2F;strong&gt; 的数量比其自带数 &lt;strong&gt;少 1&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;can-kao-yue-du&quot;&gt;参考阅读&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.geeksforgeeks.org&#x2F;introduction-of-b-tree-2&quot;&gt;Introduction of B-Tree&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Log Structured Merge Trees</title>
+		<published>2020-08-26T21:37:03+00:00</published>
+		<updated>2020-08-26T21:37:03+00:00</updated>
+		<link href="https://blog.kiyoko.io/log-structured-merge-trees/" type="text/html"/>
+		<id>https://blog.kiyoko.io/log-structured-merge-trees/</id>
+		<content type="html">&lt;p&gt;转自 &lt;a href=&quot;https:&#x2F;&#x2F;medium.com&#x2F;swlh&#x2F;log-structured-merge-trees-9c8e2bea89e8&quot;&gt;Log Structured Merge Trees&lt;&#x2F;a&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;LSM tree is at the heart of most storage systems that provide high write throughput, be it a key-value storage like dynamodb&#x2F;cassandra or a messaging system like pulsar which is backed by bookkeeper.&lt;&#x2F;p&gt;
+&lt;p&gt;The various components of a typical LSM backed system are shown below.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;log-structured-merge-trees&#x2F;01.png&quot; alt=&quot;01&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;The main reason why LSM provides high write throughput is that every write request is actually performed only &lt;strong&gt;in-memory&lt;&#x2F;strong&gt; in contrast to traditional B-Tree based implementation where the updates are done to disk which can trigger an update to an index making it very expensive.&lt;&#x2F;p&gt;
+&lt;p&gt;So the obvious question is, how does LSM achieve durability? that’s where WAL comes into the picture.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;wal&quot;&gt;WAL&lt;&#x2F;h2&gt;
+&lt;p&gt;WAL is a write-ahead log that is used to provide the durability of data during system failures, what it means is that when a request for write comes in, the data is first added to a WAL file (sometimes called journal) and flushed to the disk (using &lt;a href=&quot;https:&#x2F;&#x2F;access.redhat.com&#x2F;documentation&#x2F;en-us&#x2F;red_hat_enterprise_linux&#x2F;5&#x2F;html&#x2F;global_file_system&#x2F;s1-manage-direct-io&quot;&gt;direct io&lt;&#x2F;a&gt;) before updating the in-memory data structure.&lt;&#x2F;p&gt;
+&lt;p&gt;This allows for systems to recover from the WAL if it crashes before persisting the in-memory data structure to disk.&lt;&#x2F;p&gt;
+&lt;p&gt;Why not directly update the write to the disk instead of updating WAL? it’s because WAL updates are cheaper as it’s append-only and doesn’t require any restructuring of data on disk.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;memtable&quot;&gt;MemTable&lt;&#x2F;h2&gt;
+&lt;p&gt;The in-memory data structure is called a memtable, there are various implementations of memtable, but you can think of memtable as just a binary search tree for the sake of simplicity.&lt;&#x2F;p&gt;
+&lt;p&gt;So now for every write request, the data is appended to WAL and the memtable is updated and a successful response is returned to the client.&lt;&#x2F;p&gt;
+&lt;p&gt;For java implementations, the memtable is usually stored off-heap (direct memory) to avoid GC load&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;sstable-sorted-strings-table&quot;&gt;SSTable (Sorted Strings Table)&lt;&#x2F;h2&gt;
+&lt;p&gt;As it’s obvious that we cannot keep adding data to memtable to bloat the RAM, the memtable is frequently flushed to disk as an SSTable.&lt;&#x2F;p&gt;
+&lt;p&gt;SSTable, as the name indicates, is a sorted array of keys persisted on disk.&lt;&#x2F;p&gt;
+&lt;p&gt;The reason it is sorted is to make it easy to look up the data for readings.&lt;&#x2F;p&gt;
+&lt;p&gt;Okay, now that is the essence of how LSM provides high throughput using a WAL, MemTable &amp;amp; SSTable.&lt;&#x2F;p&gt;
+&lt;p&gt;Usually, even every delete request for a key is also added to memtable with a marker indicating it’s deleted and the same information is flushed to the SSTable.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;compactor&quot;&gt;Compactor&lt;&#x2F;h2&gt;
+&lt;p&gt;As we keep flushing SSTables to disk, the same key may be present in multiple SSTables, although the latest data of a key is present in the most recent SSTable, it’s presence in all previous SSTable needs to be cleaned up.&lt;&#x2F;p&gt;
+&lt;p&gt;This is the job of a compactor which usually runs in the background, It merges SSTables by removing redundant &amp;amp; deleted keys and creating a compacted&#x2F;merged SSTables.&lt;&#x2F;p&gt;
+&lt;p&gt;the compactor also is responsible for updating an index (typical B-Tree based index) to locate SSTable a key is present in.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;index&quot;&gt;Index&lt;&#x2F;h2&gt;
+&lt;p&gt;The index data structure created is used to locate the correct SSTable for a key, once an SSTable is located, it is easy to locate the actual key inside the SSTable as it’s sorted, a binary search in-memory is sufficient.&lt;&#x2F;p&gt;
+&lt;p&gt;Also, the size of SSTables is chosen in such a way that it corresponds to the operating system &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Page_(computer_memory)&quot;&gt;page size&lt;&#x2F;a&gt; (usually multiples of disk bock size) making it easier to load the data to memory faster.&lt;&#x2F;p&gt;
+&lt;p&gt;Although the Index along with SSTable help in faster lookup of keys, all read requests are first consulted in the memtable as it should contain the most recent change. If the key is not in the memtable, then the index is used to identify the possible SSTable the key may be present and then search inside the SSTable in-memory.&lt;&#x2F;p&gt;
+&lt;p&gt;Since every read has to check the memtable, index &amp;amp; SSTable to look for a key, it makes read requests very expensive especially for keys that are not present!&lt;&#x2F;p&gt;
+&lt;p&gt;For keys that are recently updated, the read request will easily locate it in the memtable, but for keys not recently updated, and for keys that are not present in the system the read path is expensive!&lt;&#x2F;p&gt;
+&lt;p&gt;Bloom Filters are used to improve read performance especially for the cases where the key is not present in the system.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;bloom-filter&quot;&gt;Bloom Filter&lt;&#x2F;h2&gt;
+&lt;p&gt;A Bloom filter is a probabilistic data structure, which at a high level helps you check if a key is present or not in the system with O(1) complexity in memory.&lt;&#x2F;p&gt;
+&lt;p&gt;With bloom filter, False positive match is possible, which means, it may indicate a key is present although it’s not in the system. But false-negative match won’t happen, which means if bloom filter indicates a key is not present, then it is definitely not present in the system, so we could avoid taking the expensive read path.&lt;&#x2F;p&gt;
+&lt;p&gt;So the presence of a bloom filter improves the read performance for keys that are missing in the system but for the keys that are present in the system, the read is still expensive as we have to look into the memtable, index and the SSTable.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;&#x2F;h2&gt;
+&lt;p&gt;So every time you come across a system that promises high write throughput, you can assume there will be a variant of LSM tree underneath that helps achieve the throughput and also understand why reads are expensive.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>

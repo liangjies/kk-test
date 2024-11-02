@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - arch</title>
+	<link href="https://blog.kiyoko.io/tags/arch/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2021-07-10T11:47:19+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/arch/atom.xml</id>
+	<entry xml:lang="en">
+		<title>Arch Linux 安装 fakeroot</title>
+		<published>2021-07-10T11:47:19+00:00</published>
+		<updated>2021-07-10T11:47:19+00:00</updated>
+		<link href="https://blog.kiyoko.io/archlinux-base-devel/" type="text/html"/>
+		<id>https://blog.kiyoko.io/archlinux-base-devel/</id>
+		<content type="html">&lt;p&gt;在安装 &lt;code&gt;kodi-standalone-service&lt;&#x2F;code&gt; 时遇到错误:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;yay -S&lt;&#x2F;span&gt;&lt;span&gt; kodi-standalone-service
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; ERROR: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Cannot&lt;&#x2F;span&gt;&lt;span&gt; find the fakeroot binary.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;error&lt;&#x2F;span&gt;&lt;span&gt; making: kodi-standalone-service
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;错误原因为: &lt;strong&gt;Cannot find the fakeroot binary.&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;有两种方式解决:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; pacman&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -S&lt;&#x2F;span&gt;&lt;span&gt; fakeroot
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;或者&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; pacman&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -S&lt;&#x2F;span&gt;&lt;span&gt; base-devel
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+	</entry>
+</feed>

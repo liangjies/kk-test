@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - innnodb</title>
+	<link href="https://blog.kiyoko.io/tags/innnodb/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2021-03-08T13:27:56+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/innnodb/atom.xml</id>
+	<entry xml:lang="en">
+		<title>InnoDB 入门</title>
+		<published>2021-03-08T13:27:56+00:00</published>
+		<updated>2021-03-08T13:27:56+00:00</updated>
+		<link href="https://blog.kiyoko.io/innodb-introduction/" type="text/html"/>
+		<id>https://blog.kiyoko.io/innodb-introduction/</id>
+		<content type="html">&lt;p&gt;&lt;code&gt;InnoDB&lt;&#x2F;code&gt; 是一种平衡可靠性与性能的通用存储引擎。在 &lt;code&gt;MySQL 8.0&lt;&#x2F;code&gt; 中，通过 &lt;code&gt;CREATE TABLE&lt;&#x2F;code&gt; 语句创建表时，如若未通过 &lt;code&gt;ENGINE&lt;&#x2F;code&gt; 子句指定引擎，将采用 &lt;code&gt;InnoDB&lt;&#x2F;code&gt; 作为默认的存储引擎。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;innodb-de-guan-jian-you-shi&quot;&gt;InnoDB 的关键优势&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;InnoDB&lt;&#x2F;code&gt; 的 &lt;code&gt;DML&lt;&#x2F;code&gt; 操作遵循 &lt;code&gt;ACID&lt;&#x2F;code&gt; 模型，且具有提交、回滚、错误恢复等事务的功能与能力，保障用户数据安全。&lt;&#x2F;li&gt;
+&lt;li&gt;行级锁定和 &lt;code&gt;Oracle&lt;&#x2F;code&gt; 风格的 &lt;strong&gt;一致性读取&lt;&#x2F;strong&gt; 提高了多用户使用时的并发性与性能。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;InnoDB&lt;&#x2F;code&gt; 表将数据存放在磁盘上，基于 &lt;strong&gt;主键&lt;&#x2F;strong&gt; 来优化查询。每个 &lt;code&gt;InnoDB&lt;&#x2F;code&gt; 表都有一个称为 &lt;strong&gt;聚集索引&lt;&#x2F;strong&gt; 的主键索引，使用该索引组织数据可以将查找主键的 &lt;code&gt;I&#x2F;O&lt;&#x2F;code&gt; 最小化。&lt;&#x2F;li&gt;
+&lt;li&gt;为了维护数据完整性，&lt;code&gt;InnoDB&lt;&#x2F;code&gt; 支持外键约束。当使用外键时，&lt;code&gt;InnoDB&lt;&#x2F;code&gt; 会检查插入、更新和删除等语句，来确保它们不会导致相关表之间的数据不一致。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;innodb-gong-neng-lie-biao&quot;&gt;InnoDB 功能列表&lt;&#x2F;h3&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th align=&quot;left&quot;&gt;Feature&lt;&#x2F;th&gt;&lt;th align=&quot;left&quot;&gt;Support&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;B-tree indexes&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Backup&#x2F;point-in-time recovery (在服务端实现，而非存储引擎。)&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Cluster database support&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;No&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Clustered indexes&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Compressed data&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Data caches&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Encrypted data&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes (在服务器端通过加密功能实现;在MySQL 5.7和更高版本中，支持数据静止加密。)&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Foreign key support&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Full-text search indexes&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes (在MySQL 5.6和更高版本中支持全文索引。)&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Geospatial data type support&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Geospatial indexing support&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes (MySQL 5.7和更高版本中提供了对地理空间索引的支持。)&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Hash indexes&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;No (InnoDB内部利用哈希索引来实现自适应哈希索引特性。)&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Index caches&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Locking granularity&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Row&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;MVCC&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Replication support (在服务端实现，而非存储引擎。)&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Storage limits&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;64TB&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;T-tree indexes&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;No&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Transactions&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;Update statistics for data dictionary&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Yes&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;h2 id=&quot;shi-yong-innodb-de-you-shi&quot;&gt;使用 InnoDB 的优势&lt;&#x2F;h2&gt;
+&lt;p&gt;使用 &lt;code&gt;InnoDB&lt;&#x2F;code&gt; 有如下优势:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;如果服务器由于硬件或软件问题而意外退出，无论崩溃时数据库内部遇到什么问题，在重新启动数据库后都不需要做任何特殊的操作。&lt;code&gt;InnoDB&lt;&#x2F;code&gt; 会恢复崩溃前已经确定的更改，并撤销正在进行但未提交的更改，允许用户重新启动并从停止的地方继续。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;InnoDB&lt;&#x2F;code&gt; 存储引擎维护其内部的缓冲池，当数据被访问时，该缓冲池会在内存中缓存表和索引数据。频繁被使用到的数据将直接从内存中处理。多种类型的信息都可以通过使用该缓存来提高处理速度。在专用的数据库服务器上，通常会将高达 &lt;code&gt;80%&lt;&#x2F;code&gt; 的物理内存分配给缓冲池使用。&lt;&#x2F;li&gt;
+&lt;li&gt;可以设置外键，保证多个相关数据表之间的数据完整性。&lt;&#x2F;li&gt;
+&lt;li&gt;如果磁盘或内存中的数据损坏，&lt;strong&gt;校验和&lt;&#x2F;strong&gt; 机制会在使问题假数据之前向用户发出警告。变量 &lt;code&gt;innodb_checksum_algorithm&lt;&#x2F;code&gt; 定义了 &lt;code&gt;InnoDB&lt;&#x2F;code&gt; 使用了何种校验和算法。&lt;&#x2F;li&gt;
+&lt;li&gt;在 &lt;code&gt;WHERE&lt;&#x2F;code&gt;、&lt;code&gt;ORDER BY&lt;&#x2F;code&gt;、&lt;code&gt;GROUP BY&lt;&#x2F;code&gt; 等子句与 &lt;code&gt;JOIN&lt;&#x2F;code&gt; 操作中使用主键时，&lt;code&gt;InnoDB&lt;&#x2F;code&gt; 将自动优化涉及这些列的操作，使这些操作的执行速度非常快。&lt;&#x2F;li&gt;
+&lt;li&gt;更改缓冲(change buffering) 这一自动极致会对插入，更新和删除进行优化。 &lt;code&gt;InnoDB&lt;&#x2F;code&gt; 不仅允许对同一表的并发读写访问，而且会缓存被更改数据，使磁盘 &lt;code&gt;I&#x2F;O&lt;&#x2F;code&gt; 流水线化。&lt;&#x2F;li&gt;
+&lt;li&gt;性能优势并不仅限于哪些需要很长时间查询的大表。当表中的某些被反复访问时，&lt;code&gt;InnoDB&lt;&#x2F;code&gt; 会通过自适应哈希索引( Adaptive Hash Index) 处理，加快查询速度，达到类似使用哈希表查找的效果。&lt;&#x2F;li&gt;
+&lt;li&gt;允许压缩表和关联索引。&lt;&#x2F;li&gt;
+&lt;li&gt;加密数据。&lt;&#x2F;li&gt;
+&lt;li&gt;在线创建和删除索引，执行其他 &lt;code&gt;DDL&lt;&#x2F;code&gt; 操作对性能和可用性有较小的影响。&lt;&#x2F;li&gt;
+&lt;li&gt;截断每个表文件的表空间的速度非常快，被释放的磁盘空间不仅可以供 &lt;code&gt;InnoDB&lt;&#x2F;code&gt; 使用，操作系统同样可以重用。&lt;&#x2F;li&gt;
+&lt;li&gt;表数据的存储布局对于使用动态(DYNAMIC) 行格式的 &lt;code&gt;BLOB&lt;&#x2F;code&gt; 和长文本字段更有效。&lt;&#x2F;li&gt;
+&lt;li&gt;可以通过查询 &lt;code&gt;INFORMATION_SCHEMA&lt;&#x2F;code&gt; 表来监视存储引擎的内部工作。&lt;&#x2F;li&gt;
+&lt;li&gt;可以通过查询 &lt;code&gt;performance_schema&lt;&#x2F;code&gt; 表来监控存储引擎的性能详情。&lt;&#x2F;li&gt;
+&lt;li&gt;可以混合使用 &lt;code&gt;InnoDB&lt;&#x2F;code&gt; 表和使用其他 &lt;code&gt;MySQL&lt;&#x2F;code&gt; 存储引擎的表，即使是在同一个语句中。例如，可以使用 &lt;code&gt;JOIN&lt;&#x2F;code&gt; 操作在单个查询中组合来自 &lt;code&gt;InnoDB&lt;&#x2F;code&gt; 和内存表的数据。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;InnoDB&lt;&#x2F;code&gt; 的设计目标是在处理大数据量时的提高 &lt;code&gt;CPU&lt;&#x2F;code&gt; 效率并达到最高性能。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;InnoDB&lt;&#x2F;code&gt; 表可以处理大量数据，即使在文件大小被限制为 &lt;code&gt;2GB&lt;&#x2F;code&gt; 的操作系统上。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;innodb-biao-de-zui-jia-shi-jian&quot;&gt;InnoDB 表的最佳实践&lt;&#x2F;h2&gt;
+&lt;p&gt;在使用 &lt;code&gt;InnoDB&lt;&#x2F;code&gt; 的表时有如下最佳实践:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用查询最频繁的一列或多列作为表的主键，如果没有明显的主键，则使用自动递增 &lt;code&gt;ID&lt;&#x2F;code&gt;。&lt;&#x2F;li&gt;
+&lt;li&gt;使用 &lt;code&gt;JOIN&lt;&#x2F;code&gt; 操作根据相同的 &lt;code&gt;ID&lt;&#x2F;code&gt; 值从多个表中从多个表中获取数据。在 &lt;code&gt;JOIN&lt;&#x2F;code&gt; 的列上定义外键约束，并为这些列声明相同的数据类型。外键约束可以确保被引用的列上是有索引的，这也可以提高性能。同时，外键约束可以将删除和更新的结果在所有收到影响的表上生效，保证当父表中没有相应的 &lt;code&gt;ID&lt;&#x2F;code&gt; 时，不会将数据插入到子表中。&lt;&#x2F;li&gt;
+&lt;li&gt;关闭自动提交可以提高性能 (受到存储设备写入速度的限制)。&lt;&#x2F;li&gt;
+&lt;li&gt;使用 &lt;code&gt;START TRANSACTION&lt;&#x2F;code&gt; 和 &lt;code&gt;COMMIT&lt;&#x2F;code&gt; 语句，将一组相关的 &lt;code&gt;DML&lt;&#x2F;code&gt; 操作，以事务的形式执行。事务的范围过小会导致频繁提交，范围过大会导致提交间隔太久。&lt;&#x2F;li&gt;
+&lt;li&gt;禁止使用 &lt;code&gt;LOCK TABLES&lt;&#x2F;code&gt; 语句。&lt;code&gt;InnoDB&lt;&#x2F;code&gt; 可以同时处理多个会话对同一个表的读写，而不会牺牲可靠性和高性能。要获得对一组行的独占写访问，请使用 &lt;code&gt;SELECT ... FOR UPDATE&lt;&#x2F;code&gt; 只锁定要更新的行。&lt;&#x2F;li&gt;
+&lt;li&gt;启用变量 &lt;code&gt;innodb_file_per_table&lt;&#x2F;code&gt;，或者使用通用表空间(general tablespaces) 将表的数据和索引放到单独的文件中，不建议使用 system 表空间(system tablespace)。默认启用变量 &lt;code&gt;innodb_file_per_table&lt;&#x2F;code&gt;。&lt;&#x2F;li&gt;
+&lt;li&gt;压缩 &lt;code&gt;InnoDB&lt;&#x2F;code&gt; 表数据，在某些场景可以提升读写性能。&lt;&#x2F;li&gt;
+&lt;li&gt;使用 &lt;code&gt;--sql_mode=NO_ENGINE_SUBSTITUTION&lt;&#x2F;code&gt; 参数启动服务，可避免使用禁止的引擎创建表。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;can-kao-zi-liao&quot;&gt;参考资料&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;dev.mysql.com&#x2F;doc&#x2F;refman&#x2F;8.0&#x2F;en&#x2F;innodb-introduction.html&quot;&gt;Introduction to InnoDB&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;dev.mysql.com&#x2F;doc&#x2F;refman&#x2F;8.0&#x2F;en&#x2F;innodb-benefits.html&quot;&gt;Benefits of Using InnoDB Tables&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;dev.mysql.com&#x2F;doc&#x2F;refman&#x2F;8.0&#x2F;en&#x2F;innodb-best-practices.html&quot;&gt;Best Practices for InnoDB Tables&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+</feed>

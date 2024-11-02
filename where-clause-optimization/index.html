@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 优化 WHERE 子句</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;where-clause-optimization&#x2F;">优化 WHERE 子句</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-08-01</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>以 <code>SELECT</code> 语句为例，介绍如何优化 <code>WHERE</code> 子句。这些优化方法同样适用于 <code>DELETE</code> 和 <code>UPDATE</code> 语句中的 <code>WHERE</code> 子句。</p>
+<p>在编写 <code>SQL</code> 时，开发者在主观上为了使语句执行的更快而去做一些所谓的“优化”。但实际上，这些“优化”要么会使 <code>SQL</code> 失去了可读性，要么是在重复 <code>MySQL</code> 做的事情。</p>
+<p>下面列举一些 <code>MySQL</code> 会做的优化:</p>
+<ul>
+<li>
+<p>删除不必要的括号</p>
+<pre data-lang="SQL" style="background-color:#2b303b;color:#c0c5ce;" class="language-SQL "><code class="language-SQL" data-lang="SQL"><span>((a AND b) AND c OR (((a AND b) AND (c AND d))))
+</span><span>-&gt; (a AND b AND c) OR (a AND b AND c AND d)
+</span></code></pre>
+</li>
+<li>
+<p>常量替换(Constant folding)</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span>(a&lt;b AND b=c) AND a=</span><span style="color:#d08770;">5
+</span><span>-&gt; b&gt;</span><span style="color:#d08770;">5 </span><span>AND b=c AND a=</span><span style="color:#d08770;">5
+</span></code></pre>
+</li>
+<li>
+<p>删除恒定条件</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span>(b&gt;=</span><span style="color:#d08770;">5 </span><span>AND b=</span><span style="color:#d08770;">5</span><span>) OR (b=</span><span style="color:#d08770;">6 </span><span>AND </span><span style="color:#d08770;">5</span><span>=</span><span style="color:#d08770;">5</span><span>) OR (b=</span><span style="color:#d08770;">7 </span><span>AND </span><span style="color:#d08770;">5</span><span>=</span><span style="color:#d08770;">6</span><span>)
+</span><span>-&gt; b=</span><span style="color:#d08770;">5 </span><span>OR b=</span><span style="color:#d08770;">6
+</span></code></pre>
+<p>在 <code>MySQL 8.0.14</code> 和更高版本中，这是在准备过程中发生的，而不是在优化阶段发生的，这有助于简化联接。 有关更多信息和示例，请参见 <a href="https://dev.mysql.com/doc/refman/8.0/en/outer-join-optimization.html">Section 8.2.1.9, “Outer Join Optimization”</a>。</p>
+</li>
+<li>
+<p>索引使用的常量表达式仅计算一次。</p>
+</li>
+<li>
+<p>从 <code>MySQL 8.0.16</code> 开始，数值类型的列与常数比较时，折叠(folded)或删除无效或越界的值：</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#65737e;">-- CREATE TABLE t (c TINYINT UNSIGNED NOT NULL);
+</span><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> t </span><span style="color:#b48ead;">WHERE</span><span> c ≪ </span><span style="color:#d08770;">256</span><span>;
+</span><span>-≫ </span><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> t </span><span style="color:#b48ead;">WHERE </span><span style="color:#d08770;">1</span><span>;
+</span></code></pre>
+</li>
+<li>
+<p>对于使用<code>MyISAM</code> 和 <code>MEMORY</code>存储引擎的表，在单一表上执行 <a href="https://dev.mysql.com/doc/refman/8.0/en/aggregate-functions.html#function_count"><code>COUNT(*)</code></a> 操作时，如果没有 <code>WHERE</code> 子句，或者 <code>WHERE</code> 子句的表达式 <code>NOT NULL</code>，都将直接从表信息中读取。</p>
+<blockquote>
+<p>COUNT(*) on a single table without a WHERE is retrieved directly from the table information for MyISAM and MEMORY tables. This is also done for any NOT NULL expression when used with only one table.</p>
+</blockquote>
+</li>
+<li>
+<p>尽早检测无效的常量表达式。<code>MySQL</code> 检测到无效 <code>SELECT</code> 语句时，直接返回无结果。</p>
+</li>
+<li>
+<p>不使用 <code>GROUP BY</code> 或聚合函数(<code>COUNT()，MIN()</code>)时，会把 <code>HAVING</code> 与 <code>WHERE</code> 合并。</p>
+</li>
+<li>
+<p>对于联接查询中的每个表，构造一个简单的 <code>WHERE</code> 实现快速 <code>WHERE</code> 评估，尽快跳过行的目的。</p>
+</li>
+<li>
+<p>优先读取常量表。满足以下任意一个即为常量表：</p>
+<ul>
+<li>空表或具有一行的表。</li>
+<li>使用 <code>WHERE</code> 语句构建得到的表，且 <code>WHERE</code> 子句中的所有列只能是 <code>PRIMARY KEY</code> 或 <code>NOT NULL UNIQUE</code> 索引与常量表达式比较。</li>
+</ul>
+<p>以下所有表均用作常量表：</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">WHERE</span><span> primary_key=</span><span style="color:#d08770;">1</span><span>;
+</span><span>
+</span><span style="color:#b48ead;">WHERE </span><span style="color:#d08770;">t1</span><span>.</span><span style="color:#d08770;">primary_key</span><span>=</span><span style="color:#d08770;">1 </span><span>AND </span><span style="color:#d08770;">t2</span><span>.</span><span style="color:#d08770;">primary_key</span><span>=</span><span style="color:#d08770;">t1</span><span>.</span><span style="color:#d08770;">id</span><span>;
+</span><span>
+</span><span style="color:#65737e;">-- PRIMARY KEY (column1,column2)
+</span><span style="color:#b48ead;">WHERE</span><span> column1=</span><span style="color:#d08770;">5 </span><span>AND column2=</span><span style="color:#d08770;">7
+</span><span>
+</span><span style="color:#65737e;">-- unique_not_null_column INT NOT NULL UNIQUE
+</span><span style="color:#b48ead;">WHERE</span><span> unique_not_null_column=</span><span style="color:#d08770;">5
+</span></code></pre>
+<p>参考 <a href="https://dev.mysql.com/doc/internals/en/optimizer-constants-constant-tables.html">7.2.1.4 Constants and Constant Tables</a> 了解更多有关常量与常量表。</p>
+</li>
+<li>
+<p>通过尝试所有可能的方法，找到用于联接表的最佳联接组合。如果 <code>ORDER BY</code> 和 <code>GROUP BY</code> 子句中的所有列都来自同一表，则在连接时优先使用该表。</p>
+</li>
+<li>
+<p>如果 <code>ORDER BY</code> 子句和 <code>GROUP BY</code> 子句使用不同的列，或者 <code>ORDER BY</code>/<code>GROUP BY</code> 使用的列不属于联接队列中第一个表，则会创建一个临时表。</p>
+<blockquote>
+<p>If there is an ORDER BY clause and a different GROUP BY clause, or if the ORDER BY or GROUP BY contains columns from tables other than the first table in the join queue, a temporary table is created.</p>
+</blockquote>
+</li>
+<li>
+<p>如果使用 <code>SQL_SMALL_RESULT</code> 修饰符，<code>MySQL</code> 将使用内存临时表。</p>
+</li>
+<li>
+<p>从表的所有索引中选择一个最佳索引使用。或者，优化器认为全表扫描更有效时，会选择全表扫描。曾经，当使用最佳索引仍然会跨越表的 <code>30%</code>(<code>spanned more than 30% of the table</code>)时，就会选择使用全表扫描。但现在，使用索引还是全表扫描不再只取决于固定百分比，同时还要考虑其他因素，例如表大小，行数和 <code>I/O</code> 块大小。</p>
+</li>
+<li>
+<p>在某些情况下，<code>MySQL</code> 可以从索引中读取数据行，而无需查询数据文件。如果索引中使用的所有列都是数字列，则仅使用索引树解析查询。</p>
+</li>
+<li>
+<p>在输出每一行之前，将跳过与 <code>HAVING</code> 子句不匹配的行。</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/mysql/">#mysql</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/optimization/">#optimization</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/where-clause/">#where clause</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;optimizing-select-statements&#x2F;">‹ 优化 SELECT 语句</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;io-devices&#x2F;">I&#x2F;O 设备 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

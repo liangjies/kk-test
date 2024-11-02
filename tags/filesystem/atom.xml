@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - filesystem</title>
+	<link href="https://blog.kiyoko.io/tags/filesystem/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-10-02T16:18:20+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/filesystem/atom.xml</id>
+	<entry xml:lang="en">
+		<title>使用 NFS</title>
+		<published>2020-10-02T16:18:20+00:00</published>
+		<updated>2020-10-02T16:18:20+00:00</updated>
+		<link href="https://blog.kiyoko.io/how-to-use-nfs/" type="text/html"/>
+		<id>https://blog.kiyoko.io/how-to-use-nfs/</id>
+		<content type="html">&lt;p&gt;查看被分享目录的属性:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; stat &#x2F;public
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;File:&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;public
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Size:&lt;&#x2F;span&gt;&lt;span&gt; 4096            Blocks: 8          IO Block: 4096   directory
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Device:&lt;&#x2F;span&gt;&lt;span&gt; 802h&#x2F;2050d      Inode: 58982401    Links: 2
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Access:&lt;&#x2F;span&gt;&lt;span&gt; (0777&#x2F;drwxrwxrwx)  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Uid:&lt;&#x2F;span&gt;&lt;span&gt; (    0&#x2F;    root)   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Gid:&lt;&#x2F;span&gt;&lt;span&gt; (    0&#x2F;    root)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Access:&lt;&#x2F;span&gt;&lt;span&gt; 2020-10-02 16:25:03.129246127 +0800
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Modify:&lt;&#x2F;span&gt;&lt;span&gt; 2020-10-02 16:24:56.129203697 +0800
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Change:&lt;&#x2F;span&gt;&lt;span&gt; 2020-10-02 16:24:56.129203697 +0800
+&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Birth:&lt;&#x2F;span&gt;&lt;span&gt; -
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; sudo exportfs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -avrf
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;exporting &lt;&#x2F;span&gt;&lt;span&gt;*:&#x2F;public
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;服务端 &lt;strong&gt;&#x2F;etc&#x2F;exports&lt;&#x2F;strong&gt; 配置如下:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;&#x2F;public *(rw,sync,no_subtree_check)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;确认被 NFS 导出的本地文件系统:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; sudo exportfs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -avrf
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;exporting &lt;&#x2F;span&gt;&lt;span&gt;*:&#x2F;public
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;在客户端查看远端配置:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; showmount&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -e&lt;&#x2F;span&gt;&lt;span&gt; 192.168.50.5
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Export&lt;&#x2F;span&gt;&lt;span&gt; list for 192.168.50.5:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F;public                               &lt;&#x2F;span&gt;&lt;span&gt;*
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;客户端挂载 NFS 文件系统:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; mount&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -o&lt;&#x2F;span&gt;&lt;span&gt; rw,nolock&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -t&lt;&#x2F;span&gt;&lt;span&gt; nfs 192.168.50.5:&#x2F;public .&#x2F;tmp
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;当出现如下报错信息:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;mount.nfs: Operation not permitted
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;请修改 &lt;strong&gt;&#x2F;etc&#x2F;exports&lt;&#x2F;strong&gt; 内容为:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;&#x2F;public *(rw,sync,all_squash,no_subtree_check,insecure)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;然后重新执行命令挂载。&lt;&#x2F;p&gt;
+&lt;p&gt;如果希望指定 &lt;code&gt;user&lt;&#x2F;code&gt; 与 &lt;code&gt;group&lt;&#x2F;code&gt; 来操作文件，可以通过在 &lt;strong&gt;&#x2F;etc&#x2F;exports&lt;&#x2F;strong&gt; 中增加选项: &lt;strong&gt;anonuid=1026,anongid=100&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;reference&quot;&gt;Reference&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;unix.stackexchange.com&#x2F;questions&#x2F;252812&#x2F;user-permissions-in-nfs-mounted-directory&quot;&gt;User permissions in NFS mounted directory&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;access.redhat.com&#x2F;solutions&#x2F;3773891&quot;&gt;Mount failed with mount: mount.nfs: access denied by server while mounting error&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+</feed>

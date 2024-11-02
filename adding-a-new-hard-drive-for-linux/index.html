@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 为 Linux 增加新磁盘</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/adding-a-new-hard-drive-for-linux/#cha-kan-she-bei-wen-jian" class="toc-link">查看设备文件</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/adding-a-new-hard-drive-for-linux/#chuang-jian-fen-qu" class="toc-link">创建分区</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/adding-a-new-hard-drive-for-linux/#shi-yong-ci-pan" class="toc-link">使用磁盘</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/adding-a-new-hard-drive-for-linux/#ce-shi-ci-pan" class="toc-link">测试磁盘</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;adding-a-new-hard-drive-for-linux&#x2F;">为 Linux 增加新磁盘</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-11-01</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <h2 id="cha-kan-she-bei-wen-jian">查看设备文件</h2>
+<p>将磁盘插入计算机后，在终端中查看:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> lsblk</span><span style="color:#bf616a;"> -d -o</span><span> name,serial
+</span><span>
+</span><span style="color:#bf616a;">NAME</span><span>    SERIAL
+</span><span style="color:#bf616a;">nvme0n1</span><span> 200000000000
+</span></code></pre>
+<p>或者</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo fdisk</span><span style="color:#bf616a;"> -l
+</span><span>
+</span><span style="color:#bf616a;">Disk</span><span> /dev/nvme0n1: 931.53 GiB, 1000204886016 bytes, 1953525168 sectors
+</span><span style="color:#bf616a;">Disk</span><span> model: WDS100T3X0C-00SJG0
+</span><span style="color:#bf616a;">Units:</span><span> sectors of 1 * 512 = 512 bytes
+</span><span style="color:#bf616a;">Sector</span><span> size (logical/physical)</span><span style="color:#96b5b4;">:</span><span> 512 bytes / 512 bytes
+</span><span style="color:#bf616a;">I/O</span><span> size (minimum/optimal)</span><span style="color:#96b5b4;">:</span><span> 512 bytes / 512 bytes
+</span></code></pre>
+<p>可以确认设备文件为 <code>/dev/nvme0n1</code>。</p>
+<h2 id="chuang-jian-fen-qu">创建分区</h2>
+<p>创建分区表:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo parted /dev/nvme0n1 mklabel gpt
+</span><span>
+</span><span style="color:#bf616a;">Information:</span><span> You may need to update /etc/fstab.
+</span></code></pre>
+<p>创建主分区，并确认对齐:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo parted</span><span style="color:#bf616a;"> -s -m</span><span> /dev/nvme0n1 mkpart primary ext4 1 100%
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> sudo parted /dev/nvme0n1 align-check opt 1
+</span><span style="color:#bf616a;">1</span><span> aligned
+</span></code></pre>
+<p>查看分区详细信息:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo parted /dev/nvme0n1 print
+</span><span style="color:#bf616a;">Model:</span><span> WDS100T3X0C-00SJG0 (nvme)
+</span><span style="color:#bf616a;">Disk</span><span> /dev/nvme0n1: 1000GB
+</span><span style="color:#bf616a;">Sector</span><span> size (logical/physical)</span><span style="color:#96b5b4;">:</span><span> 512B/512B
+</span><span style="color:#bf616a;">Partition</span><span> Table: gpt
+</span><span style="color:#bf616a;">Disk</span><span> Flags:
+</span><span>
+</span><span style="color:#bf616a;">Number</span><span>  Start   End     Size    File system  Name     Flags
+</span><span> </span><span style="color:#bf616a;">1</span><span>      1049kB  1000GB  1000GB               primary
+</span></code></pre>
+<h2 id="shi-yong-ci-pan">使用磁盘</h2>
+<p>创建文件系统:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo mkfs.ext4 /dev/nvme0n1p1
+</span><span>
+</span><span style="color:#bf616a;">mke2fs</span><span> 1.45.5 (07-Jan-2020)
+</span><span style="color:#bf616a;">Discarding</span><span> device blocks: done
+</span><span style="color:#bf616a;">Creating</span><span> filesystem with 244190208 4k blocks and 61054976 inodes
+</span><span style="color:#bf616a;">Filesystem</span><span> UUID: b5424944-2d8c-4c5f-8bb4-0e538db5592b
+</span><span style="color:#bf616a;">Superblock</span><span> backups stored on blocks:
+</span><span>        </span><span style="color:#bf616a;">32768,</span><span> 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208,
+</span><span>        </span><span style="color:#bf616a;">4096000,</span><span> 7962624, 11239424, 20480000, 23887872, 71663616, 78675968,
+</span><span>        </span><span style="color:#bf616a;">102400000,</span><span> 214990848
+</span><span>
+</span><span style="color:#bf616a;">Allocating</span><span> group tables: done
+</span><span style="color:#bf616a;">Writing</span><span> inode tables: done
+</span><span style="color:#bf616a;">Creating</span><span> journal (262144 blocks)</span><span style="color:#96b5b4;">:</span><span> done
+</span><span style="color:#bf616a;">Writing</span><span> superblocks and filesystem accounting information: done
+</span></code></pre>
+<p>挂载磁盘:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo mkdir</span><span style="color:#bf616a;"> -p</span><span> /nvme
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> sudo mount /dev/nvme0n1p1 /nvme
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> df</span><span style="color:#bf616a;"> -h
+</span><span style="color:#bf616a;">Filesystem</span><span>      Size  Used Avail Use% Mounted on
+</span><span style="color:#bf616a;">/dev/nvme0n1p1</span><span>  916G   77M  870G   1% /nvme
+</span></code></pre>
+<h2 id="ce-shi-ci-pan">测试磁盘</h2>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cd /nvme
+</span><span>
+</span><span style="color:#65737e;"># ioengine: 可以指定为 psync / libaio
+</span><span style="color:#65737e;"># numjobs: 测试线程数，线程之间的测试相互独立，成倍占用 size 指定的大小
+</span><span style="color:#65737e;"># rw: 读写方式
+</span><span style="color:#65737e;">#     read: 顺序读
+</span><span style="color:#65737e;">#     write: 顺序写
+</span><span style="color:#65737e;">#     randread: 随机读
+</span><span style="color:#65737e;">#     randwrite: 随机写
+</span><span style="color:#65737e;"># bs: 每次读写块大小
+</span><span style="color:#bf616a;">$</span><span> sudo fio</span><span style="color:#bf616a;"> -direct</span><span>=1</span><span style="color:#bf616a;"> -iodepth</span><span> 1</span><span style="color:#bf616a;"> -thread -rw</span><span>=randread</span><span style="color:#bf616a;"> -ioengine</span><span>=psync</span><span style="color:#bf616a;"> -bs</span><span>=4k</span><span style="color:#bf616a;"> -size</span><span>=100G</span><span style="color:#bf616a;"> -numjobs</span><span>=4</span><span style="color:#bf616a;"> -group_reporting -name</span><span>=file
+</span></code></pre>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/linux/">#linux</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/hard-drive/">#hard drive</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-daemonset&#x2F;">‹ Kubernetes DaemonSet</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;nvidia-docker&#x2F;">Nvidia Docker ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

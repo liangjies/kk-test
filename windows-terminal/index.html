@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>f
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - Windows Terminal</tditle>f
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+            covalenthq
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+            
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+            
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/windows-terminal/#wo-de-pei-zhi-wen-jian" class="toc-link">我的配置文件</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/windows-terminal/#quan-ju-she-zhi" class="toc-link">全局设置</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/windows-terminal/#pei-zhi-zhong-duan" class="toc-link">配置终端</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/windows-terminal/#mo-ren-zhong-duan-pei-zhi" class="toc-link">默认终端配置</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/windows-terminal/#pei-se-fang-an" class="toc-link">配色方案</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/windows-terminal/#zi-ding-yi-kuai-jie-jian" class="toc-link">自定义快捷键</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/windows-terminal/#can-kao-wen-dang" class="toc-link">参考文档</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;windows-terminal&#x2F;">Windows Terminal</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-09-05</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p><a href="https://docs.microsoft.com/en-us/windows/terminal/"><code>Windows Terminal</code></a> 是继 <code>WSL</code> 之后出品的又一个开发者友好的现代化应用程序。在支持原有的 <code>CMD</code>、<code>Powershell</code> 之外，还支持 <code>WSL</code> 子系统。其主要特性包括: 多 <code>tab</code>，多 <code>panes</code>，支持显示 <code>Unicode</code> 与 <code>UTF-8</code> 字符，使用 <code>GPU</code> 加速的文本渲染引擎，内置 <code>SSH</code> 客户端，更允许用户自定义主题及文本样式，颜色，背景，快捷键等。</p>
+<p>更多内容请阅读<a href="https://docs.microsoft.com/en-us/windows/terminal/">官方文档</a>。</p>
+<h2 id="wo-de-pei-zhi-wen-jian">我的配置文件</h2>
+<pre data-lang="json" style="background-color:#2b303b;color:#c0c5ce;" class="language-json "><code class="language-json" data-lang="json"><span>{
+</span><span>    &quot;</span><span style="color:#a3be8c;">$schema</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">https://aka.ms/terminal-profiles-schema</span><span>&quot;,
+</span><span>    &quot;</span><span style="color:#a3be8c;">defaultProfile</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">{a5a97cb8-8961-5535-816d-772efe0c6a3f}</span><span>&quot;,
+</span><span>    &quot;</span><span style="color:#a3be8c;">copyOnSelect</span><span>&quot;: </span><span style="color:#d08770;">false</span><span>,
+</span><span>    &quot;</span><span style="color:#a3be8c;">copyFormatting</span><span>&quot;: </span><span style="color:#d08770;">false</span><span>,
+</span><span>    &quot;</span><span style="color:#a3be8c;">theme</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">dark</span><span>&quot;,
+</span><span>    &quot;</span><span style="color:#a3be8c;">tabWidthMode</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">titleLength</span><span>&quot;,
+</span><span>    &quot;</span><span style="color:#a3be8c;">profiles</span><span>&quot;: {
+</span><span>        &quot;</span><span style="color:#a3be8c;">defaults</span><span>&quot;: {
+</span><span>            &quot;</span><span style="color:#a3be8c;">colorScheme</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">Dracula</span><span>&quot;
+</span><span>        },
+</span><span>        &quot;</span><span style="color:#a3be8c;">list</span><span>&quot;: [
+</span><span>            {
+</span><span>                &quot;</span><span style="color:#a3be8c;">guid</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">{61c54bbd-c2c6-5271-96e7-009a87ff44bf}</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">name</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">Windows PowerShell</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">commandline</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">powershell.exe</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">hidden</span><span>&quot;: </span><span style="color:#d08770;">false
+</span><span>            },
+</span><span>            {
+</span><span>                &quot;</span><span style="color:#a3be8c;">guid</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">{0caa0dad-35be-5f56-a8ff-afceeeaa6101}</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">name</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">Command Prompt</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">commandline</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">cmd.exe</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">hidden</span><span>&quot;: </span><span style="color:#d08770;">true
+</span><span>            },
+</span><span>            {
+</span><span>                &quot;</span><span style="color:#a3be8c;">guid</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">{a5a97cb8-8961-5535-816d-772efe0c6a3f}</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">hidden</span><span>&quot;: </span><span style="color:#d08770;">false</span><span>,
+</span><span>                &quot;</span><span style="color:#a3be8c;">name</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">Arch</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">tabTitle</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">Arch</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">suppressApplicationTitle</span><span>&quot;: </span><span style="color:#d08770;">true</span><span>,
+</span><span>                &quot;</span><span style="color:#a3be8c;">antialiasingMode</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">cleartype</span><span>&quot;, </span><span style="color:#65737e;">// &quot;grayscale&quot;、&quot;cleartype&quot;、&quot;aliased&quot;
+</span><span>                &quot;</span><span style="color:#a3be8c;">icon</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">ms-appdata:///roaming/archlinux-512.webp</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">source</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">Windows.Terminal.Wsl</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">acrylicOpacity</span><span>&quot;: </span><span style="color:#d08770;">0.8</span><span>,
+</span><span>                &quot;</span><span style="color:#a3be8c;">useAcrylic</span><span>&quot;: </span><span style="color:#d08770;">true
+</span><span>            }
+</span><span>        ]
+</span><span>    },
+</span><span>    &quot;</span><span style="color:#a3be8c;">schemes</span><span>&quot;: [
+</span><span>        {
+</span><span>            &quot;</span><span style="color:#a3be8c;">name</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">Dracula</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">cursorColor</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#F8F8F2</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">selectionBackground</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#44475A</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">background</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#282A36</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">foreground</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#F8F8F2</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">black</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#21222C</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">blue</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#BD93F9</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">cyan</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#8BE9FD</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">green</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#50FA7B</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">purple</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#FF79C6</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">red</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#FF5555</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">white</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#F8F8F2</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">yellow</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#F1FA8C</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">brightBlack</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#6272A4</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">brightBlue</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#D6ACFF</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">brightCyan</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#A4FFFF</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">brightGreen</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#69FF94</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">brightPurple</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#FF92DF</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">brightRed</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#FF6E6E</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">brightWhite</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#FFFFFF</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">brightYellow</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#FFFFA5</span><span>&quot;
+</span><span>        }
+</span><span>    ],
+</span><span>    &quot;</span><span style="color:#a3be8c;">keybindings</span><span>&quot;: [
+</span><span>        {
+</span><span>            &quot;</span><span style="color:#a3be8c;">command</span><span>&quot;: {
+</span><span>                &quot;</span><span style="color:#a3be8c;">action</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">copy</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">singleLine</span><span>&quot;: </span><span style="color:#d08770;">false
+</span><span>            },
+</span><span>            &quot;</span><span style="color:#a3be8c;">keys</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">ctrl+c</span><span>&quot;
+</span><span>        },
+</span><span>        {
+</span><span>            &quot;</span><span style="color:#a3be8c;">command</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">paste</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">keys</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">ctrl+v</span><span>&quot;
+</span><span>        },
+</span><span>        {
+</span><span>            &quot;</span><span style="color:#a3be8c;">command</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">find</span><span>&quot;,
+</span><span>            &quot;</span><span style="color:#a3be8c;">keys</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">ctrl+shift+f</span><span>&quot;
+</span><span>        },
+</span><span>        {
+</span><span>            &quot;</span><span style="color:#a3be8c;">command</span><span>&quot;: {
+</span><span>                &quot;</span><span style="color:#a3be8c;">action</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">splitPane</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">split</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">auto</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">splitMode</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">duplicate</span><span>&quot;
+</span><span>            },
+</span><span>            &quot;</span><span style="color:#a3be8c;">keys</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">alt+shift+d</span><span>&quot;
+</span><span>        },
+</span><span>        {
+</span><span>            &quot;</span><span style="color:#a3be8c;">command</span><span>&quot;: {
+</span><span>                &quot;</span><span style="color:#a3be8c;">action</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">splitPane</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">split</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">horizontal</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">splitMode</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">duplicate</span><span>&quot;
+</span><span>            },
+</span><span>            &quot;</span><span style="color:#a3be8c;">keys</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">alt+shift+-</span><span>&quot;
+</span><span>        },
+</span><span>        {
+</span><span>            &quot;</span><span style="color:#a3be8c;">command</span><span>&quot;: {
+</span><span>                &quot;</span><span style="color:#a3be8c;">action</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">splitPane</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">split</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">vertical</span><span>&quot;,
+</span><span>                &quot;</span><span style="color:#a3be8c;">splitMode</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">duplicate</span><span>&quot;
+</span><span>            },
+</span><span>            &quot;</span><span style="color:#a3be8c;">keys</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">alt+shift+|</span><span>&quot;
+</span><span>        }
+</span><span>    ]
+</span><span>}
+</span></code></pre>
+<h2 id="quan-ju-she-zhi">全局设置</h2>
+<ul>
+<li><a href="https://docs.microsoft.com/en-us/windows/terminal/customize-settings/global-settings#default-profile"><strong>defaultProfile</strong></a>: 默认使用的终端配置，可以是 <code>profiles.list</code> 中的某一个。</li>
+<li><a href="https://docs.microsoft.com/en-us/windows/terminal/customize-settings/global-settings#darklight-theme"><strong>theme</strong></a>: 窗体配色，可以是 <code>system</code>, <code>dark</code>, <code>light</code></li>
+<li><a href="https://docs.microsoft.com/en-us/windows/terminal/customize-settings/global-settings#tab-width-mode"><strong>tabWidthMode</strong></a>: <code>tab</code> 显示长度，可以是 <code>equal</code>, <code>titleLength</code>, <code>compact</code></li>
+</ul>
+<h2 id="pei-zhi-zhong-duan">配置终端</h2>
+<p><code>profiles</code> 用于配置具体的终端，其包含如下两部分:</p>
+<pre data-lang="json" style="background-color:#2b303b;color:#c0c5ce;" class="language-json "><code class="language-json" data-lang="json"><span>{
+</span><span>    &quot;</span><span style="color:#a3be8c;">profiles</span><span>&quot;: {
+</span><span>        &quot;</span><span style="color:#a3be8c;">defaults</span><span>&quot;: {
+</span><span>            </span><span style="color:#65737e;">// SETTINGS TO APPLY TO ALL PROFILES
+</span><span>        },
+</span><span>        &quot;</span><span style="color:#a3be8c;">list</span><span>&quot;: [
+</span><span>            </span><span style="color:#65737e;">// PROFILE OBJECTS
+</span><span>        ]
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h3 id="mo-ren-zhong-duan-pei-zhi">默认终端配置</h3>
+<ul>
+<li>
+<p><strong>profiles.defaults</strong>: 中的配置对所有的终端有效。</p>
+</li>
+<li>
+<p><strong>profiles.list</strong>: 包含所有可用的终端，配置只对当前终端。</p>
+</li>
+<li>
+<p><strong>guid</strong>: 配置文件可将 <code>GUID</code> 用作唯一标识符。 若要将某个配置文件设置为默认配置文件，则需要 <code>defaultProfile</code> 全局设置的 <code>GUID</code>，为必填项</p>
+</li>
+<li>
+<p><strong>colorScheme</strong>: 终端使用的配色方案，需要在 <code>schemes</code> 中目标配色方案</p>
+</li>
+<li>
+<p><strong>hidden</strong>: 在下拉列表中是否隐藏，默认为 <code>false</code></p>
+</li>
+<li>
+<p><strong>name</strong>: &quot;在下拉列表中显示的名字</p>
+</li>
+<li>
+<p><strong>tabTitle</strong>: 在 <code>tab</code> 上显示的名字，会覆盖 <strong>name</strong>，需要与 <strong>suppressApplicationTitle</strong> 一起使用才会生效。若要了解如何使 shell 设置标题，请访问<a href="https://docs.microsoft.com/en-us/windows/terminal/tutorials/tab-title">tab title tutorial</a></p>
+</li>
+<li>
+<p><strong>suppressApplicationTitle</strong>: 设置为 <strong>true</strong> 时，<strong>tabTitle</strong> 会替代 <code>tab</code> 的默认标题，并将禁止应用程序的任何标题更改消息。 如果未设置 <strong>tabTitle</strong>，将改为使用 <strong>name</strong></p>
+</li>
+<li>
+<p><strong>antialiasingMode</strong>: 抗锯齿模式，可以为 <strong>grayscale</strong>、<strong>cleartype</strong>、<strong>aliased</strong></p>
+</li>
+<li>
+<p><strong>icon</strong>: 显示图标，&quot;ms-appdata:///roaming/archlinux-512.webp&quot;</p>
+</li>
+<li>
+<p><strong>acrylicOpacity</strong>: 窗口透明度，<strong>[0, 1]</strong> 之内的浮点数，需要配合 <strong>useAcrylic</strong> 一起使用</p>
+</li>
+<li>
+<p><strong>useAcrylic</strong>: 是否是否透明效果</p>
+</li>
+<li>
+<p><strong>startingDirectory</strong>: 起始目录位置，比如 <code>\\\\wsl$\\Ubuntu-20.04\\home\\alice</code></p>
+</li>
+</ul>
+<h4 id="ms-appdata-zai-shi-yao-wei-zhi">ms-appdata 在什么位置</h4>
+<p><code>Windows Terminal</code> 是一个 <code>UWP</code> 应用(如果是在应用商店下载的话)，会有属于自己的 <strong>appdata</strong> 目录，位于:</p>
+<pre data-lang="powershell" style="background-color:#2b303b;color:#c0c5ce;" class="language-powershell "><code class="language-powershell" data-lang="powershell"><span>%LOCALAPPDATA%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\RoamingState
+</span></code></pre>
+<p>在文件管理器中打开这个目录放入数据，<code>Windows Terminal</code> 即可通过 <code>ms-appdata:\\\</code> 的方式获取到。</p>
+<h2 id="pei-se-fang-an">配色方案</h2>
+<p>可以在 <strong>themes</strong> 定义一系列的配色方案，要求每个配色方案要有一个唯一的 <strong>name</strong>。除 <strong>name</strong> 以外，每个设置都接受十六进制格式 (<strong>#rgb</strong> 或 <strong>#rrggbb</strong>) 的字符串形式的颜色。 <strong>cursorColor</strong> 和 <strong>selectionBackground</strong> 设置是可选的。</p>
+<p>如果要在一个命令行配置文件中设置配色方案，请添加 <strong>colorScheme</strong> 属性，并将配色方案的 <strong>name</strong> 作为值。</p>
+<h2 id="zi-ding-yi-kuai-jie-jian">自定义快捷键</h2>
+<p>内容太多，请查看<a href="https://docs.microsoft.com/en-us/windows/terminal/customize-settings/key-bindings">官方文档</a>。</p>
+<h2 id="can-kao-wen-dang">参考文档</h2>0x766dbb6d2d0acd06c699c3f87a1a42c18145b3c88db94e34bc85c8f611cdb3f6
+<ul>
+<li><a href="https://docs.microsoft.com/en-us/windows/terminal/">Windows Terminal</a></li>
+<li><a href="https://www.howtogeek.com/426346/how-to-customize-the-new-windows-terminal-app/">How to Customize the New Windows Terminal App</a></li>
+<li><a href="https://docs.microsoft.com/en-us/windows/terminal/customize-settings/key-bindings">Custom key bindings in Windows Terminal</a></li>
+<li><a href="https://draculatheme.com/windows-terminal/">draculatheme</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/windows/">#windows</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/terminal/">#terminal</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;projected-volumes&#x2F;">‹ 投射数据卷 (TBC)</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;b-tree&#x2F;">B 树 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

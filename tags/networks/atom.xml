@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - networks</title>
+	<link href="https://blog.kiyoko.io/tags/networks/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-10-19T18:55:44+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/networks/atom.xml</id>
+	<entry xml:lang="en">
+		<title>Ubuntu 20.04 配置静态网络</title>
+		<published>2020-10-19T18:55:44+00:00</published>
+		<updated>2020-10-19T18:55:44+00:00</updated>
+		<link href="https://blog.kiyoko.io/configure-networks-on-ubuntu-20-04/" type="text/html"/>
+		<id>https://blog.kiyoko.io/configure-networks-on-ubuntu-20-04/</id>
+		<content type="html">&lt;p&gt;&lt;strong&gt;Ubuntu 20.04&lt;&#x2F;strong&gt; 的网络配置文件位于 &lt;strong&gt;&#x2F;etc&#x2F;netplan&#x2F;00-installer-config.yaml&lt;&#x2F;strong&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# This is the network config written by &amp;#39;subiquity&amp;#39;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;network&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ethernets&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ens33&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;dhcp4&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;false
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;addresses&lt;&#x2F;span&gt;&lt;span&gt;: [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;192.168.50.30&#x2F;24&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;gateway4&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;192.168.50.1
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nameservers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;addresses&lt;&#x2F;span&gt;&lt;span&gt;: [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;192.168.50.1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;8.8.8.8&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;更新配置:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;root@ubuntu-00:~#&lt;&#x2F;span&gt;&lt;span&gt; netplan&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --debug&lt;&#x2F;span&gt;&lt;span&gt; apply
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;**&lt;&#x2F;span&gt;&lt;span&gt; (generate:3768)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt; DEBUG: 11:49:11.734: Processing input file &#x2F;etc&#x2F;netplan&#x2F;00-installer-config.yaml..
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;**&lt;&#x2F;span&gt;&lt;span&gt; (generate:3768)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt; DEBUG: 11:49:11.734: starting new processing pass
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;**&lt;&#x2F;span&gt;&lt;span&gt; (generate:3768)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt; DEBUG: 11:49:11.735: We have some netdefs, pass them through a final round of validation
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;**&lt;&#x2F;span&gt;&lt;span&gt; (generate:3768)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt; DEBUG: 11:49:11.735: ens33: setting default backend to 1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;**&lt;&#x2F;span&gt;&lt;span&gt; (generate:3768)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt; DEBUG: 11:49:11.735: Configuration is valid
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;**&lt;&#x2F;span&gt;&lt;span&gt; (generate:3768)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt; DEBUG: 11:49:11.736: Generating output files..
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;**&lt;&#x2F;span&gt;&lt;span&gt; (generate:3768)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt; DEBUG: 11:49:11.736: NetworkManager: definition ens33 is not for us (backend 1)
+&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;generate:3768&lt;&#x2F;span&gt;&lt;span&gt;): GLib-DEBUG: 11:49:11.736: posix_spawn avoided (fd close requested)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;DEBUG:netplan&lt;&#x2F;span&gt;&lt;span&gt; generated networkd configuration changed, restarting networkd
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+	</entry>
+</feed>

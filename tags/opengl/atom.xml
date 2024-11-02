@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - opengl</title>
+	<link href="https://blog.kiyoko.io/tags/opengl/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2022-01-30T15:50:48+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/opengl/atom.xml</id>
+	<entry xml:lang="en">
+		<title>使用 GLEW 绘制三角形</title>
+		<published>2022-01-30T15:50:48+00:00</published>
+		<updated>2022-01-30T15:50:48+00:00</updated>
+		<link href="https://blog.kiyoko.io/opengl-03/" type="text/html"/>
+		<id>https://blog.kiyoko.io/opengl-03/</id>
+		<content type="html">&lt;p&gt;之前已经使用 &lt;code&gt;GLFW&lt;&#x2F;code&gt; 绘制了一个三角形，直接定义坐标即可，但使用 &lt;code&gt;GLEW&lt;&#x2F;code&gt; 绘制图形要麻烦一些，因为需要自己编写 &lt;code&gt;Shader&lt;&#x2F;code&gt; 程序。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;shader-bian-cheng&quot;&gt;Shader 编程&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;code&gt;Shader&lt;&#x2F;code&gt; 的本质是一个运行在 &lt;code&gt;GPU&lt;&#x2F;code&gt; 上面的程序，因为图形的渲染由 &lt;code&gt;GPU&lt;&#x2F;code&gt; 负责，因此需要对 &lt;code&gt;GPU&lt;&#x2F;code&gt; 编程告诉 &lt;code&gt;GPU&lt;&#x2F;code&gt; 如何渲染，这个很好理解，就像使用 &lt;code&gt;c&#x2F;c++&lt;&#x2F;code&gt; 等通用语言对 &lt;code&gt;CPU&lt;&#x2F;code&gt; 编程一样。&lt;&#x2F;p&gt;
+&lt;p&gt;因此，编写一个 &lt;code&gt;Shader&lt;&#x2F;code&gt; 程序至少需要 &lt;strong&gt;2&lt;&#x2F;strong&gt; 部分:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;需要被 &lt;code&gt;GPU&lt;&#x2F;code&gt; 渲染的数据&lt;&#x2F;li&gt;
+&lt;li&gt;需要被 &lt;code&gt;GPU&lt;&#x2F;code&gt; 执行的程序&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;&lt;strong&gt;注&lt;&#x2F;strong&gt;: &lt;em&gt;之后的一切都建立在 &lt;code&gt;GLFW&lt;&#x2F;code&gt; 与 &lt;code&gt;GLEW&lt;&#x2F;code&gt; 初始化成功之后。&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;本次内容会涉及到两种不同的 &lt;code&gt;Shader&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;VertexShader&lt;&#x2F;code&gt;: 作用于每个 &lt;code&gt;Vertex&lt;&#x2F;code&gt;，通常是处理从世界空间到裁剪空间(屏幕坐标)的坐标转换，后接&lt;code&gt;光栅化&lt;&#x2F;code&gt;。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;FragmentShader&lt;&#x2F;code&gt;: 作用于每个屏幕上的 &lt;code&gt;Fragment&lt;&#x2F;code&gt; (可近似理解为像素)，通常是计算颜色。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;shu-ju&quot;&gt;数据&lt;&#x2F;h3&gt;
+&lt;p&gt;二维平面上，三角形有 &lt;strong&gt;3&lt;&#x2F;strong&gt; 个顶点，每个点的坐标包含 &lt;code&gt;x&lt;&#x2F;code&gt;, &lt;code&gt;y&lt;&#x2F;code&gt; &lt;strong&gt;2&lt;&#x2F;strong&gt; 个 &lt;code&gt;float&lt;&#x2F;code&gt; 数值。因此，可以使用 &lt;code&gt;c&lt;&#x2F;code&gt; 定义一个数组:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;float&lt;&#x2F;span&gt;&lt;span&gt; positions[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;6&lt;&#x2F;span&gt;&lt;span&gt;] = {
+&lt;&#x2F;span&gt;&lt;span&gt;    -&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;, -&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;,  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;     &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;, -&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f
+&lt;&#x2F;span&gt;&lt;span&gt;};
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;但这个数组是在内存中，如果要让 &lt;code&gt;GPU&lt;&#x2F;code&gt; 可以访问，需要将内存中的数据同步到显存中。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;glgenbuffers&quot;&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.gl&#x2F;gl4&#x2F;glGenBuffers&quot;&gt;GlGenBuffers&lt;&#x2F;a&gt;&lt;&#x2F;h4&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; generate buffer object names
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;glGenBuffers&lt;&#x2F;span&gt;&lt;span&gt;(GLsizei  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;n&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;                  GLuint * &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;buffers&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;其作用是生成若干缓冲区名称，这个解释比较晦涩，其实就是创建 &lt;code&gt;n&lt;&#x2F;code&gt; 个缓冲区描述符保存在 &lt;code&gt;buffers&lt;&#x2F;code&gt; 中。可以有如下两种使用方式:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;创建一个缓冲区&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;unsigned int&lt;&#x2F;span&gt;&lt;span&gt; buffer = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; https:&#x2F;&#x2F;docs.gl&#x2F;gl4&#x2F;glGenBuffers
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glGenBuffers&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &amp;amp;buffer);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;创建若干(一个或多个)缓冲区&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;unsigned int&lt;&#x2F;span&gt;&lt;span&gt; buffers[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;] = { &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;};
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glGenBuffers&lt;&#x2F;span&gt;&lt;span&gt;(sizeof(buffers) &#x2F; sizeof(buffers[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;]), buffers);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;glbindbuffer&quot;&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.gl&#x2F;gl4&#x2F;glBindBuffer&quot;&gt;GlBindBuffer&lt;&#x2F;a&gt;&lt;&#x2F;h4&gt;
+&lt;p&gt;缓冲区无法直接使用，需要将缓冲区与特定目标(target)绑定才可以使用。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;glBindBuffer&lt;&#x2F;span&gt;&lt;span&gt;(GLenum &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;target&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;                  GLuint &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;buffer&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;target&lt;&#x2F;code&gt; 从下表中选择&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;buffer&lt;&#x2F;code&gt; 缓冲区的名字
+&lt;ul&gt;
+&lt;li&gt;当 &lt;code&gt;buffer&lt;&#x2F;code&gt; 表示的缓冲区不存在时会自动创建一个。&lt;&#x2F;li&gt;
+&lt;li&gt;当目标存在已绑定的缓冲区时，会使用本次的缓冲区替换之前的绑定关系。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th align=&quot;left&quot;&gt;Buffer Binding Target&lt;&#x2F;th&gt;&lt;th align=&quot;left&quot;&gt;Purpose&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;GL_ARRAY_BUFFER&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Vertex attributes&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;GL_ATOMIC_COUNTER_BUFFER&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Atomic counter storage&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;GL_COPY_READ_BUFFER&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Buffer copy source&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;GL_COPY_WRITE_BUFFER&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Buffer copy destination&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;GL_DISPATCH_INDIRECT_BUFFER&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Indirect compute dispatch commands&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;GL_DRAW_INDIRECT_BUFFER&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Indirect command arguments&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;GL_ELEMENT_ARRAY_BUFFER&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Vertex array indices&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;GL_PIXEL_PACK_BUFFER&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Pixel read target&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;GL_PIXEL_UNPACK_BUFFER&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Texture data source&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;GL_QUERY_BUFFER&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Query result buffer&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;GL_SHADER_STORAGE_BUFFER&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Read-write storage for shaders&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;GL_TEXTURE_BUFFER&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Texture data buffer&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;GL_TRANSFORM_FEEDBACK_BUFFER&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Transform feedback buffer&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;GL_UNIFORM_BUFFER&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;Uniform block storage&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;h4 id=&quot;glbufferdata&quot;&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.gl&#x2F;gl4&#x2F;glBufferData&quot;&gt;GlBufferData&lt;&#x2F;a&gt;&lt;&#x2F;h4&gt;
+&lt;p&gt;有了缓冲区，就可以使用 &lt;code&gt;glBufferData&lt;&#x2F;code&gt; 函数将数据写入到缓冲区中了。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;glBufferData&lt;&#x2F;span&gt;&lt;span&gt;(GLenum         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;target&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;                  GLsizeiptr     &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;size&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;                  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span&gt; GLvoid * &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;data&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;                  GLenum         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;usage&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;target&lt;&#x2F;code&gt;: 同上&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;size&lt;&#x2F;code&gt;: 写入缓冲区的数据量，单位 &lt;code&gt;byte&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;data&lt;&#x2F;code&gt;: 数据指针&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;usage&lt;&#x2F;code&gt;: 数据用途，由访问频率(frequency of access)与访问性质(nature of access)组成
+&lt;ul&gt;
+&lt;li&gt;可取值:
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;GL_STREAM_DRAW&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;GL_STREAM_READ&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;GL_STREAM_COPY&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;GL_STATIC_DRAW&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;GL_STATIC_READ&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;GL_STATIC_COPY&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;GL_DYNAMIC_DRAW&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;GL_DYNAMIC_READ&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;GL_DYNAMIC_COPY&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;频率(frequency of access):
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;STREAM&lt;&#x2F;code&gt;: The data store contents will be modified once and used at most a few times.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;STATIC&lt;&#x2F;code&gt;: The data store contents will be modified once and used many times.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;DYNAMIC&lt;&#x2F;code&gt;: The data store contents will be modified repeatedly and used many times.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;性质(nature of access):
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;DRAW&lt;&#x2F;code&gt;: The data store contents are modified by the application, and used as the source for GL drawing and image specification commands.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;READ&lt;&#x2F;code&gt;: The data store contents are modified by reading data from the GL, and used to return that data when queried by the application.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;COPY&lt;&#x2F;code&gt;: The data store contents are modified by reading data from the GL, and used as the source for GL drawing and image specification commands.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h4 id=&quot;glenablevertexattribarray&quot;&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.gl&#x2F;gl4&#x2F;glEnableVertexAttribArray&quot;&gt;GlEnableVertexAttribArray&lt;&#x2F;a&gt;&lt;&#x2F;h4&gt;
+&lt;p&gt;&lt;code&gt;VertexAttribArray&lt;&#x2F;code&gt; 默认为 &lt;code&gt;Disable&lt;&#x2F;code&gt; 状态，必须使用函数显式启用才能使用。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;glEnableVertexAttribArray&lt;&#x2F;span&gt;&lt;span&gt;(GLuint &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;index&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;glvertexattribpointer&quot;&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.gl&#x2F;gl4&#x2F;glVertexAttribPointer&quot;&gt;GlVertexAttribPointer&lt;&#x2F;a&gt;&lt;&#x2F;h4&gt;
+&lt;p&gt;定义 &lt;code&gt;VertexAttrib&lt;&#x2F;code&gt; 的数据。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;glVertexAttribPointer&lt;&#x2F;span&gt;&lt;span&gt;(GLuint         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;index&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;                           GLint          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;size&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;                           GLenum         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;                           GLboolean      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;normalized&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;                           GLsizei        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;stride&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;                           &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span&gt; GLvoid * &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pointer&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;index&lt;&#x2F;code&gt;: 这个目前还不明白，只知道要与 &lt;code&gt;glEnableVertexAttribArray&lt;&#x2F;code&gt; 参数同时为 &lt;code&gt;0&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;size&lt;&#x2F;code&gt;: 每个顶点包含的元素数量，包括 &lt;strong&gt;position(位置)&lt;&#x2F;strong&gt;, &lt;strong&gt;normal(法线)&lt;&#x2F;strong&gt;, &lt;strong&gt;color(颜色)&lt;&#x2F;strong&gt;, 和 &lt;strong&gt;texture coordinates(纹理坐标)&lt;&#x2F;strong&gt;，可取值 &lt;strong&gt;(1,2,3,4)&lt;&#x2F;strong&gt;。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;type&lt;&#x2F;code&gt;: 每个元素的数据类型，&lt;code&gt;GL_FLOAT&lt;&#x2F;code&gt; 表示以 &lt;code&gt;float&lt;&#x2F;code&gt; 为单位_&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;normalized&lt;&#x2F;code&gt;: 是否为向量(只有方向无大小)&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;stride&lt;&#x2F;code&gt;: 连续的顶点属性之间的字节偏移间隔&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;pointer&lt;&#x2F;code&gt;: 数据偏移量&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h4 id=&quot;shu-ju-bu-fen-wan-zheng-dai-ma&quot;&gt;数据部分完整代码&lt;&#x2F;h4&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;float&lt;&#x2F;span&gt;&lt;span&gt; positions[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;6&lt;&#x2F;span&gt;&lt;span&gt;] = {
+&lt;&#x2F;span&gt;&lt;span&gt;        -&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;, -&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;,  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;, -&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;unsigned int&lt;&#x2F;span&gt;&lt;span&gt; buffer = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glGenBuffers&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &amp;amp;buffer);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glBindBuffer&lt;&#x2F;span&gt;&lt;span&gt;(GL_ARRAY_BUFFER, buffer);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glBufferData&lt;&#x2F;span&gt;&lt;span&gt;(GL_ARRAY_BUFFER, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;6 &lt;&#x2F;span&gt;&lt;span&gt;* sizeof(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;float&lt;&#x2F;span&gt;&lt;span&gt;), (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;const void&lt;&#x2F;span&gt;&lt;span&gt;*)(&amp;amp;positions), GL_STATIC_DRAW)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;glEnableVertexAttribArray&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glVertexAttribPointer&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;, GL_FLOAT, GL_FALSE, sizeof(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;float&lt;&#x2F;span&gt;&lt;span&gt;) * &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;shader-yu-program&quot;&gt;&lt;code&gt;Shader&lt;&#x2F;code&gt; 与 &lt;code&gt;Program&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;p&gt;要得到一个可以被执行的 &lt;code&gt;Shader&lt;&#x2F;code&gt; 程序，需要&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;编写 &lt;code&gt;Shader&lt;&#x2F;code&gt; 代码&lt;&#x2F;li&gt;
+&lt;li&gt;编译 &lt;code&gt;Shader&lt;&#x2F;code&gt; 代码&lt;&#x2F;li&gt;
+&lt;li&gt;链接到程序&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h4 id=&quot;shader-dai-ma&quot;&gt;&lt;code&gt;Shader&lt;&#x2F;code&gt; 代码&lt;&#x2F;h4&gt;
+&lt;p&gt;&lt;code&gt;Shader&lt;&#x2F;code&gt; 代码使用 &lt;code&gt;GLSL&lt;&#x2F;code&gt; 语言编写，语法结构类似与 &lt;code&gt;c&lt;&#x2F;code&gt; 要求语句以 &lt;code&gt;;&lt;&#x2F;code&gt; 结尾，由换行等。&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;注: 只考虑 &lt;code&gt;OpenGL&lt;&#x2F;code&gt; 的 &lt;code&gt;Shader&lt;&#x2F;code&gt; 语言，不考虑 &lt;code&gt;NVIDIA&lt;&#x2F;code&gt; 与 &lt;code&gt;MS&lt;&#x2F;code&gt; 等。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h5 id=&quot;vertexshader&quot;&gt;&lt;code&gt;VertexShader&lt;&#x2F;code&gt;&lt;&#x2F;h5&gt;
+&lt;p&gt;在本次示例中，&lt;code&gt;VertexShader&lt;&#x2F;code&gt; 用来控制点的坐标(position):&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span&gt;std::string vertexShader =
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;#version 330 core&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;layout(location = 0) in vec4 position;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;void main() {&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    gl_Position = position;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;layout(location = 0)&lt;&#x2F;code&gt; 表示使用 &lt;code&gt;glVertexAttribPointer&lt;&#x2F;code&gt; 第一个参数 &lt;code&gt;index=0&lt;&#x2F;code&gt; 对应的数据。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;in vec4 position;&lt;&#x2F;code&gt; 中使用 &lt;code&gt;vec4&lt;&#x2F;code&gt; 是因为后续的 &lt;code&gt;gl_Position&lt;&#x2F;code&gt; 是 &lt;code&gt;vec4&lt;&#x2F;code&gt; 类型，虽然实际每个顶点是 &lt;code&gt;vec2&lt;&#x2F;code&gt;(&lt;code&gt;glVertexAttribPointer&lt;&#x2F;code&gt; 的第二个参数 &lt;code&gt;size=2&lt;&#x2F;code&gt;)类型&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;in vec4 position;&lt;&#x2F;code&gt; 中的 &lt;code&gt;position&lt;&#x2F;code&gt; 表示每一个顶点(VetexAttrib)的 &lt;code&gt;position&lt;&#x2F;code&gt; 属性部分&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h5 id=&quot;fragmentshader&quot;&gt;&lt;code&gt;FragmentShader&lt;&#x2F;code&gt;&lt;&#x2F;h5&gt;
+&lt;p&gt;在本次示例中，&lt;code&gt;FragmentShader&lt;&#x2F;code&gt; 用来控制颜色(color):&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span&gt;std::string fragmentShader =
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;#version 330 core&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;layout(location = 0) out vec4 color;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;void main() {&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    color = vec4(0.0, 1.0, 0.0, 1.0);&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; 0: 黑色 1: 白色 范围: 0-1 (类比 0-255) 顺序: rgba
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;bian-yi-shader-dai-ma&quot;&gt;编译 &lt;code&gt;Shader&lt;&#x2F;code&gt; 代码&lt;&#x2F;h4&gt;
+&lt;h5 id=&quot;glcreateshader&quot;&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.gl&#x2F;gl4&#x2F;glCreateShader&quot;&gt;GlCreateShader&lt;&#x2F;a&gt;&lt;&#x2F;h5&gt;
+&lt;p&gt;编译 &lt;code&gt;Shader&lt;&#x2F;code&gt; 代码之前，需要先创建一个 &lt;code&gt;Shader&lt;&#x2F;code&gt; 对象，函数返回 &lt;code&gt;Shader&lt;&#x2F;code&gt; 描述符在之后所有 &lt;code&gt;Shader&lt;&#x2F;code&gt; 相关操作中使用:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span&gt;GLuint &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;glCreateShader&lt;&#x2F;span&gt;&lt;span&gt;(GLenum &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;shaderType&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;shaderType&lt;&#x2F;code&gt;: &lt;code&gt;Shader&lt;&#x2F;code&gt; 的类型，可取值:
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;GL_COMPUTE_SHADER&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;GL_VERTEX_SHADER&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;GL_TESS_CONTROL_SHADER&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;GL_TESS_EVALUATION_SHADER&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;GL_GEOMETRY_SHADER&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;GL_FRAGMENT_SHADER&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;返回值: &lt;code&gt;Shader&lt;&#x2F;code&gt; 描述符&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h5 id=&quot;glshadersource&quot;&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.gl&#x2F;gl4&#x2F;glShaderSource&quot;&gt;GlShaderSource&lt;&#x2F;a&gt;&lt;&#x2F;h5&gt;
+&lt;p&gt;有了 &lt;code&gt;Shader&lt;&#x2F;code&gt; 之后，需要设置(替换) &lt;code&gt;Shader&lt;&#x2F;code&gt; 中的代码:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;glShaderSource&lt;&#x2F;span&gt;&lt;span&gt;(GLuint          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;shader&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;                    GLsizei         &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;count&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;                    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span&gt; GLchar ** &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;string&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;                    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span&gt; GLint *   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;length&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;shader&lt;&#x2F;code&gt;: 目标 &lt;code&gt;Shader&lt;&#x2F;code&gt; 描述符&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;count&lt;&#x2F;code&gt;: &lt;code&gt;string&lt;&#x2F;code&gt; 数组与 &lt;code&gt;length&lt;&#x2F;code&gt; 数组的长度&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;string&lt;&#x2F;code&gt;: 加载到 &lt;code&gt;Shader&lt;&#x2F;code&gt; 的字符串数组&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;length&lt;&#x2F;code&gt;: 字符串长度数组，与 &lt;code&gt;string&lt;&#x2F;code&gt; 相对应。如果 &lt;code&gt;length&lt;&#x2F;code&gt; 参数为 &lt;code&gt;NULL&lt;&#x2F;code&gt;，则假设每一个字符串以 &lt;code&gt;null&lt;&#x2F;code&gt; 结束。否则，则认为每一个元素表示相对应字符串的长度，小于 0 同样被认为以 &lt;code&gt;null&lt;&#x2F;code&gt; 结束。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;使用传入的 &lt;code&gt;string&lt;&#x2F;code&gt; 参数设置 &lt;code&gt;Shader&lt;&#x2F;code&gt; 的源代码，原有代码会被完全替换。并且，根据函数可知，一个 &lt;code&gt;Shader&lt;&#x2F;code&gt; 可以设置多份源代码。&lt;&#x2F;p&gt;
+&lt;h5 id=&quot;glcompileshader&quot;&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.gl&#x2F;gl4&#x2F;glCompileShader&quot;&gt;GlCompileShader&lt;&#x2F;a&gt;&lt;&#x2F;h5&gt;
+&lt;p&gt;与 &lt;code&gt;c&#x2F;c++&lt;&#x2F;code&gt; 编写的程序一样，需要经过编译操作才能被执行，同样 &lt;code&gt;Shader&lt;&#x2F;code&gt; 代码也需要被编译，传入之前创建的 &lt;code&gt;Shader&lt;&#x2F;code&gt; 描述符:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;glCompileShader&lt;&#x2F;span&gt;&lt;span&gt;(GLuint &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;shader&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;shader&lt;&#x2F;code&gt;: &lt;code&gt;Shader&lt;&#x2F;code&gt; 描述符&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h5 id=&quot;bian-yi-bu-fen-wan-zheng-dai-ma&quot;&gt;编译部分完整代码&lt;&#x2F;h5&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;static unsigned int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;ComplieShader&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;unsigned int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span&gt; std::string&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;source&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;unsigned int&lt;&#x2F;span&gt;&lt;span&gt; id = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glCreateShader&lt;&#x2F;span&gt;&lt;span&gt;(type);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;const char&lt;&#x2F;span&gt;&lt;span&gt;* src = source.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;c_str&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glShaderSource&lt;&#x2F;span&gt;&lt;span&gt;(id, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &amp;amp;src, nullptr);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glCompileShader&lt;&#x2F;span&gt;&lt;span&gt;(id);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int&lt;&#x2F;span&gt;&lt;span&gt; result = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glGetShaderiv&lt;&#x2F;span&gt;&lt;span&gt;(id, GL_COMPILE_STATUS, &amp;amp;result);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; 错误处理
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(GL_FALSE == result) {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int&lt;&#x2F;span&gt;&lt;span&gt; length = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glGetShaderiv&lt;&#x2F;span&gt;&lt;span&gt;(id, GL_INFO_LOG_LENGTH, &amp;amp;length);
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;char&lt;&#x2F;span&gt;&lt;span&gt;* message = (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;char&lt;&#x2F;span&gt;&lt;span&gt;*)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;alloca&lt;&#x2F;span&gt;&lt;span&gt;(length * sizeof(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;char&lt;&#x2F;span&gt;&lt;span&gt;));
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glGetShaderInfoLog&lt;&#x2F;span&gt;&lt;span&gt;(id, length, &amp;amp;length, message);
+&lt;&#x2F;span&gt;&lt;span&gt;        std::cout &amp;lt;&amp;lt;
+&lt;&#x2F;span&gt;&lt;span&gt;            &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Failed compile &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &amp;lt;&amp;lt;
+&lt;&#x2F;span&gt;&lt;span&gt;            ((type == GL_VERTEX_SHADER) ? &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;vertex&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; : &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;fragment&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;) &amp;lt;&amp;lt;
+&lt;&#x2F;span&gt;&lt;span&gt;            &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; shader: &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &amp;lt;&amp;lt; source &amp;lt;&amp;lt;
+&lt;&#x2F;span&gt;&lt;span&gt;            &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; error: &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &amp;lt;&amp;lt; message &amp;lt;&amp;lt;
+&lt;&#x2F;span&gt;&lt;span&gt;            std::endl;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glDeleteShader&lt;&#x2F;span&gt;&lt;span&gt;(id);
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return&lt;&#x2F;span&gt;&lt;span&gt; id;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;chuang-jian-program&quot;&gt;创建 &lt;code&gt;Program&lt;&#x2F;code&gt;&lt;&#x2F;h4&gt;
+&lt;h5 id=&quot;glcreateprogram&quot;&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.gl&#x2F;gl4&#x2F;glCreateProgram&quot;&gt;GlCreateProgram&lt;&#x2F;a&gt;&lt;&#x2F;h5&gt;
+&lt;p&gt;首先需要创建一个程序对象，可以类比为一个可执行程序:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span&gt;GLuint &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;glCreateProgram&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h5 id=&quot;glattachshader&quot;&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.gl&#x2F;gl4&#x2F;glAttachShader&quot;&gt;GlAttachShader&lt;&#x2F;a&gt;&lt;&#x2F;h5&gt;
+&lt;p&gt;一个完整的 &lt;code&gt;Shader&lt;&#x2F;code&gt; 程序可能需要由若干个 &lt;code&gt;Shader&lt;&#x2F;code&gt; 组成，因此需要有一种将他们链接到一起的机制。&lt;code&gt;glAttachShader&lt;&#x2F;code&gt; 函数的作用是在链接之前，将 &lt;code&gt;Shader&lt;&#x2F;code&gt; 添加到 &lt;code&gt;Program&lt;&#x2F;code&gt; 上。可以类比为 &lt;code&gt;Cmake&lt;&#x2F;code&gt; 中的 &lt;code&gt;target_link_libraries&lt;&#x2F;code&gt; 函数，&lt;code&gt;program&lt;&#x2F;code&gt; 是 &lt;code&gt;executable&lt;&#x2F;code&gt;，&lt;code&gt;shader&lt;&#x2F;code&gt; 是 &lt;code&gt;libraries&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;glAttachShader&lt;&#x2F;span&gt;&lt;span&gt;(GLuint &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;program&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;                    GLuint &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;shader&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;program&lt;&#x2F;code&gt;: 程序描述符&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;shader&lt;&#x2F;code&gt;: &lt;code&gt;Shader&lt;&#x2F;code&gt; 描述符&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h5 id=&quot;gllinkprogram&quot;&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.gl&#x2F;gl4&#x2F;glLinkProgram&quot;&gt;GlLinkProgram&lt;&#x2F;a&gt;&lt;&#x2F;h5&gt;
+&lt;p&gt;当所有必要的 &lt;code&gt;Shader&lt;&#x2F;code&gt; 都添加到 &lt;code&gt;program&lt;&#x2F;code&gt; 上之后，就可以将他们链接起来了。类似于 &lt;code&gt;c&#x2F;c++&lt;&#x2F;code&gt; 程序的链接阶段。&lt;&#x2F;p&gt;
+&lt;p&gt;将 &lt;code&gt;program&lt;&#x2F;code&gt; 关联的所有 &lt;code&gt;Shader&lt;&#x2F;code&gt; 链接到一起，并根据 &lt;code&gt;Shader&lt;&#x2F;code&gt; 的类型，创建可执行程序交给相应的可编程处理器执行。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;glLinkProgram&lt;&#x2F;span&gt;&lt;span&gt;(GLuint &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;program&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h5 id=&quot;lian-jie-jie-duan-wan-zheng-dai-ma&quot;&gt;链接阶段完整代码&lt;&#x2F;h5&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; CreateProgram 输入 Shader 源码，返回相应的 Shader 程序
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;static unsigned int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;CreateProgram&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span&gt; std::string&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;vertexShader&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;const&lt;&#x2F;span&gt;&lt;span&gt; std::string&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fragmentShader&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;unsigned int&lt;&#x2F;span&gt;&lt;span&gt; program = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glCreateProgram&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;unsigned int&lt;&#x2F;span&gt;&lt;span&gt; vs = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ComplieShader&lt;&#x2F;span&gt;&lt;span&gt;(GL_VERTEX_SHADER, vertexShader);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;unsigned int&lt;&#x2F;span&gt;&lt;span&gt; fs = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ComplieShader&lt;&#x2F;span&gt;&lt;span&gt;(GL_FRAGMENT_SHADER, fragmentShader);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glAttachShader&lt;&#x2F;span&gt;&lt;span&gt;(program, vs);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glAttachShader&lt;&#x2F;span&gt;&lt;span&gt;(program, fs);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glLinkProgram&lt;&#x2F;span&gt;&lt;span&gt;(program);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glValidateProgram&lt;&#x2F;span&gt;&lt;span&gt;(program);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glDeleteShader&lt;&#x2F;span&gt;&lt;span&gt;(vs);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glDeleteShader&lt;&#x2F;span&gt;&lt;span&gt;(fs);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return&lt;&#x2F;span&gt;&lt;span&gt; program;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;zhi-xing-shader-cheng-xu&quot;&gt;执行 Shader 程序&lt;&#x2F;h4&gt;
+&lt;h5 id=&quot;gluseprogram&quot;&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.gl&#x2F;gl4&#x2F;glUseProgram&quot;&gt;GlUseProgram&lt;&#x2F;a&gt;&lt;&#x2F;h5&gt;
+&lt;p&gt;正确链接的程序，需要通过 &lt;code&gt;glUseProgram&lt;&#x2F;code&gt; 函数显式执行才能进行渲染，类似于 &lt;code&gt;c&#x2F;c++&lt;&#x2F;code&gt; 代码编译之后执行 &lt;code&gt;.&#x2F;a.out&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;glUseProgram&lt;&#x2F;span&gt;&lt;span&gt;(GLuint &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;program&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;需要在进入主渲染循环之前调用该函数。&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>使用 GLEW 库开发 OpenGL</title>
+		<published>2022-01-30T15:10:06+00:00</published>
+		<updated>2022-01-30T15:10:06+00:00</updated>
+		<link href="https://blog.kiyoko.io/opengl-02/" type="text/html"/>
+		<id>https://blog.kiyoko.io/opengl-02/</id>
+		<content type="html">&lt;p&gt;&lt;a href=&quot;http:&#x2F;&#x2F;glew.sourceforge.net&#x2F;&quot;&gt;&lt;code&gt;GLEW&lt;&#x2F;code&gt;&lt;&#x2F;a&gt; 是一个跨平台开源的 &lt;code&gt;c&#x2F;c++&lt;&#x2F;code&gt; 扩展加载库。将下载的&lt;a href=&quot;https:&#x2F;&#x2F;sourceforge.net&#x2F;projects&#x2F;glew&#x2F;files&#x2F;glew&#x2F;2.1.0&#x2F;glew-2.1.0-win32.zip&#x2F;download&quot;&gt;&lt;code&gt;GLEW&lt;&#x2F;code&gt;&lt;&#x2F;a&gt;安装到如下目录:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;└─dependencies
+&lt;&#x2F;span&gt;&lt;span&gt;   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;└─glew-2.1.0
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;├─bin
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;│&lt;&#x2F;span&gt;&lt;span&gt;  └─Release
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;│&lt;&#x2F;span&gt;&lt;span&gt;      ├─Win32
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;│&lt;&#x2F;span&gt;&lt;span&gt;      └─x64
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;├─doc
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;├─include
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;│&lt;&#x2F;span&gt;&lt;span&gt;  └─GL
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;└─lib
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;└─Release
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;├─Win32
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;└─x64
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;pei-zhi-huan-jing&quot;&gt;配置环境&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;在 &lt;code&gt;Configuration Properties&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;C&#x2F;C++&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;General&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Additional Include Directories&lt;&#x2F;code&gt; 添加 &lt;code&gt;$(SolutionDir)dependencies\glew-2.1.0\include&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;在 &lt;code&gt;Configuration Properties&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Linker&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;General&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Additional Library Directories&lt;&#x2F;code&gt; 添加 &lt;code&gt;$(SolutionDir)dependencies\glew-2.1.0\lib\Release\Win32&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;在 &lt;code&gt;Configuration Properties&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Linker&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Input&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Additional Dependencies&lt;&#x2F;code&gt; 添加 &lt;code&gt;glew32s.lib&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;值得注意的是:&lt;&#x2F;p&gt;
+&lt;p&gt;在 &lt;code&gt;lib&lt;&#x2F;code&gt; 文件夹下存在两个文件，其使用场景不同:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;glew32.lib&lt;&#x2F;code&gt;: 需要配合 &lt;code&gt;dll&lt;&#x2F;code&gt; 一起作为动态链接库使用&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;glew32s.lib&lt;&#x2F;code&gt;: 用于静态链接&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;zhu-yi-shi-xiang&quot;&gt;注意事项&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;tou-wen-jian&quot;&gt;头文件&lt;&#x2F;h3&gt;
+&lt;p&gt;在引入 &lt;code&gt;&amp;lt;GL&#x2F;glew.h&amp;gt;&lt;&#x2F;code&gt; 文件时，&lt;code&gt;#include &amp;lt;GL&#x2F;glew.h&amp;gt;&lt;&#x2F;code&gt; 必须写在其他 &lt;code&gt;OpenGL&lt;&#x2F;code&gt; 的引用语句之前，否则会出现错误:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;1&amp;gt;C:\Users\divinerapier\Documents\code\opengl\opengl\dependencies\glew-2.1.0\include\GL\glew.h(85,1): fatal error C1189: #error:  gl.h included before glew.h
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;这是因为，在 &lt;code&gt;&amp;lt;GL&#x2F;glew.h&amp;gt;&lt;&#x2F;code&gt; 文件中会进行判断:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#if defined&lt;&#x2F;span&gt;&lt;span&gt;(__gl_h_) || &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;defined&lt;&#x2F;span&gt;&lt;span&gt;(__GL_H__) || &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;defined&lt;&#x2F;span&gt;&lt;span&gt;(_GL_H) || &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;defined&lt;&#x2F;span&gt;&lt;span&gt;(__X_GL_H)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#error &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;gl.h included before glew.h
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#endif
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;要求引入 &lt;code&gt;&amp;lt;GL&#x2F;glew.h&amp;gt;&lt;&#x2F;code&gt; 文件之前，不能有 &lt;code&gt;__gl_h_&lt;&#x2F;code&gt; 等宏定义。因此，应该写作:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#include &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;GL&#x2F;glew.h&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#include &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;GLFW&#x2F;glfw3.h&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;chu-shi-hua&quot;&gt;初始化&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;code&gt;GLFW&lt;&#x2F;code&gt; 与 &lt;code&gt;GLEW&lt;&#x2F;code&gt; 都需要初始化，那应该按照什么顺序，谁先谁后? 在 &lt;code&gt;GLEW&lt;&#x2F;code&gt; 的&lt;a href=&quot;http:&#x2F;&#x2F;glew.sourceforge.net&#x2F;basic.html&quot;&gt;官网&lt;&#x2F;a&gt;中有说明:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;First you need to create a valid OpenGL rendering context and call glewInit() to initialize the extension entry points. If glewInit() returns GLEW_OK, the initialization succeeded and you can use the available extensions as well as core OpenGL functionality.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;就是应该先初始化 &lt;code&gt;GLEW&lt;&#x2F;code&gt; 之外的其他库，并创建好有效的渲染窗体(a valid OpenGL rendering context)，之后才能调用 &lt;code&gt;glewInit()&lt;&#x2F;code&gt; 函数。即代码中应该:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    GLFWwindow* window;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;* Initialize the library *&#x2F;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glfwInit&lt;&#x2F;span&gt;&lt;span&gt;()) {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;* Create a windowed mode window and its OpenGL context *&#x2F;
+&lt;&#x2F;span&gt;&lt;span&gt;    window = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glfwCreateWindow&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;640&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;480&lt;&#x2F;span&gt;&lt;span&gt;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Hello World&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(!window) {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glfwTerminate&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;* Make the window&amp;#39;s context current *&#x2F;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glfwMakeContextCurrent&lt;&#x2F;span&gt;&lt;span&gt;(window);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glewInit&lt;&#x2F;span&gt;&lt;span&gt;() != GLEW_OK) {
+&lt;&#x2F;span&gt;&lt;span&gt;        std::cout &amp;lt;&amp;lt; &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ohhhhhhhhh&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &amp;lt;&amp;lt; std::endl;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;yu-chu-li-hong-ding-yi&quot;&gt;预处理宏定义&lt;&#x2F;h3&gt;
+&lt;p&gt;上述代码在运行的时候会遇到一个链接错误:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;1&amp;gt;Application.obj : error LNK2019: unresolved external symbol __imp__glewInit@0 referenced in function _main&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;即找不到函数 &lt;code&gt;glewInit&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;这个问题只要看一下 &lt;code&gt;glewInit&lt;&#x2F;code&gt; 定义就能明白:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span&gt;GLEWAPI GLenum GLEWAPIENTRY &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;glewInit &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;再跳转到 &lt;code&gt;GLEWAPI&lt;&#x2F;code&gt; 的宏定义:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#ifdef&lt;&#x2F;span&gt;&lt;span&gt; GLEW_STATIC
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#  define &lt;&#x2F;span&gt;&lt;span&gt;GLEWAPI &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;extern
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#else
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#  ifdef&lt;&#x2F;span&gt;&lt;span&gt; GLEW_BUILD
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#    define &lt;&#x2F;span&gt;&lt;span&gt;GLEWAPI &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;extern __declspec&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;dllexport&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#  else
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#    define &lt;&#x2F;span&gt;&lt;span&gt;GLEWAPI &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;extern __declspec&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;dllimport&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#  endif
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#endif
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;可以发现，由于 &lt;code&gt;GLEW_STATIC&lt;&#x2F;code&gt; 与 &lt;code&gt;GLEW_BUILD&lt;&#x2F;code&gt; 均未定义，因此，会使用&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span&gt;define GLEWAPI &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;extern __declspec&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;dllimport&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;解决办法就是定义 &lt;code&gt;GLEW_STATIC&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;在 &lt;code&gt;Configuration Properties&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;C&#x2F;C++&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Preprocessor&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Preprocessor Definitions&lt;&#x2F;code&gt; 中添加 &lt;code&gt;GLEW_STATIC&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;wen-dang&quot;&gt;文档&lt;&#x2F;h2&gt;
+&lt;p&gt;在&lt;a href=&quot;https:&#x2F;&#x2F;docs.gl&#x2F;&quot;&gt;文档&lt;&#x2F;a&gt;上可以直接使用函数名进行搜索。&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>搭建 OpenGL 环境环境</title>
+		<published>2022-01-30T14:51:20+00:00</published>
+		<updated>2022-01-30T14:51:20+00:00</updated>
+		<link href="https://blog.kiyoko.io/opengl-01/" type="text/html"/>
+		<id>https://blog.kiyoko.io/opengl-01/</id>
+		<content type="html">&lt;ul&gt;
+&lt;li&gt;Windows 11&lt;&#x2F;li&gt;
+&lt;li&gt;VS 2022&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;glfw&#x2F;glfw&#x2F;releases&#x2F;download&#x2F;3.3.6&#x2F;glfw-3.3.6.zip&quot;&gt;GLFW 3.3.6&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;使用 &lt;code&gt;VS 2022&lt;&#x2F;code&gt; 新建一个 &lt;code&gt;c&#x2F;c++&lt;&#x2F;code&gt; 的空项目，在解决方案目录下创建 &lt;code&gt;dependencies&lt;&#x2F;code&gt; 目录，并以如下目录结构下载 &lt;code&gt;GLFW&lt;&#x2F;code&gt; 依赖库。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;└─dependencies
+&lt;&#x2F;span&gt;&lt;span&gt;   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;└─glfw
+&lt;&#x2F;span&gt;&lt;span&gt;       &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;├─include
+&lt;&#x2F;span&gt;&lt;span&gt;       &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;│&lt;&#x2F;span&gt;&lt;span&gt;  └─GLFW
+&lt;&#x2F;span&gt;&lt;span&gt;       &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;└─lib-vc2022
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;huan-jing-pei-zhi&quot;&gt;环境配置&lt;&#x2F;h2&gt;
+&lt;p&gt;右键点击项目，进入 &lt;code&gt;properties&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;将 &lt;code&gt;Configuration&lt;&#x2F;code&gt; 设置为 &lt;code&gt;All Configurations&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;在 &lt;code&gt;Configuration Properties&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;C&#x2F;C++&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;General&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Additional Include Directories&lt;&#x2F;code&gt; 添加 &lt;code&gt;$(SolutionDir)dependencies\glfw\include&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;在 &lt;code&gt;Configuration Properties&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Linker&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;General&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Additional Library Directories&lt;&#x2F;code&gt; 添加 &lt;code&gt;$(SolutionDir)dependencies\glfw\lib-vc2022&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;在 &lt;code&gt;Configuration Properties&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Linker&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Input&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Additional Dependencies&lt;&#x2F;code&gt; 添加 &lt;code&gt;glfw3.lib&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;dai-ma&quot;&gt;代码&lt;&#x2F;h2&gt;
+&lt;p&gt;源码来自 &lt;a href=&quot;https:&#x2F;&#x2F;www.glfw.org&#x2F;documentation.html&quot;&gt;GLFW&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;c&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-c &quot;&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;#include &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;GLFW&#x2F;glfw3.h&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    GLFWwindow* window;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;* Initialize the library *&#x2F;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glfwInit&lt;&#x2F;span&gt;&lt;span&gt;())
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;* Create a windowed mode window and its OpenGL context *&#x2F;
+&lt;&#x2F;span&gt;&lt;span&gt;    window = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glfwCreateWindow&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;640&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;480&lt;&#x2F;span&gt;&lt;span&gt;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Hello World&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;NULL&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(!window) {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glfwTerminate&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;* Make the window&amp;#39;s context current *&#x2F;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glfwMakeContextCurrent&lt;&#x2F;span&gt;&lt;span&gt;(window);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;* Loop until the user closes the window *&#x2F;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;while &lt;&#x2F;span&gt;&lt;span&gt;(!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glfwWindowShouldClose&lt;&#x2F;span&gt;&lt;span&gt;(window)) {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;* Render here *&#x2F;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glClear&lt;&#x2F;span&gt;&lt;span&gt;(GL_COLOR_BUFFER_BIT);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glBegin&lt;&#x2F;span&gt;&lt;span&gt;(GL_TRIANGLES);
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glVertex2f&lt;&#x2F;span&gt;&lt;span&gt;(-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;, -&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glVertex2f&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glVertex2f&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;, -&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glEnd&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;* Swap front and back buffers *&#x2F;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glfwSwapBuffers&lt;&#x2F;span&gt;&lt;span&gt;(window);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;* Poll for and process events *&#x2F;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glfwPollEvents&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;glfwTerminate&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;chang-jian-cuo-wu&quot;&gt;常见错误&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;wen-ti-1-application-obj-error-lnk2019-unresolved-external-symbol-imp-glclear-4-referenced-in-function-main&quot;&gt;问题: &lt;code&gt;1&amp;gt;Application.obj : error LNK2019: unresolved external symbol __imp__glClear@4 referenced in function _main&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;code&gt;Configuration Properties&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Linker&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Input&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Additional Dependencies&lt;&#x2F;code&gt; 添加 &lt;code&gt;opengl32.lib&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;wen-ti-1-glfw3-lib-win32-init-obj-error-lnk2019-unresolved-external-symbol-imp-translatemessage-4-referenced-in-function-glfwplatforminit&quot;&gt;问题: &lt;code&gt;1&amp;gt;glfw3.lib(win32_init.obj) : error LNK2019: unresolved external symbol __imp__TranslateMessage@4 referenced in function __glfwPlatformInit&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;p&gt;在 &lt;code&gt;google.com&lt;&#x2F;code&gt; 中搜索 &lt;code&gt;TranslateMessage&lt;&#x2F;code&gt; 进入 &lt;code&gt;https:&#x2F;&#x2F;docs.microsoft.com&#x2F;&lt;&#x2F;code&gt; 的链接，在最下方可以找到 &lt;code&gt;Library User32.lib&lt;&#x2F;code&gt;，将 &lt;code&gt;User32.lib&lt;&#x2F;code&gt; 添加到 &lt;code&gt;Configuration Properties&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Linker&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Input&lt;&#x2F;code&gt; &amp;gt; &lt;code&gt;Additional Dependencies&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>

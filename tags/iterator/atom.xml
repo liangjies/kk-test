@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - iterator</title>
+	<link href="https://blog.kiyoko.io/tags/iterator/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2021-05-30T17:15:46+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/iterator/atom.xml</id>
+	<entry xml:lang="en">
+		<title>tokio stream</title>
+		<published>2021-05-30T17:15:46+00:00</published>
+		<updated>2021-05-30T17:15:46+00:00</updated>
+		<link href="https://blog.kiyoko.io/tokio-stream-01/" type="text/html"/>
+		<id>https://blog.kiyoko.io/tokio-stream-01/</id>
+		<content type="html">&lt;p&gt;如下所示代码，&lt;code&gt;sleep&lt;&#x2F;code&gt; 代替实际可能遇到的其他 &lt;code&gt;async&lt;&#x2F;code&gt; 函数，即希望通过使用 &lt;code&gt;async&lt;&#x2F;code&gt; 配合 &lt;code&gt;adaptor&lt;&#x2F;code&gt; 的组合处理 &lt;code&gt;iterator&lt;&#x2F;code&gt;。显然，如下代码无法通过编译，因为不允许在 &lt;code&gt;non-async&lt;&#x2F;code&gt; 代码块中使用 &lt;code&gt;.await&lt;&#x2F;code&gt;。而且，也不允许传入 &lt;code&gt;async&lt;&#x2F;code&gt; 函数给 &lt;code&gt;fold&lt;&#x2F;code&gt;。可以尝试的一种方法是通过 &lt;code&gt;futures::executor::block_on&lt;&#x2F;code&gt; 将 &lt;code&gt;async&lt;&#x2F;code&gt; 函数转换为 &lt;code&gt;non-async&lt;&#x2F;code&gt; 函数，但这个方法看起来有些蠢笨。好在，在 &lt;code&gt;async&lt;&#x2F;code&gt; 环境中存在 &lt;code&gt;stream&lt;&#x2F;code&gt; 可以使用。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std::time::Duration;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;futures::StreamExt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;tokio::time::sleep;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tokio&lt;&#x2F;span&gt;&lt;span&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;(flavor = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;multi_thread&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, worker_threads = 2)]
+&lt;&#x2F;span&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let mut&lt;&#x2F;span&gt;&lt;span&gt; handles = vec![];
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span&gt; index in &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;..&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;16 &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; h = tokio::spawn(async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;start index: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, index);
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; res = (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u128&lt;&#x2F;span&gt;&lt;span&gt;..&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1000&lt;&#x2F;span&gt;&lt;span&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;fold&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u128&lt;&#x2F;span&gt;&lt;span&gt;, |&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;| {
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sleep&lt;&#x2F;span&gt;&lt;span&gt;(Duration::from_micros(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span&gt;                a + b * b
+&lt;&#x2F;span&gt;&lt;span&gt;            });
+&lt;&#x2F;span&gt;&lt;span&gt;            println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;finish index: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; res: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, index, res);
+&lt;&#x2F;span&gt;&lt;span&gt;        });
+&lt;&#x2F;span&gt;&lt;span&gt;        handles.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;push&lt;&#x2F;span&gt;&lt;span&gt;(h);
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span&gt; h in handles {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; _res = h.await.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;unwrap&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;stream&quot;&gt;Stream&lt;&#x2F;h2&gt;
+&lt;p&gt;根据&lt;a href=&quot;https:&#x2F;&#x2F;doc.rust-lang.org&#x2F;std&#x2F;stream&#x2F;index.html&quot;&gt;文档&lt;&#x2F;a&gt;:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;If futures are asynchronous values, then streams are asynchronous iterators. If you’ve found yourself with an asynchronous collection of some kind, and needed to perform an operation on the elements of said collection, you’ll quickly run into ‘streams’. Streams are heavily used in idiomatic asynchronous Rust code, so it’s worth becoming familiar with them.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;核心内容: &lt;code&gt;stream&lt;&#x2F;code&gt; 就是 &lt;code&gt;async&lt;&#x2F;code&gt; 编程中的 &lt;code&gt;iterator&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;iterator-stream&quot;&gt;Iterator -&amp;gt; Stream&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;code&gt;crate futures&lt;&#x2F;code&gt; 提供的函数 &lt;code&gt;futures::stream::iter&lt;&#x2F;code&gt; 可以将一个 &lt;code&gt;iterator&lt;&#x2F;code&gt; 转换为 &lt;code&gt;stream&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F;&#x2F; Converts an `Iterator` into a `Stream` which is always ready
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F;&#x2F; to yield the next value.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F;&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F;&#x2F; Iterators in Rust don&amp;#39;t express the ability to block, so this adapter
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F;&#x2F; simply always calls `iter.next()` and returns that.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;pub fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;iter&lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;I&amp;gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;i&lt;&#x2F;span&gt;&lt;span&gt;: I) -&amp;gt; Iter&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;I::&lt;&#x2F;span&gt;&lt;span&gt;IntoIter&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;where
+&lt;&#x2F;span&gt;&lt;span&gt;    I: IntoIterator,
+&lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    assert_stream::&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;I::&lt;&#x2F;span&gt;&lt;span&gt;Item, _&amp;gt;(Iter { iter: i.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;into_iter&lt;&#x2F;span&gt;&lt;span&gt;() })
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;例如:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;foo&lt;&#x2F;span&gt;&lt;span&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;  futures::executor::block_on(async {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;futures::stream::{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;self&lt;&#x2F;span&gt;&lt;span&gt;, StreamExt};
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; stream = stream::iter(vec![&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;17&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;19&lt;&#x2F;span&gt;&lt;span&gt;]);
+&lt;&#x2F;span&gt;&lt;span&gt;    assert_eq!(vec![&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;17&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;19&lt;&#x2F;span&gt;&lt;span&gt;], stream.collect::&amp;lt;Vec&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;i32&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;&amp;gt;().await);
+&lt;&#x2F;span&gt;&lt;span&gt;  });
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;shi-yong-stream-zhong-gou&quot;&gt;使用 Stream 重构&lt;&#x2F;h2&gt;
+&lt;p&gt;整个重构的核心就是 &lt;code&gt;futures::stream::iter&lt;&#x2F;code&gt; 函数。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;main&lt;&#x2F;code&gt; 函数为:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std::time::Duration;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;futures::StreamExt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;tokio::time::sleep;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tokio&lt;&#x2F;span&gt;&lt;span&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;(flavor = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;multi_thread&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, worker_threads = 2)]
+&lt;&#x2F;span&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; start = std::time::Instant::now();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; for_loop().await
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; for_each().await;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; map().await;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;elapsed: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, start.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;elapsed&lt;&#x2F;span&gt;&lt;span&gt;().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;as_secs_f64&lt;&#x2F;span&gt;&lt;span&gt;());
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;各种重构代码分别位于 &lt;code&gt;for_loop&lt;&#x2F;code&gt;, &lt;code&gt;for_each&lt;&#x2F;code&gt;, &lt;code&gt;map&lt;&#x2F;code&gt; 中。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;shi-yong-for-loop&quot;&gt;使用 for-loop&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;for_loop&lt;&#x2F;span&gt;&lt;span&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let mut&lt;&#x2F;span&gt;&lt;span&gt; handles = vec![];
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span&gt; index in &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;..&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;16 &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; h = tokio::spawn(async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;start index: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, index);
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sleep&lt;&#x2F;span&gt;&lt;span&gt;(Duration::from_secs(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; res = futures::stream::iter(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u128&lt;&#x2F;span&gt;&lt;span&gt;..&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1000&lt;&#x2F;span&gt;&lt;span&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;fold&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u128&lt;&#x2F;span&gt;&lt;span&gt;, |&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;| async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sleep&lt;&#x2F;span&gt;&lt;span&gt;(Duration::from_nanos(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span&gt;                a + b * b
+&lt;&#x2F;span&gt;&lt;span&gt;            });
+&lt;&#x2F;span&gt;&lt;span&gt;            (index, res)
+&lt;&#x2F;span&gt;&lt;span&gt;        });
+&lt;&#x2F;span&gt;&lt;span&gt;        handles.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;push&lt;&#x2F;span&gt;&lt;span&gt;(h);
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span&gt; h in handles {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; res = h.await.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;unwrap&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;        println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;index: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;. result: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, res.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;, res.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1.&lt;&#x2F;span&gt;&lt;span&gt;await)
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;输出为:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;start index: 0
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 1
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 2
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 3
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 4
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 5
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 6
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 7
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 8
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 9
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 10
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 11
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 12
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 13
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 14
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 15
+&lt;&#x2F;span&gt;&lt;span&gt;index: 0. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 1. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 2. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 3. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 4. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 5. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 6. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 7. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 8. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 9. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 10. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 11. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 12. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 13. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 14. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;index: 15. result: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;elapsed: 20.4097263
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;shi-yong-for-each&quot;&gt;使用 for-each&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;for_each&lt;&#x2F;span&gt;&lt;span&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;    futures::stream::iter(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;..&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;16&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;        .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;for_each&lt;&#x2F;span&gt;&lt;span&gt;(|&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;index&lt;&#x2F;span&gt;&lt;span&gt;| async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            tokio::spawn(async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;                println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;start index: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, index);
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sleep&lt;&#x2F;span&gt;&lt;span&gt;(Duration::from_secs(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; res = futures::stream::iter(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u128&lt;&#x2F;span&gt;&lt;span&gt;..&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1000&lt;&#x2F;span&gt;&lt;span&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;fold&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u128&lt;&#x2F;span&gt;&lt;span&gt;, |&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;| async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;                    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sleep&lt;&#x2F;span&gt;&lt;span&gt;(Duration::from_nanos(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span&gt;                    a + b * b
+&lt;&#x2F;span&gt;&lt;span&gt;                });
+&lt;&#x2F;span&gt;&lt;span&gt;                println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;finish index: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; res: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, index, res.await);
+&lt;&#x2F;span&gt;&lt;span&gt;            })
+&lt;&#x2F;span&gt;&lt;span&gt;            .await;
+&lt;&#x2F;span&gt;&lt;span&gt;        })
+&lt;&#x2F;span&gt;&lt;span&gt;        .await;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;输出为:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;start index: 0
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 0 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 1
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 1 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 2
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 2 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 3
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 3 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 4
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 4 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 5
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 5 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 6
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 6 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 7
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 7 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 8
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 8 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 9
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 9 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 10
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 10 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 11
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 11 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 12
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 12 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 13
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 13 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 14
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 14 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 15
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 15 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;elapsed: 35.0121356
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;shi-yong-map&quot;&gt;使用 map&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; handles = futures::stream::iter(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;..&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;16&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;        .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;(|&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;index&lt;&#x2F;span&gt;&lt;span&gt;| async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            tokio::spawn(async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;                println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;start index: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, index);
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sleep&lt;&#x2F;span&gt;&lt;span&gt;(Duration::from_secs(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; res = futures::stream::iter(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u128&lt;&#x2F;span&gt;&lt;span&gt;..&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1000&lt;&#x2F;span&gt;&lt;span&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;fold&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u128&lt;&#x2F;span&gt;&lt;span&gt;, |&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;| async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;                    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sleep&lt;&#x2F;span&gt;&lt;span&gt;(Duration::from_nanos(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span&gt;                    a + b * b
+&lt;&#x2F;span&gt;&lt;span&gt;                });
+&lt;&#x2F;span&gt;&lt;span&gt;                println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;finish index: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; res: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, index, res.await);
+&lt;&#x2F;span&gt;&lt;span&gt;            }).await
+&lt;&#x2F;span&gt;&lt;span&gt;        }).collect::&amp;lt;Vec&amp;lt;_&amp;gt;&amp;gt;().await;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    async {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span&gt; h in handles {
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; a = h.await.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;unwrap&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;        }
+&lt;&#x2F;span&gt;&lt;span&gt;    }.await
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;start index: 0
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 0 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 1
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 1 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 2
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 2 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 3
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 3 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 4
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 4 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 5
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 5 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 6
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 6 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 7
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 7 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 8
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 8 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 9
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 9 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 10
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 10 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 11
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 11 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 12
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 12 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 13
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 13 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 14
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 14 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 15
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 15 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;elapsed: 34.9667163
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; handles = futures::stream::iter(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;..&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;16&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;        .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;(|&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;index&lt;&#x2F;span&gt;&lt;span&gt;| async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            tokio::spawn(async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;                println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;start index: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, index);
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sleep&lt;&#x2F;span&gt;&lt;span&gt;(Duration::from_secs(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; res = futures::stream::iter(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u128&lt;&#x2F;span&gt;&lt;span&gt;..&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1000&lt;&#x2F;span&gt;&lt;span&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;fold&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u128&lt;&#x2F;span&gt;&lt;span&gt;, |&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;| async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;                    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sleep&lt;&#x2F;span&gt;&lt;span&gt;(Duration::from_nanos(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span&gt;                    a + b * b
+&lt;&#x2F;span&gt;&lt;span&gt;                });
+&lt;&#x2F;span&gt;&lt;span&gt;                println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;finish index: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; res: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, index, res.await);
+&lt;&#x2F;span&gt;&lt;span&gt;            })
+&lt;&#x2F;span&gt;&lt;span&gt;        }).collect::&amp;lt;Vec&amp;lt;_&amp;gt;&amp;gt;().await;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    async {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span&gt; h in handles {
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; a = h.await.await.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;unwrap&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;        }
+&lt;&#x2F;span&gt;&lt;span&gt;    }.await
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;start index: 0
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 0 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 1
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 1 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 2
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 2 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 3
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 3 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 4
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 4 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 5
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 5 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 6
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 6 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 7
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 7 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 8
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 8 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 9
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 9 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 10
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 10 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 11
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 11 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 12
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 12 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 13
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 13 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 14
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 14 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 15
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 15 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;elapsed: 35.0125656
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; handles = futures::stream::iter(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;..&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;16&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;        .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;(|&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;index&lt;&#x2F;span&gt;&lt;span&gt;| async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; h =tokio::spawn(async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;                println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;start index: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, index);
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sleep&lt;&#x2F;span&gt;&lt;span&gt;(Duration::from_secs(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; res = futures::stream::iter(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u128&lt;&#x2F;span&gt;&lt;span&gt;..&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1000&lt;&#x2F;span&gt;&lt;span&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;fold&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u128&lt;&#x2F;span&gt;&lt;span&gt;, |&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;| async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;                    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sleep&lt;&#x2F;span&gt;&lt;span&gt;(Duration::from_nanos(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span&gt;                    a + b * b
+&lt;&#x2F;span&gt;&lt;span&gt;                });
+&lt;&#x2F;span&gt;&lt;span&gt;                (index, res)
+&lt;&#x2F;span&gt;&lt;span&gt;            });
+&lt;&#x2F;span&gt;&lt;span&gt;            h
+&lt;&#x2F;span&gt;&lt;span&gt;        })
+&lt;&#x2F;span&gt;&lt;span&gt;        .collect::&amp;lt;Vec&amp;lt;_&amp;gt;&amp;gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;        .await;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    async {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;for&lt;&#x2F;span&gt;&lt;span&gt; h in handles {
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; a = h.await.await.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;unwrap&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;            println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;finish index: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; res: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, a.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;, a.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1.&lt;&#x2F;span&gt;&lt;span&gt;await);
+&lt;&#x2F;span&gt;&lt;span&gt;        }
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;    .await
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;start index: 0
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 0 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 1
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 1 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 2
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 2 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 3
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 3 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 4
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 4 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 5
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 5 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 6
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 6 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 7
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 7 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 8
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 8 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 9
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 9 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 10
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 10 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 11
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 11 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 12
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 12 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 13
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 13 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 14
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 14 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;start index: 15
+&lt;&#x2F;span&gt;&lt;span&gt;finish index: 15 res: 332833500
+&lt;&#x2F;span&gt;&lt;span&gt;elapsed: 35.442368
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;具体的时间差异以后再来分析。&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>

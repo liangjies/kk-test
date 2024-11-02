@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - Pod 的基本概念</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-basics-of-pods/#nodeselector" class="toc-link">NodeSelector</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-basics-of-pods/#nodename" class="toc-link">NodeName</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-basics-of-pods/#hostaliases" class="toc-link">HostAliases</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-basics-of-pods/#shareprocessnamespace" class="toc-link">ShareProcessNamespace</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-basics-of-pods/#gong-xiang-su-zhu-ji-de-namespace" class="toc-link">共享宿主机的 Namespace</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-basics-of-pods/#lifecycle" class="toc-link">Lifecycle</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-basics-of-pods/#status" class="toc-link">Status</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/the-basics-of-pods/#can-kao-wen-dang" class="toc-link">参考文档</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;the-basics-of-pods&#x2F;">Pod 的基本概念</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-09-02</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>前文提到，可以类比于虚拟机与应用程序之间的关系来理解 <code>Pod</code> 与 <code>Container</code> 之间的关系。这样就可以容易理解 <strong>凡是调度、网络、存储，以及安全相关的属性，基本都是 Pod 级别的</strong>。</p>
+<p>这些属性有一个共同点: 描述 <strong>机器</strong> 这个整体，而不是里面运行的 <strong>程序</strong>。比如:</p>
+<ul>
+<li>配置这个 <strong>机器</strong> 的网卡: <code>Pod</code> 的网络定义</li>
+<li>配置这个 <strong>机器</strong> 的磁盘: <code>Pod</code> 的存储定义</li>
+<li>配置这个 <strong>机器</strong> 的防火墙: <code>Pod</code> 的安全定义</li>
+<li>这台 <strong>机器</strong> 运行在哪个服务器之上: <code>Pod</code> 的调度</li>
+</ul>
+<h2 id="nodeselector">NodeSelector</h2>
+<p><code>NodeSelector</code> 是一个供用户将 <code>Pod</code> 与 <code>Node</code> 进行绑定的字段，用法如下所示:</p>
+<pre data-lang="yml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yml "><code class="language-yml" data-lang="yml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Pod
+</span><span>...
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span> </span><span style="color:#bf616a;">nodeSelector</span><span>:
+</span><span>   </span><span style="color:#bf616a;">disktype</span><span>: </span><span style="color:#a3be8c;">ssd
+</span></code></pre>
+<p>这样的一个配置，意味着这个 <code>Pod</code> 永远只能运行在携带了 <code>disktype: ssd</code> 标签 <code>(Label)</code> 的节点上。否则，将调度失败。</p>
+<h2 id="nodename">NodeName</h2>
+<p>当 <code>Kubernetes</code> 将 <code>Pod</code> 调度到某个 <code>Node</code> 上之后，会自动设置 <code>Pod</code> 的 <code>NodeName</code> 字段。即，<code>Kubernetes</code> 会认为所有已被赋值 <code>NodeName</code> 字段的 <code>Pod</code> 都是被调度过的。因此，通过用户也可以设置该字段来 <strong>骗过</strong> 调度器，比如在测试或者调试阶段。</p>
+<h2 id="hostaliases">HostAliases</h2>
+<p><code>HostAliases</code> 定义 <code>Pod</code> 的 <code>hosts</code> 文件 <code>(比如 /etc/hosts)</code> 里的内容。</p>
+<p>比如，在这个 <code>Pod</code> 的 <code>YAML</code> 文件中设置了一组 <code>IP</code> 和 <code>Hostname</code> 的数据。</p>
+<pre data-lang="yml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yml "><code class="language-yml" data-lang="yml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Pod
+</span><span>...
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">hostAliases</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">ip</span><span>: &quot;</span><span style="color:#a3be8c;">10.1.2.3</span><span>&quot;
+</span><span>    </span><span style="color:#bf616a;">hostnames</span><span>:
+</span><span>    - &quot;</span><span style="color:#a3be8c;">foo.remote</span><span>&quot;
+</span><span>    - &quot;</span><span style="color:#a3be8c;">bar.remote</span><span>&quot;
+</span><span>...
+</span></code></pre>
+<p>在 <code>Pod</code> 启动后，<code>/etc/hosts</code> 文件的内容将如下所示:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cat /etc/hosts
+</span><span style="color:#65737e;"># Kubernetes-managed hosts file.
+</span><span style="color:#bf616a;">127.0.0.1</span><span> localhost
+</span><span style="color:#bf616a;">...
+</span><span style="color:#bf616a;">10.244.135.10</span><span> hostaliases-pod
+</span><span style="color:#bf616a;">10.1.2.3</span><span> foo.remote
+</span><span style="color:#bf616a;">10.1.2.3</span><span> bar.remote
+</span></code></pre>
+<p>其中，最下面两行记录，就是通过 <code>HostAliases</code> 字段写入的。</p>
+<p><strong>特别注意</strong>: 在 <code>Kubernetes</code> 中，强烈建议使用这种方式设置 hosts 文件里的内容。如果使用直接修改 <code>hosts</code> 文件的方式，在 <code>Pod</code> 被删除重建之后，<code>kubelet</code> 会还原被修改的内容。</p>
+<h2 id="shareprocessnamespace">ShareProcessNamespace</h2>
+<p><strong>凡是跟容器的 <code>Linux Namespace</code> 相关的属性，也一定是 <code>Pod</code> 级别的</strong>。</p>
+<p>设计 <code>Pod</code> 的初衷，就是要让里面的容器尽可能多地共享 <code>Linux Namespace</code>，仅保留必要的隔离和限制能力。这样，<code>Pod</code> 之于 <code>Container</code> 就会更近似于虚拟机之于程序。</p>
+<pre data-lang="yml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yml "><code class="language-yml" data-lang="yml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Pod
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">shareProcessNamespace</span><span>: </span><span style="color:#d08770;">true
+</span><span>  </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>    </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>  - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">shell
+</span><span>    </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">busybox
+</span><span>    </span><span style="color:#bf616a;">stdin</span><span>: </span><span style="color:#d08770;">true
+</span><span>    </span><span style="color:#bf616a;">tty</span><span>: </span><span style="color:#d08770;">true
+</span></code></pre>
+<p><code>shareProcessNamespace: true</code> 表示: <code>Pod</code> 里的 <code>Containers</code> 要共享 <code>PID Namespace</code>。</p>
+<h2 id="gong-xiang-su-zhu-ji-de-namespace">共享宿主机的 Namespace</h2>
+<ul>
+<li><strong>HostPID</strong> - 控制 Pod 中容器是否可以共享宿主上的进程 ID 空间。 注意，如果与 ptrace 相结合，这种授权可能被利用，导致向容器外的特权逃逸 (默认情况下 ptrace 是被禁止的)。</li>
+<li><strong>HostIPC</strong> - 控制 Pod 容器是否可共享宿主上的 IPC 名字空间。</li>
+<li><strong>HostNetwork</strong> - 控制是否 Pod 可以使用节点的网络名字空间。 此类授权将允许 Pod 访问本地回路 (loopback) 设备、在本地主机 (localhost) 上监听的服务、还可能用来监听同一节点上其他 Pod 的网络活动。</li>
+<li><strong>HostPorts</strong> -提供可以在宿主网络名字空间中可使用的端口范围列表。 该属性定义为一组 HostPortRange 对象的列表，每个对象中包含 min(含) 与 max(含) 值的设置。 默认不允许访问宿主端口。</li>
+</ul>
+<p>例如:</p>
+<pre data-lang="yml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yml "><code class="language-yml" data-lang="yml"><span>
+</span><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Pod
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">hostNetwork</span><span>: </span><span style="color:#d08770;">true
+</span><span>  </span><span style="color:#bf616a;">hostIPC</span><span>: </span><span style="color:#d08770;">true
+</span><span>  </span><span style="color:#bf616a;">hostPID</span><span>: </span><span style="color:#d08770;">true
+</span><span>  </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>    </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>  - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">shell
+</span><span>    </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">busybox
+</span><span>    </span><span style="color:#bf616a;">stdin</span><span>: </span><span style="color:#d08770;">true
+</span><span>    </span><span style="color:#bf616a;">tty</span><span>: </span><span style="color:#d08770;">true
+</span></code></pre>
+<h2 id="lifecycle">Lifecycle</h2>
+<p><code>Container Lifecycle Hooks</code>。顾名思义，是在容器状态发生变化时触发一系列 <strong>钩子</strong>。我们来看这样一个例子:</p>
+<pre data-lang="yml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yml "><code class="language-yml" data-lang="yml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Pod
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">lifecycle-demo
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">lifecycle-demo-container
+</span><span>    </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>    </span><span style="color:#bf616a;">lifecycle</span><span>:
+</span><span>      </span><span style="color:#bf616a;">postStart</span><span>:
+</span><span>        </span><span style="color:#bf616a;">exec</span><span>:
+</span><span>          </span><span style="color:#bf616a;">command</span><span>: [&quot;</span><span style="color:#a3be8c;">/bin/sh</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">-c</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">echo Hello from the postStart handler &gt; /usr/share/message</span><span>&quot;]
+</span><span>      </span><span style="color:#bf616a;">preStop</span><span>:
+</span><span>        </span><span style="color:#bf616a;">exec</span><span>:
+</span><span>          </span><span style="color:#bf616a;">command</span><span>: [&quot;</span><span style="color:#a3be8c;">/usr/sbin/nginx</span><span>&quot;,&quot;</span><span style="color:#a3be8c;">-s</span><span>&quot;,&quot;</span><span style="color:#a3be8c;">quit</span><span>&quot;]
+</span></code></pre>
+<ul>
+<li>
+<p><strong>PostStart</strong>: 这个回调在创建容器之后立即执行。 但是，不能保证回调会在容器入口点 <code>(ENTRYPOINT)</code> 之前执行。没有参数传递给处理程序。</p>
+</li>
+<li>
+<p><strong>PreStop</strong>: 在容器因 API 请求或者管理事件 <strong>(诸如存活态探针失败、资源抢占、资源竞争等)</strong> 而被终止之前，此回调会被调用。如果容器已经处于终止或者完成状态，则对 preStop 回调的调用将失败。此调用是阻塞的，也是同步调用，因此必须在删除容器的调用之前完成。没有参数传递给处理程序。</p>
+</li>
+</ul>
+<blockquote>
+<p><code>Kubernetes</code> 只有在 <code>Pod</code> 结束 <strong>(Terminated)</strong> 的时候才会发送 preStop 事件，这意味着在 Pod 完成 <strong>(Completed)</strong> 时 preStop 的事件处理逻辑不会被触发。这个限制在 <a href="https://github.com/kubernetes/kubernetes/issues/55807">issue #55087</a> 中被追踪。</p>
+</blockquote>
+<p>有关终止行为的更详细描述，请参见 <a href="https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/#termination-of-pods">终止 Pod</a>。</p>
+<h2 id="status">Status</h2>
+<p>Pending。Pod 已被 Kubernetes 系统接受 <strong>(YAML 文件已经提交给了 Kubernetes)</strong>，但有一个或者多个容器尚未创建亦未运行。此阶段包括等待 Pod 被调度的时间和通过网络下载镜像的时间，</p>
+<p>Running。Pod 已经绑定到了某个节点，Pod 中所有的容器都已被创建。至少有一个容器仍在运行，或者正处于启动或重启状态。</p>
+<p>Succeeded。Pod 中的所有容器都已成功终止，并且不会再重启。这种情况在运行一次性任务时最为常见。</p>
+<p>Failed。Pod 中的所有容器都已终止，并且至少有一个容器是因为失败终止。也就是说，容器以非 <code>0</code> 状态退出或者被系统终止。这个状态的出现，意味着你得想办法 Debug 这个容器的应用，比如查看 Pod 的 Events 和日志。</p>
+<p>Unknown。这是一个异常状态，意味着 Pod 的状态不能持续地被 kubelet 汇报给 kube-apiserver，这很有可能是主从节点(Master 和 Kubelet)间的通信出现了问题。</p>
+<h2 id="can-kao-wen-dang">参考文档</h2>
+<ul>
+<li><a href="https://kubernetes.io/zh/docs/tasks/configure-pod-container/share-process-namespace/">在 Pod 中的容器之间共享进程命名空间</a></li>
+<li><a href="https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/">Share Process Namespace between Containers in a Pod</a></li>
+<li><a href="https://kubernetes.io/zh/docs/concepts/policy/pod-security-policy/">Pod 安全策略</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/policy/pod-security-policy/">Pod Security Policies</a></li>
+<li><a href="https://kubernetes.io/zh/docs/concepts/workloads/pods/pod-lifecycle/">Pod 的生命周期</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/">Pod Lifecycle</a></li>
+<li><a href="https://kubernetes.io/zh/docs/tasks/configure-pod-container/attach-handler-lifecycle-event/">为容器的生命周期事件设置处理函数</a></li>
+<li><a href="https://kubernetes.io/zh/docs/concepts/containers/container-lifecycle-hooks/">容器生命周期回调</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/kubernetes/">#kubernetes</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/pod/">#pod</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;enable-rss-on-hexo&#x2F;">‹ 让你的 Hexo 博客支持 RSS</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;play-with-k8s&#x2F;">Play with Kubernetes ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

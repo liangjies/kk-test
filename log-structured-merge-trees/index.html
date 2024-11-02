@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - Log Structured Merge Trees</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/log-structured-merge-trees/#wal" class="toc-link">WAL</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/log-structured-merge-trees/#memtable" class="toc-link">MemTable</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/log-structured-merge-trees/#sstable-sorted-strings-table" class="toc-link">SSTable (Sorted Strings Table)</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/log-structured-merge-trees/#compactor" class="toc-link">Compactor</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/log-structured-merge-trees/#index" class="toc-link">Index</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/log-structured-merge-trees/#bloom-filter" class="toc-link">Bloom Filter</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/log-structured-merge-trees/#summary" class="toc-link">Summary</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;log-structured-merge-trees&#x2F;">Log Structured Merge Trees</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-08-26</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>转自 <a href="https://medium.com/swlh/log-structured-merge-trees-9c8e2bea89e8">Log Structured Merge Trees</a>。</p>
+<p>LSM tree is at the heart of most storage systems that provide high write throughput, be it a key-value storage like dynamodb/cassandra or a messaging system like pulsar which is backed by bookkeeper.</p>
+<p>The various components of a typical LSM backed system are shown below.</p>
+<p><img src="/images/log-structured-merge-trees/01.png" alt="01" /></p>
+<p>The main reason why LSM provides high write throughput is that every write request is actually performed only <strong>in-memory</strong> in contrast to traditional B-Tree based implementation where the updates are done to disk which can trigger an update to an index making it very expensive.</p>
+<p>So the obvious question is, how does LSM achieve durability? that’s where WAL comes into the picture.</p>
+<h2 id="wal">WAL</h2>
+<p>WAL is a write-ahead log that is used to provide the durability of data during system failures, what it means is that when a request for write comes in, the data is first added to a WAL file (sometimes called journal) and flushed to the disk (using <a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/5/html/global_file_system/s1-manage-direct-io">direct io</a>) before updating the in-memory data structure.</p>
+<p>This allows for systems to recover from the WAL if it crashes before persisting the in-memory data structure to disk.</p>
+<p>Why not directly update the write to the disk instead of updating WAL? it’s because WAL updates are cheaper as it’s append-only and doesn’t require any restructuring of data on disk.</p>
+<h2 id="memtable">MemTable</h2>
+<p>The in-memory data structure is called a memtable, there are various implementations of memtable, but you can think of memtable as just a binary search tree for the sake of simplicity.</p>
+<p>So now for every write request, the data is appended to WAL and the memtable is updated and a successful response is returned to the client.</p>
+<p>For java implementations, the memtable is usually stored off-heap (direct memory) to avoid GC load</p>
+<h2 id="sstable-sorted-strings-table">SSTable (Sorted Strings Table)</h2>
+<p>As it’s obvious that we cannot keep adding data to memtable to bloat the RAM, the memtable is frequently flushed to disk as an SSTable.</p>
+<p>SSTable, as the name indicates, is a sorted array of keys persisted on disk.</p>
+<p>The reason it is sorted is to make it easy to look up the data for readings.</p>
+<p>Okay, now that is the essence of how LSM provides high throughput using a WAL, MemTable &amp; SSTable.</p>
+<p>Usually, even every delete request for a key is also added to memtable with a marker indicating it’s deleted and the same information is flushed to the SSTable.</p>
+<h2 id="compactor">Compactor</h2>
+<p>As we keep flushing SSTables to disk, the same key may be present in multiple SSTables, although the latest data of a key is present in the most recent SSTable, it’s presence in all previous SSTable needs to be cleaned up.</p>
+<p>This is the job of a compactor which usually runs in the background, It merges SSTables by removing redundant &amp; deleted keys and creating a compacted/merged SSTables.</p>
+<p>the compactor also is responsible for updating an index (typical B-Tree based index) to locate SSTable a key is present in.</p>
+<h2 id="index">Index</h2>
+<p>The index data structure created is used to locate the correct SSTable for a key, once an SSTable is located, it is easy to locate the actual key inside the SSTable as it’s sorted, a binary search in-memory is sufficient.</p>
+<p>Also, the size of SSTables is chosen in such a way that it corresponds to the operating system <a href="https://en.wikipedia.org/wiki/Page_(computer_memory)">page size</a> (usually multiples of disk bock size) making it easier to load the data to memory faster.</p>
+<p>Although the Index along with SSTable help in faster lookup of keys, all read requests are first consulted in the memtable as it should contain the most recent change. If the key is not in the memtable, then the index is used to identify the possible SSTable the key may be present and then search inside the SSTable in-memory.</p>
+<p>Since every read has to check the memtable, index &amp; SSTable to look for a key, it makes read requests very expensive especially for keys that are not present!</p>
+<p>For keys that are recently updated, the read request will easily locate it in the memtable, but for keys not recently updated, and for keys that are not present in the system the read path is expensive!</p>
+<p>Bloom Filters are used to improve read performance especially for the cases where the key is not present in the system.</p>
+<h2 id="bloom-filter">Bloom Filter</h2>
+<p>A Bloom filter is a probabilistic data structure, which at a high level helps you check if a key is present or not in the system with O(1) complexity in memory.</p>
+<p>With bloom filter, False positive match is possible, which means, it may indicate a key is present although it’s not in the system. But false-negative match won’t happen, which means if bloom filter indicates a key is not present, then it is definitely not present in the system, so we could avoid taking the expensive read path.</p>
+<p>So the presence of a bloom filter improves the read performance for keys that are missing in the system but for the keys that are present in the system, the read is still expensive as we have to look into the memtable, index and the SSTable.</p>
+<h2 id="summary">Summary</h2>
+<p>So every time you come across a system that promises high write throughput, you can assume there will be a variant of LSM tree underneath that helps achieve the throughput and also understand why reads are expensive.</p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/lsm-tree/">#lsm tree</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/sstable/">#sstable</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/storage-engine/">#storage engine</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;container-orchestration-and-kubernetes&#x2F;">‹ 容器编排与 Kubernetes</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;why-do-we-need-pods&#x2F;">Pod 的意义 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

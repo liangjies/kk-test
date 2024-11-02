@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - Kubernetes StatefulSet</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-statefulset/#shi-yong-statefulsets" class="toc-link">使用 StatefulSets</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-statefulset/#xian-zhi" class="toc-link">限制</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-statefulset/#zu-jian" class="toc-link">组件</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-statefulset/#pod-selector" class="toc-link">Pod Selector</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-statefulset/#can-kao-wen-dang" class="toc-link">参考文档</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-statefulset&#x2F;">Kubernetes StatefulSet</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-10-27</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>StatefulSet 是用来管理有状态应用的工作负载 API 对象。</p>
+<p>StatefulSet 用来管理 Deployment 和扩展一组 Pod，并且能为这些 Pod 提供序号和唯一性保证。</p>
+<p>和 Deployment 相同的是，StatefulSet 管理了基于相同容器定义的一组 Pod。但和 Deployment 不同的是，StatefulSet 为它们的每个 Pod 维护了一个固定的 ID。这些 Pod 是基于相同的声明来创建的，但是不能相互替换：无论怎么调度，每个 Pod 都有一个永久不变的 ID。</p>
+<p>StatefulSet 和其他控制器使用相同的工作模式。你在 StatefulSet 对象 中定义你期望的状态，然后 StatefulSet 的 控制器 就会通过各种更新来达到那种你想要的状态。</p>
+<h2 id="shi-yong-statefulsets">使用 StatefulSets</h2>
+<p>StatefulSets 对于需要满足以下一个或多个需求的应用程序很有价值:</p>
+<ul>
+<li>稳定的、唯一的网络标识符。</li>
+<li>稳定的、持久的存储。</li>
+<li>有序的、优雅的部署和缩放。</li>
+<li>有序的、自动的滚动更新。</li>
+</ul>
+<p>在上面，稳定意味着 Pod 调度或重调度的整个过程是有持久性的。如果应用程序不需要任何稳定的标识符或有序的部署、删除或伸缩，则应该使用由一组无状态的副本控制器提供的工作负载来部署应用程序，比如 Deployment 或者 ReplicaSet 可能更适用于您的无状态应用部署需要。</p>
+<h2 id="xian-zhi">限制</h2>
+<ul>
+<li>给定 Pod 的存储必须由 <a href="https://github.com/kubernetes/examples/tree/master/staging/persistent-volume-provisioning/README.md">PersistentVolume</a> 驱动 基于所请求的 <strong>storage class</strong> 来提供，或者由管理员预先提供。</li>
+<li>删除或者收缩 StatefulSet 并 <strong>不会删除</strong> 它关联的存储卷。这样做是为了保证数据安全，它通常比自动清除 StatefulSet 所有相关的资源更有价值。</li>
+<li>StatefulSet 当前需要 <a href="https://kubernetes.io/docs/concepts/services-networking/service/#headless-services">Headless Services</a> 来负责 Pod 的网络标识。用户需要负责创建此服务。</li>
+<li>当删除 StatefulSets 时，StatefulSet 不提供任何终止 Pod 的保证。为了实现 StatefulSet 中的 Pod 可以有序和优雅的终止，可以在删除之前将 StatefulSet 缩放为 0。</li>
+<li>在默认 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies">Pod 管理策略</a>(<strong>OrderedReady</strong>) 时使用 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#rolling-updates">滚动更新</a>，可能进入需要 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#forced-rollback">人工干预</a> 才能修复的损坏状态。</li>
+</ul>
+<h2 id="zu-jian">组件</h2>
+<p>下面的示例演示了 StatefulSet 的组件。</p>
+<pre data-lang="yaml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yaml "><code class="language-yaml" data-lang="yaml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Service
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>  </span><span style="color:#bf616a;">labels</span><span>:
+</span><span>    </span><span style="color:#bf616a;">app</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">ports</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">port</span><span>: </span><span style="color:#d08770;">80
+</span><span>    </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">web
+</span><span>  </span><span style="color:#bf616a;">clusterIP</span><span>: </span><span style="color:#a3be8c;">None
+</span><span>  </span><span style="color:#bf616a;">selector</span><span>:
+</span><span>    </span><span style="color:#bf616a;">app</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span style="color:#a3be8c;">+++
+</span><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">apps/v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">StatefulSet
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">web
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">selector</span><span>:
+</span><span>    </span><span style="color:#bf616a;">matchLabels</span><span>:
+</span><span>      </span><span style="color:#bf616a;">app</span><span>: </span><span style="color:#a3be8c;">nginx </span><span style="color:#65737e;"># has to match .spec.template.metadata.labels
+</span><span>  </span><span style="color:#bf616a;">serviceName</span><span>: &quot;</span><span style="color:#a3be8c;">nginx</span><span>&quot;
+</span><span>  </span><span style="color:#bf616a;">replicas</span><span>: </span><span style="color:#d08770;">3 </span><span style="color:#65737e;"># by default is 1
+</span><span>  </span><span style="color:#bf616a;">template</span><span>:
+</span><span>    </span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>      </span><span style="color:#bf616a;">labels</span><span>:
+</span><span>        </span><span style="color:#bf616a;">app</span><span>: </span><span style="color:#a3be8c;">nginx </span><span style="color:#65737e;"># has to match .spec.selector.matchLabels
+</span><span>    </span><span style="color:#bf616a;">spec</span><span>:
+</span><span>      </span><span style="color:#bf616a;">terminationGracePeriodSeconds</span><span>: </span><span style="color:#d08770;">10
+</span><span>      </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>      - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>        </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">k8s.gcr.io/nginx-slim:0.8
+</span><span>        </span><span style="color:#bf616a;">ports</span><span>:
+</span><span>        - </span><span style="color:#bf616a;">containerPort</span><span>: </span><span style="color:#d08770;">80
+</span><span>          </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">web
+</span><span>        </span><span style="color:#bf616a;">volumeMounts</span><span>:
+</span><span>        - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">www
+</span><span>          </span><span style="color:#bf616a;">mountPath</span><span>: </span><span style="color:#a3be8c;">/usr/share/nginx/html
+</span><span>  </span><span style="color:#bf616a;">volumeClaimTemplates</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>      </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">www
+</span><span>    </span><span style="color:#bf616a;">spec</span><span>:
+</span><span>      </span><span style="color:#bf616a;">accessModes</span><span>: [ &quot;</span><span style="color:#a3be8c;">ReadWriteOnce</span><span>&quot; ]
+</span><span>      </span><span style="color:#bf616a;">storageClassName</span><span>: &quot;</span><span style="color:#a3be8c;">my-storage-class</span><span>&quot;
+</span><span>      </span><span style="color:#bf616a;">resources</span><span>:
+</span><span>        </span><span style="color:#bf616a;">requests</span><span>:
+</span><span>          </span><span style="color:#bf616a;">storage</span><span>: </span><span style="color:#a3be8c;">1Gi
+</span></code></pre>
+<ul>
+<li>名为 <strong>nginx</strong> 的 Headless Service 用来控制网络域名。</li>
+<li>名为 <strong>web</strong> 的 StatefulSet 有一个 Spec，它表明将在独立的 3 个 Pod 副本中启动 nginx 容器。</li>
+<li><strong>volumeClaimTemplates</strong> 将通过 PersistentVolumes 驱动提供的 <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">PersistentVolumes</a> 来提供稳定的存储。</li>
+</ul>
+<p>StatefulSet 对象的 <strong>name</strong> 必须是合法的 <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/names#dns-subdomain-names">DNS 域名</a>。</p>
+<h2 id="pod-selector">Pod Selector</h2>
+<p>必须将 StatefullSet 的 <strong>.spec.selector</strong> 字段与 <strong>.spec.template.metadata.labels</strong> 设置相同的值。</p>
+<p>在 Kubernetes 1.8 版本之前，忽略 <strong>.spec.selector</strong> 字段会获得默认设置值。在 1.8 及以后的版本中，未指定匹配的 Pod Selector 将在创建 StatefulSet 期间导致验证错误。</p>
+<h2 id="can-kao-wen-dang">参考文档</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">Kubernetes StatefulSet</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/kubernetes/">#kubernetes</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/controllers/">#controllers</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-deployment&#x2F;">‹ Kubernetes Deployment</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-daemonset&#x2F;">Kubernetes DaemonSet ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

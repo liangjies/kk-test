@@ -1,0 +1,804 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - pod</title>
+	<link href="https://blog.kiyoko.io/tags/pod/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-09-04T08:39:17+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/pod/atom.xml</id>
+	<entry xml:lang="en">
+		<title>投射数据卷 (TBC)</title>
+		<published>2020-09-04T08:39:17+00:00</published>
+		<updated>2020-09-04T08:39:17+00:00</updated>
+		<link href="https://blog.kiyoko.io/projected-volumes/" type="text/html"/>
+		<id>https://blog.kiyoko.io/projected-volumes/</id>
+		<content type="html">&lt;p&gt;&lt;strong&gt;投射数据卷&lt;&#x2F;strong&gt; 的官方名称为: &lt;code&gt;projected volume&lt;&#x2F;code&gt;。&lt;code&gt;Project&lt;&#x2F;code&gt; 在这里的意思为 &lt;a href=&quot;https:&#x2F;&#x2F;cn.bing.com&#x2F;dict&#x2F;search?q=project&amp;amp;qs=n&amp;amp;form=Z9LH5&amp;amp;sp=-1&amp;amp;pq=project&amp;amp;sc=8-7&amp;amp;sk=&amp;amp;cvid=A2B01F96E5A847E7A67FEC9AE0A97060&quot;&gt;&lt;strong&gt;投射&lt;&#x2F;strong&gt;&lt;&#x2F;a&gt;。感谢 &lt;code&gt;k8s&lt;&#x2F;code&gt; 帮助我学习英语。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;storage&#x2F;volumes&#x2F;#projected&quot;&gt;官方定义为&lt;&#x2F;a&gt;:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A projected volume maps several existing volume sources into the same directory.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;&lt;code&gt;Projected Volumes&lt;&#x2F;code&gt; 存在的意义不是为了存放容器里的数据，也不是用来进行容器和宿主机之间的数据交换。而是为容器提供预先定义好的数据。所以，从容器的角度来看，这些 &lt;code&gt;Volume&lt;&#x2F;code&gt; 里的信息就是仿佛是被 &lt;code&gt;Kubernetes&lt;&#x2F;code&gt; &lt;strong&gt;投射&lt;&#x2F;strong&gt; (Project) 进入容器当中的。到目前为止，Kubernetes 支持的 Projected Volume 一共有四种:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Secret&lt;&#x2F;li&gt;
+&lt;li&gt;ConfigMap&lt;&#x2F;li&gt;
+&lt;li&gt;Downward API&lt;&#x2F;li&gt;
+&lt;li&gt;ServiceAccountToken。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;下面是官方给出的一个&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;storage&#x2F;volumes&#x2F;#example-pod-with-a-secret-a-downward-api-and-a-configmap&quot;&gt;例子&lt;&#x2F;a&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yml &quot;&gt;&lt;code class=&quot;language-yml&quot; data-lang=&quot;yml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;volume-test
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;container-test
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;busybox
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumeMounts&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;all-in-one
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mountPath&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;projected-volume&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;readOnly&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumes&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;all-in-one
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;projected&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sources&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;secret&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;mysecret
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;items&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;username
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;my-group&#x2F;my-username
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;downwardAPI&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;items&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;labels&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;metadata.labels
+&lt;&#x2F;span&gt;&lt;span&gt;            - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;cpu_limit&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resourceFieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containerName&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;container-test
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resource&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;limits.cpu
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;configMap&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;myconfigmap
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;items&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;config
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;my-group&#x2F;my-config
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;首先，可以看到 &lt;code&gt;volumes&lt;&#x2F;code&gt; 与 &lt;code&gt;containers&lt;&#x2F;code&gt; 是同级的属性字段，同属于 &lt;code&gt;pod&lt;&#x2F;code&gt; 的信息。其次，在上述示例中，使用了三种 &lt;code&gt;Projected Volume&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;在有了初步认识之后，接下来对每一种 &lt;code&gt;Projected Volume&lt;&#x2F;code&gt; 做出更详细的说明。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;secret&quot;&gt;Secret&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;code&gt;Secret&lt;&#x2F;code&gt; 最常见的用法是保存认证信息，比如数据库等。这些数据会被保存在内部的 &lt;code&gt;ETCD&lt;&#x2F;code&gt; 中，可以通过将 &lt;code&gt;Secret&lt;&#x2F;code&gt; 以 &lt;code&gt;Volume&lt;&#x2F;code&gt; 的形式挂载到 &lt;code&gt;Pod&lt;&#x2F;code&gt; 上的方式，允许 &lt;code&gt;Pod&lt;&#x2F;code&gt; 使用 &lt;code&gt;Secret&lt;&#x2F;code&gt; 中的数据。&lt;&#x2F;p&gt;
+&lt;p&gt;接下来介绍两种创建 &lt;code&gt;Secret&lt;&#x2F;code&gt; 以及使用的方式。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;ming-ling-xing-fang-shi&quot;&gt;命令行方式&lt;&#x2F;h3&gt;
+&lt;h4 id=&quot;tong-guo-ming-ling-xing-chuang-jian-secret&quot;&gt;通过命令行创建 Secret&lt;&#x2F;h4&gt;
+&lt;p&gt;使用如下命令创建两个 &lt;code&gt;Secret&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;echo &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;admin&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; &amp;gt; .&#x2F;user.txt
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;echo &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;password&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39; &amp;gt; .&#x2F;pass.txt
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; create secret generic user&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --from-file&lt;&#x2F;span&gt;&lt;span&gt;=.&#x2F;user.txt
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; create secret generic pass&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --from-file&lt;&#x2F;span&gt;&lt;span&gt;=.&#x2F;pass.txt
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;cha-xun-secret&quot;&gt;查询 Secret&lt;&#x2F;h4&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl get secrets
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;NAME&lt;&#x2F;span&gt;&lt;span&gt;                  TYPE                                  DATA   AGE
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pass&lt;&#x2F;span&gt;&lt;span&gt;                  Opaque                                1      13s
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;user&lt;&#x2F;span&gt;&lt;span&gt;                  Opaque                                1      18s
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;zai-pod-zhong-shi-yong-secret&quot;&gt;在 Pod 中使用 Secret&lt;&#x2F;h4&gt;
+&lt;p&gt;生成一个 &lt;code&gt;yaml&lt;&#x2F;code&gt; 文件，引用上面的 &lt;code&gt;Secret&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 生成 yaml，在 volumes.projected 中指定上面的 user 与 pass
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cat &amp;lt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;EOF &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;&amp;gt; busybox.yaml
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;apiVersion: v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;kind: Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;metadata:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;  name: test-projected-volume
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;spec:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;  containers:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;  - name: test-secret-volume
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    image: busybox
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    args:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    - sleep
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    - &amp;quot;86400&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    volumeMounts:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    - name: mysql-cred
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;      mountPath: &amp;quot;&#x2F;projected-volume&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;      readOnly: true
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;  volumes:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;  - name: mysql-cred
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    projected:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;      sources:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;      - secret:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;          name: user
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;      - secret:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;          name: pass
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;EOF
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 创建 pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl apply&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -f&lt;&#x2F;span&gt;&lt;span&gt; .&#x2F;busybox.yaml
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pod&#x2F;test-projected-volume&lt;&#x2F;span&gt;&lt;span&gt; created
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;zai-pod-zhong-cha-kan-secret-shu-ju&quot;&gt;在 Pod 中查看 Secret 数据&lt;&#x2F;h4&gt;
+&lt;p&gt;进入到 &lt;code&gt;Pod&lt;&#x2F;code&gt; 中:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl exec&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -ti&lt;&#x2F;span&gt;&lt;span&gt; test-projected-volume -- sh
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;#
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;查看 &lt;code&gt;Secret&lt;&#x2F;code&gt; 数据:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# ls &#x2F;projected-volume&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;user.txt
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pass.txt
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# cat &#x2F;projected-volume&#x2F;user.txt
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;admin
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# cat &#x2F;projected-volume&#x2F;pass.txt
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;password
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;可以看到，在 &lt;code&gt;mountPath&lt;&#x2F;code&gt; 指定的路径下面有预先定义好的 &lt;code&gt;Secret&lt;&#x2F;code&gt;，并且文件名就是 &lt;code&gt;--from-file&lt;&#x2F;code&gt; 指定的参数。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;yaml-fang-shi&quot;&gt;yaml 方式&lt;&#x2F;h3&gt;
+&lt;h4 id=&quot;tong-guo-yaml-chuang-jian-secret&quot;&gt;通过 yaml 创建 Secret&lt;&#x2F;h4&gt;
+&lt;p&gt;创建 &lt;code&gt;Secret&lt;&#x2F;code&gt; 的配置文件:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cat &amp;lt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;EOF &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;&amp;gt; secret.yaml
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;apiVersion: v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;kind: Secret
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;metadata:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;  name: mysecret
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;type: Opaque
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;data:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;  user: YWRtaW4=
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;  pass: cGFzc3dvcmQ=
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;EOF
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;在 &lt;code&gt;Kubernetes&lt;&#x2F;code&gt; 中创建 &lt;code&gt;Secret&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl apply&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -f&lt;&#x2F;span&gt;&lt;span&gt; .&#x2F;secret.yml
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;secret&#x2F;mysecret&lt;&#x2F;span&gt;&lt;span&gt; created
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;cha-xun-secret-1&quot;&gt;查询 Secret&lt;&#x2F;h4&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl get secrets
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;NAME&lt;&#x2F;span&gt;&lt;span&gt;                  TYPE                                  DATA   AGE
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mysecret&lt;&#x2F;span&gt;&lt;span&gt;              Opaque                                2      3m23s
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;结果与使用命令行的方式有一些区别。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;zai-pod-zhong-shi-yong-secret-1&quot;&gt;在 Pod 中使用 Secret&lt;&#x2F;h4&gt;
+&lt;p&gt;生成一个 &lt;code&gt;yaml&lt;&#x2F;code&gt; 文件，引用上面的 &lt;code&gt;Secret&lt;&#x2F;code&gt;，需要注意 &lt;code&gt;secret.name&lt;&#x2F;code&gt; 应使用 &lt;code&gt;mysecret&lt;&#x2F;code&gt;，同时，数量从刚才的 &lt;strong&gt;2个&lt;&#x2F;strong&gt; 变成了 &lt;strong&gt;1个&lt;&#x2F;strong&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cat &amp;lt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;EOF &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;&amp;gt; busybox.yaml
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;apiVersion: v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;kind: Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;metadata:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;  name: test-projected-volume
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;spec:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;  containers:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;  - name: test-secret-volume
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    image: busybox
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    args:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    - sleep
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    - &amp;quot;86400&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    volumeMounts:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    - name: mysql-cred
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;      mountPath: &amp;quot;&#x2F;projected-volume&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;      readOnly: true
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;  volumes:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;  - name: mysql-cred
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;    projected:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;      sources:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;      - secret:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;          name: mysecret
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;EOF
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 创建 pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl apply&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -f&lt;&#x2F;span&gt;&lt;span&gt; .&#x2F;busybox.yaml
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pod&#x2F;test-projected-volume&lt;&#x2F;span&gt;&lt;span&gt; created
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;zai-pod-zhong-cha-kan-secret-shu-ju-1&quot;&gt;在 Pod 中查看 Secret 数据&lt;&#x2F;h4&gt;
+&lt;p&gt;进入到 &lt;code&gt;Pod&lt;&#x2F;code&gt; 中:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl exec&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -ti&lt;&#x2F;span&gt;&lt;span&gt; test-projected-volume -- sh
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;#
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;查看 &lt;code&gt;Secret&lt;&#x2F;code&gt; 数据:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# ls &#x2F;projected-volume&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pass&lt;&#x2F;span&gt;&lt;span&gt;  user
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# cat &#x2F;projected-volume&#x2F;user
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;admin
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# cat &#x2F;projected-volume&#x2F;pass.txt
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;password
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;可以看到，在 &lt;code&gt;mountPath&lt;&#x2F;code&gt; 指定的路径下面有预先定义好的 &lt;code&gt;Secret&lt;&#x2F;code&gt;，并且文件名就是创建 &lt;code&gt;Secret&lt;&#x2F;code&gt; 的 &lt;code&gt;yaml&lt;&#x2F;code&gt; 文件中，&lt;code&gt;data&lt;&#x2F;code&gt; 字段的 &lt;code&gt;key&lt;&#x2F;code&gt;，内容为对应 &lt;code&gt;value&lt;&#x2F;code&gt; 经过 &lt;code&gt;base64&lt;&#x2F;code&gt; 解码之后的结果。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;config-map&quot;&gt;Config Map&lt;&#x2F;h2&gt;
+&lt;p&gt;与 &lt;code&gt;Secret&lt;&#x2F;code&gt; 相同的是，&lt;code&gt;ConfigMap&lt;&#x2F;code&gt; 也用于保存用户定义的配置信息；不同的是，&lt;code&gt;ConfigMap&lt;&#x2F;code&gt; 中的数据使用保持明文形式。&lt;&#x2F;p&gt;
+&lt;p&gt;比如，原始配置保存在 &lt;code&gt;example&#x2F;ui.properties&lt;&#x2F;code&gt; 中，通过该文件创建一个 &lt;code&gt;ConfigMap&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# .properties文件的内容
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cat example&#x2F;ui.properties
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;color.good&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;purple
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;color.bad&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;yellow
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;allow.textmode&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;how.nice.to.look&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;fairlyNice
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 从 .properties 文件创建 ConfigMap
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl create configmap ui-config&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --from-file&lt;&#x2F;span&gt;&lt;span&gt;=example&#x2F;ui.properties
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# 以 yaml 格式查看 ConfigMap 里保存的信息(data)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; kubectl get configmaps ui-config&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -o&lt;&#x2F;span&gt;&lt;span&gt; yaml
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion:&lt;&#x2F;span&gt;&lt;span&gt; v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;data:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ui.properties: &lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;color.good&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;purple
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;color.bad&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;yellow
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;allow.textmode&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;how.nice.to.look&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;fairlyNice
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind:&lt;&#x2F;span&gt;&lt;span&gt; ConfigMap
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name:&lt;&#x2F;span&gt;&lt;span&gt; ui-config
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;downward-api&quot;&gt;Downward API&lt;&#x2F;h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A downwardAPI volume is used to make downward API data available to applications. It mounts a directory and writes the requested data in plain text files.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;让 &lt;code&gt;Pod&lt;&#x2F;code&gt; 里的容器能够直接获取到这个 &lt;code&gt;Pod API&lt;&#x2F;code&gt; 对象本身的信息。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;Kubernets&lt;&#x2F;code&gt; 提供了两种方式使用 &lt;code&gt;Downward API&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Environment variables&lt;&#x2F;li&gt;
+&lt;li&gt;Volume File&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;shi-yong-pod-de-zi-duan-zuo-wei-huan-jing-bian-liang&quot;&gt;使用 Pod 的字段作为环境变量&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;dapi-envars-fieldref
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test-container
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;k8s.gcr.io&#x2F;busybox
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;command&lt;&#x2F;span&gt;&lt;span&gt;: [ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sh&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;-c&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;args&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;while true; do
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;echo -en &amp;#39;\n&amp;#39;;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;printenv MY_NODE_NAME MY_POD_NAME MY_POD_NAMESPACE;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;printenv MY_POD_IP MY_POD_SERVICE_ACCOUNT;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sleep 10;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;done;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;env&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;MY_NODE_NAME
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;valueFrom&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;spec.nodeName
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;MY_POD_NAME
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;valueFrom&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;metadata.name
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;MY_POD_NAMESPACE
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;valueFrom&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;metadata.namespace
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;MY_POD_IP
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;valueFrom&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;status.podIP
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;MY_POD_SERVICE_ACCOUNT
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;valueFrom&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;spec.serviceAccountName
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;restartPolicy&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Never
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;上述配置文件中，包含了五个环境变量。字段 &lt;code&gt;env&lt;&#x2F;code&gt; 是 &lt;a href=&quot;https:&#x2F;&#x2F;v1-16.docs.kubernetes.io&#x2F;docs&#x2F;reference&#x2F;generated&#x2F;kubernetes-api&#x2F;v1.16&#x2F;#envvar-v1-core&quot;&gt;EnvVars&lt;&#x2F;a&gt; 类型的数组。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;fieldRef&lt;&#x2F;strong&gt; 表示选择 &lt;strong&gt;Pod&lt;&#x2F;strong&gt; 的字段，允许使用:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;metadata.name&lt;&#x2F;li&gt;
+&lt;li&gt;metadata.namespace&lt;&#x2F;li&gt;
+&lt;li&gt;metadata.labels&lt;&#x2F;li&gt;
+&lt;li&gt;metadata.annotations&lt;&#x2F;li&gt;
+&lt;li&gt;spec.nodeName&lt;&#x2F;li&gt;
+&lt;li&gt;spec.serviceAccountName&lt;&#x2F;li&gt;
+&lt;li&gt;status.hostIP&lt;&#x2F;li&gt;
+&lt;li&gt;status.podIP&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;由 &lt;code&gt;command&lt;&#x2F;code&gt; 字段与 &lt;code&gt;args&lt;&#x2F;code&gt; 字段可以得知，这个 &lt;code&gt;Pod&lt;&#x2F;code&gt; 的功能为打印在 &lt;code&gt;env&lt;&#x2F;code&gt; 中定义的环境变量。&lt;&#x2F;p&gt;
+&lt;p&gt;创建 &lt;code&gt;Pod&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; apply&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -f&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;k8s.io&#x2F;examples&#x2F;pods&#x2F;inject&#x2F;dapi-envars-pod.yaml
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;查看 &lt;code&gt;Pod&lt;&#x2F;code&gt; 是否为运行状态:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; get pods
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;查看日志:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; logs dapi-envars-fieldref
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;得到如下输出:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;minikube
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;dapi-envars-fieldref
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;default
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;172.17.0.4
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;default
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;shi-yong-container-de-zi-duan-zuo-wei-huan-jing-bian-liang&quot;&gt;使用 Container 的字段作为环境变量&lt;&#x2F;h3&gt;
+&lt;p&gt;与上面的示例类似，除了可以将 &lt;code&gt;Pod&lt;&#x2F;code&gt; 的字段作为环境变量的值传入 &lt;code&gt;Container&lt;&#x2F;code&gt; 外，同样可以将 &lt;code&gt;Container&lt;&#x2F;code&gt; 的字段作为环境变量的值传入 &lt;code&gt;Container&lt;&#x2F;code&gt; 中。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;dapi-envars-resourcefieldref
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test-container
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;k8s.gcr.io&#x2F;busybox:1.24
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;command&lt;&#x2F;span&gt;&lt;span&gt;: [ &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sh&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;-c&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;args&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;while true; do
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;echo -en &amp;#39;\n&amp;#39;;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;printenv MY_CPU_REQUEST MY_CPU_LIMIT;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;printenv MY_MEM_REQUEST MY_MEM_LIMIT;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sleep 10;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;done;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resources&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;requests&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;memory&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;32Mi&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cpu&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;125m&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;limits&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;memory&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;64Mi&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cpu&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;250m&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;env&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;MY_CPU_REQUEST
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;valueFrom&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resourceFieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containerName&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test-container
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resource&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;requests.cpu
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;MY_CPU_LIMIT
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;valueFrom&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resourceFieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containerName&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test-container
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resource&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;limits.cpu
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;MY_MEM_REQUEST
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;valueFrom&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resourceFieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containerName&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test-container
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resource&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;requests.memory
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;MY_MEM_LIMIT
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;valueFrom&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resourceFieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containerName&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test-container
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resource&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;limits.memory
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;restartPolicy&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Never
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;strong&gt;resourceFieldRef&lt;&#x2F;strong&gt; 表示选择 &lt;strong&gt;Container&lt;&#x2F;strong&gt; 的字段，允许使用 &lt;strong&gt;resources.limits&lt;&#x2F;strong&gt; 和 &lt;strong&gt;resources.requests&lt;&#x2F;strong&gt;，具体如下:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;limits.cpu&lt;&#x2F;li&gt;
+&lt;li&gt;limits.memory&lt;&#x2F;li&gt;
+&lt;li&gt;limits.ephemeral-storage&lt;&#x2F;li&gt;
+&lt;li&gt;requests.cpu&lt;&#x2F;li&gt;
+&lt;li&gt;requests.memory&lt;&#x2F;li&gt;
+&lt;li&gt;requests.ephemeral-storage&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;创建 &lt;code&gt;Pod&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; apply&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -f&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;k8s.io&#x2F;examples&#x2F;pods&#x2F;inject&#x2F;dapi-envars-container.yaml
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;查看 &lt;code&gt;Pod&lt;&#x2F;code&gt; 是否为运行状态:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; get pods
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;查看日志:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; logs dapi-envars-resourcefieldref
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;得到如下输出:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;33554432
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;67108864
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;jiang-pod-zi-duan-cun-chu-zai-wen-jian-zhong&quot;&gt;将 Pod 字段存储在文件中&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;kubernetes-downwardapi-volume-example
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;labels&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;zone&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;us-est-coast
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cluster&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test-cluster1
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;rack&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;rack-22
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;annotations&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;build&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;two
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;builder&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;john-doe
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;client-container
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;k8s.gcr.io&#x2F;busybox
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;command&lt;&#x2F;span&gt;&lt;span&gt;: [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sh&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;-c&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;args&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;while true; do
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;if [[ -e &#x2F;etc&#x2F;podinfo&#x2F;labels ]]; then
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;echo -en &amp;#39;\n\n&amp;#39;; cat &#x2F;etc&#x2F;podinfo&#x2F;labels; fi;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;if [[ -e &#x2F;etc&#x2F;podinfo&#x2F;annotations ]]; then
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;echo -en &amp;#39;\n\n&amp;#39;; cat &#x2F;etc&#x2F;podinfo&#x2F;annotations; fi;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sleep 5;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;done;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumeMounts&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;podinfo
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mountPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;etc&#x2F;podinfo
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumes&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;podinfo
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;downwardAPI&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;items&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;labels&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;metadata.labels
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;annotations&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;fieldPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;metadata.annotations
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;在这个示例中，为 &lt;code&gt;Pod&lt;&#x2F;code&gt; 定义了 &lt;code&gt;downward API&lt;&#x2F;code&gt; 类型的 &lt;code&gt;Volume&lt;&#x2F;code&gt;，并且将这个 &lt;code&gt;Volume&lt;&#x2F;code&gt; 的挂载点位于 &lt;code&gt;&#x2F;etc&#x2F;podinfo&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;downwardAPI&lt;&#x2F;code&gt; 的 &lt;code&gt;item&lt;&#x2F;code&gt; 属性为 &lt;a href=&quot;https:&#x2F;&#x2F;v1-16.docs.kubernetes.io&#x2F;docs&#x2F;reference&#x2F;generated&#x2F;kubernetes-api&#x2F;v1.16&#x2F;#downwardapivolumefile-v1-core&quot;&gt;DownwardAPIVolumeFile&lt;&#x2F;a&gt; 类型的数组。具体属性为:&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th align=&quot;left&quot;&gt;Field&lt;&#x2F;th&gt;&lt;th align=&quot;left&quot;&gt;Type&lt;&#x2F;th&gt;&lt;th align=&quot;left&quot;&gt;Description&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;fieldRef&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;&lt;a href=&quot;https:&#x2F;&#x2F;v1-16.docs.kubernetes.io&#x2F;docs&#x2F;reference&#x2F;generated&#x2F;kubernetes-api&#x2F;v1.16&#x2F;#objectfieldselector-v1-core&quot;&gt;ObjectFieldSelector&lt;&#x2F;a&gt;&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;必须: 从 annotations, labels, name and namespace 之中选择 &lt;code&gt;Pod&lt;&#x2F;code&gt; 的一个字段&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;mode&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;integer&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;可选:文件属性，取值范围 [0, 0777]。缺省使用默认值。可能与其他影响改文件的参数产生冲突&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;path&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;string&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;必须: 文件相对路径，要求必须是相对路径，且不能包含 &lt;strong&gt;..&lt;&#x2F;strong&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td align=&quot;left&quot;&gt;resourceFieldRef&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;&lt;a href=&quot;https:&#x2F;&#x2F;v1-16.docs.kubernetes.io&#x2F;docs&#x2F;reference&#x2F;generated&#x2F;kubernetes-api&#x2F;v1.16&#x2F;#resourcefieldselector-v1-core&quot;&gt;ResourceFieldSelector&lt;&#x2F;a&gt;&lt;&#x2F;td&gt;&lt;td align=&quot;left&quot;&gt;只支持 &lt;code&gt;Container&lt;&#x2F;code&gt; 的 &lt;code&gt;resources.limit&lt;&#x2F;code&gt; 与 &lt;code&gt;resources.requests&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;p&gt;创建 &lt;code&gt;Pod&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; apply&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -f&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;k8s.io&#x2F;examples&#x2F;pods&#x2F;inject&#x2F;dapi-volume.yaml
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;查看 &lt;code&gt;Pod&lt;&#x2F;code&gt; 是否为运行状态:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; get pods
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;查看日志:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; logs kubernetes-downwardapi-volume-example
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;得到如下输出:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cluster&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test-cluster1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;rack&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;rack-22&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;zone&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;us-est-coast&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;build&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;two&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;builder&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;john-doe&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;进入到 &lt;code&gt;Pod&lt;&#x2F;code&gt; 中:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; exec&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -it&lt;&#x2F;span&gt;&lt;span&gt; kubernetes-downwardapi-volume-example -- sh
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;查看 &lt;code&gt;Volume&lt;&#x2F;code&gt; 文件:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F;#&lt;&#x2F;span&gt;&lt;span&gt; cat &#x2F;etc&#x2F;podinfo&#x2F;labels
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;得到如下内容:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cluster&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test-cluster1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;rack&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;rack-22&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;zone&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;us-est-coast&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;类似地，查看 &lt;code&gt;annotations&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F;#&lt;&#x2F;span&gt;&lt;span&gt; cat &#x2F;etc&#x2F;podinfo&#x2F;annotations
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;jiang-container-zi-duan-cun-chu-zai-wen-jian-zhong&quot;&gt;将 Container 字段存储在文件中&lt;&#x2F;h3&gt;
+&lt;p&gt;同样可以将 &lt;code&gt;Container&lt;&#x2F;code&gt; 的字段写入到文件中，并以 &lt;code&gt;Volume&lt;&#x2F;code&gt; 的形式挂载到 &lt;code&gt;Container&lt;&#x2F;code&gt; 中&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;kubernetes-downwardapi-volume-example-2
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;client-container
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;k8s.gcr.io&#x2F;busybox:1.24
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;command&lt;&#x2F;span&gt;&lt;span&gt;: [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sh&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;-c&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;args&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;while true; do
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;echo -en &amp;#39;\n&amp;#39;;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;if [[ -e &#x2F;etc&#x2F;podinfo&#x2F;cpu_limit ]]; then
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;echo -en &amp;#39;\n&amp;#39;; cat &#x2F;etc&#x2F;podinfo&#x2F;cpu_limit; fi;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;if [[ -e &#x2F;etc&#x2F;podinfo&#x2F;cpu_request ]]; then
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;echo -en &amp;#39;\n&amp;#39;; cat &#x2F;etc&#x2F;podinfo&#x2F;cpu_request; fi;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;if [[ -e &#x2F;etc&#x2F;podinfo&#x2F;mem_limit ]]; then
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;echo -en &amp;#39;\n&amp;#39;; cat &#x2F;etc&#x2F;podinfo&#x2F;mem_limit; fi;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;if [[ -e &#x2F;etc&#x2F;podinfo&#x2F;mem_request ]]; then
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;echo -en &amp;#39;\n&amp;#39;; cat &#x2F;etc&#x2F;podinfo&#x2F;mem_request; fi;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sleep 5;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;done;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resources&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;requests&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;memory&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;32Mi&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cpu&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;125m&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;limits&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;memory&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;64Mi&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cpu&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;250m&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumeMounts&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;podinfo
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mountPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;etc&#x2F;podinfo
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumes&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;podinfo
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;downwardAPI&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;items&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;cpu_limit&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resourceFieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containerName&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;client-container
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resource&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;limits.cpu
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;divisor&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;1m
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;cpu_request&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resourceFieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containerName&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;client-container
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resource&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;requests.cpu
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;divisor&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;1m
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;mem_limit&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resourceFieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containerName&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;client-container
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resource&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;limits.memory
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;divisor&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;1Mi
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;mem_request&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resourceFieldRef&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containerName&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;client-container
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;resource&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;requests.memory
+&lt;&#x2F;span&gt;&lt;span&gt;              &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;divisor&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;1Mi
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;创建 &lt;code&gt;Pod&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; apply&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -f&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;k8s.io&#x2F;examples&#x2F;pods&#x2F;inject&#x2F;dapi-volume-resources.yaml
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;进入到 &lt;code&gt;Pod&lt;&#x2F;code&gt; 中:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; exec&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -it&lt;&#x2F;span&gt;&lt;span&gt; kubernetes-downwardapi-volume-example-2 -- sh
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;查看 &lt;code&gt;Volume&lt;&#x2F;code&gt; 文件:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;&#x2F;#&lt;&#x2F;span&gt;&lt;span&gt; cat &#x2F;etc&#x2F;podinfo&#x2F;cpu_limit
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;can-kao-wen-dang&quot;&gt;参考文档&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;storage&#x2F;volumes&#x2F;#projected&quot;&gt;Projected Volumes&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;tasks&#x2F;configure-pod-container&#x2F;configure-projected-volume-storage&#x2F;&quot;&gt;Configure a Pod to Use a Projected Volume for Storage&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;v1-16.docs.kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;storage&#x2F;volumes&#x2F;#downwardapi&quot;&gt;Donwload API&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;v1-16.docs.kubernetes.io&#x2F;docs&#x2F;tasks&#x2F;inject-data-application&#x2F;downward-api-volume-expose-pod-information&#x2F;&quot;&gt;Expose Pod Information to Containers Through Files&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;v1-16.docs.kubernetes.io&#x2F;docs&#x2F;tasks&#x2F;inject-data-application&#x2F;environment-variable-expose-pod-information&#x2F;#use-pod-fields-as-values-for-environment-variables&quot;&gt;Use Pod fields as values for environment variables&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;v1-16.docs.kubernetes.io&#x2F;docs&#x2F;tasks&#x2F;inject-data-application&#x2F;downward-api-volume-expose-pod-information&#x2F;#store-pod-fields&quot;&gt;Store Pod fields&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;v1-16.docs.kubernetes.io&#x2F;docs&#x2F;reference&#x2F;generated&#x2F;kubernetes-api&#x2F;v1.16&#x2F;#envvar-v1-core&quot;&gt;Kubernetes API: EnvVar v1 core&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;v1-16.docs.kubernetes.io&#x2F;docs&#x2F;reference&#x2F;generated&#x2F;kubernetes-api&#x2F;v1.16&#x2F;#envvarsource-v1-core&quot;&gt;Kubernetes API: EnvVarSource v1 core&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Pod 的基本概念</title>
+		<published>2020-09-02T21:06:17+00:00</published>
+		<updated>2020-09-02T21:06:17+00:00</updated>
+		<link href="https://blog.kiyoko.io/the-basics-of-pods/" type="text/html"/>
+		<id>https://blog.kiyoko.io/the-basics-of-pods/</id>
+		<content type="html">&lt;p&gt;前文提到，可以类比于虚拟机与应用程序之间的关系来理解 &lt;code&gt;Pod&lt;&#x2F;code&gt; 与 &lt;code&gt;Container&lt;&#x2F;code&gt; 之间的关系。这样就可以容易理解 &lt;strong&gt;凡是调度、网络、存储，以及安全相关的属性，基本都是 Pod 级别的&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;这些属性有一个共同点: 描述 &lt;strong&gt;机器&lt;&#x2F;strong&gt; 这个整体，而不是里面运行的 &lt;strong&gt;程序&lt;&#x2F;strong&gt;。比如:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;配置这个 &lt;strong&gt;机器&lt;&#x2F;strong&gt; 的网卡: &lt;code&gt;Pod&lt;&#x2F;code&gt; 的网络定义&lt;&#x2F;li&gt;
+&lt;li&gt;配置这个 &lt;strong&gt;机器&lt;&#x2F;strong&gt; 的磁盘: &lt;code&gt;Pod&lt;&#x2F;code&gt; 的存储定义&lt;&#x2F;li&gt;
+&lt;li&gt;配置这个 &lt;strong&gt;机器&lt;&#x2F;strong&gt; 的防火墙: &lt;code&gt;Pod&lt;&#x2F;code&gt; 的安全定义&lt;&#x2F;li&gt;
+&lt;li&gt;这台 &lt;strong&gt;机器&lt;&#x2F;strong&gt; 运行在哪个服务器之上: &lt;code&gt;Pod&lt;&#x2F;code&gt; 的调度&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;nodeselector&quot;&gt;NodeSelector&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;code&gt;NodeSelector&lt;&#x2F;code&gt; 是一个供用户将 &lt;code&gt;Pod&lt;&#x2F;code&gt; 与 &lt;code&gt;Node&lt;&#x2F;code&gt; 进行绑定的字段，用法如下所示:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yml &quot;&gt;&lt;code class=&quot;language-yml&quot; data-lang=&quot;yml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span&gt;...
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nodeSelector&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;disktype&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ssd
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;这样的一个配置，意味着这个 &lt;code&gt;Pod&lt;&#x2F;code&gt; 永远只能运行在携带了 &lt;code&gt;disktype: ssd&lt;&#x2F;code&gt; 标签 &lt;code&gt;(Label)&lt;&#x2F;code&gt; 的节点上。否则，将调度失败。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;nodename&quot;&gt;NodeName&lt;&#x2F;h2&gt;
+&lt;p&gt;当 &lt;code&gt;Kubernetes&lt;&#x2F;code&gt; 将 &lt;code&gt;Pod&lt;&#x2F;code&gt; 调度到某个 &lt;code&gt;Node&lt;&#x2F;code&gt; 上之后，会自动设置 &lt;code&gt;Pod&lt;&#x2F;code&gt; 的 &lt;code&gt;NodeName&lt;&#x2F;code&gt; 字段。即，&lt;code&gt;Kubernetes&lt;&#x2F;code&gt; 会认为所有已被赋值 &lt;code&gt;NodeName&lt;&#x2F;code&gt; 字段的 &lt;code&gt;Pod&lt;&#x2F;code&gt; 都是被调度过的。因此，通过用户也可以设置该字段来 &lt;strong&gt;骗过&lt;&#x2F;strong&gt; 调度器，比如在测试或者调试阶段。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;hostaliases&quot;&gt;HostAliases&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;code&gt;HostAliases&lt;&#x2F;code&gt; 定义 &lt;code&gt;Pod&lt;&#x2F;code&gt; 的 &lt;code&gt;hosts&lt;&#x2F;code&gt; 文件 &lt;code&gt;(比如 &#x2F;etc&#x2F;hosts)&lt;&#x2F;code&gt; 里的内容。&lt;&#x2F;p&gt;
+&lt;p&gt;比如，在这个 &lt;code&gt;Pod&lt;&#x2F;code&gt; 的 &lt;code&gt;YAML&lt;&#x2F;code&gt; 文件中设置了一组 &lt;code&gt;IP&lt;&#x2F;code&gt; 和 &lt;code&gt;Hostname&lt;&#x2F;code&gt; 的数据。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yml &quot;&gt;&lt;code class=&quot;language-yml&quot; data-lang=&quot;yml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span&gt;...
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;hostAliases&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ip&lt;&#x2F;span&gt;&lt;span&gt;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;10.1.2.3&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;hostnames&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;foo.remote&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    - &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;bar.remote&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;...
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;在 &lt;code&gt;Pod&lt;&#x2F;code&gt; 启动后，&lt;code&gt;&#x2F;etc&#x2F;hosts&lt;&#x2F;code&gt; 文件的内容将如下所示:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cat &#x2F;etc&#x2F;hosts
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Kubernetes-managed hosts file.
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;127.0.0.1&lt;&#x2F;span&gt;&lt;span&gt; localhost
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;...
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10.244.135.10&lt;&#x2F;span&gt;&lt;span&gt; hostaliases-pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10.1.2.3&lt;&#x2F;span&gt;&lt;span&gt; foo.remote
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;10.1.2.3&lt;&#x2F;span&gt;&lt;span&gt; bar.remote
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;其中，最下面两行记录，就是通过 &lt;code&gt;HostAliases&lt;&#x2F;code&gt; 字段写入的。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;特别注意&lt;&#x2F;strong&gt;: 在 &lt;code&gt;Kubernetes&lt;&#x2F;code&gt; 中，强烈建议使用这种方式设置 hosts 文件里的内容。如果使用直接修改 &lt;code&gt;hosts&lt;&#x2F;code&gt; 文件的方式，在 &lt;code&gt;Pod&lt;&#x2F;code&gt; 被删除重建之后，&lt;code&gt;kubelet&lt;&#x2F;code&gt; 会还原被修改的内容。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;shareprocessnamespace&quot;&gt;ShareProcessNamespace&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;凡是跟容器的 &lt;code&gt;Linux Namespace&lt;&#x2F;code&gt; 相关的属性，也一定是 &lt;code&gt;Pod&lt;&#x2F;code&gt; 级别的&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;设计 &lt;code&gt;Pod&lt;&#x2F;code&gt; 的初衷，就是要让里面的容器尽可能多地共享 &lt;code&gt;Linux Namespace&lt;&#x2F;code&gt;，仅保留必要的隔离和限制能力。这样，&lt;code&gt;Pod&lt;&#x2F;code&gt; 之于 &lt;code&gt;Container&lt;&#x2F;code&gt; 就会更近似于虚拟机之于程序。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yml &quot;&gt;&lt;code class=&quot;language-yml&quot; data-lang=&quot;yml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;shareProcessNamespace&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;shell
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;busybox
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;stdin&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tty&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;shareProcessNamespace: true&lt;&#x2F;code&gt; 表示: &lt;code&gt;Pod&lt;&#x2F;code&gt; 里的 &lt;code&gt;Containers&lt;&#x2F;code&gt; 要共享 &lt;code&gt;PID Namespace&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;gong-xiang-su-zhu-ji-de-namespace&quot;&gt;共享宿主机的 Namespace&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;HostPID&lt;&#x2F;strong&gt; - 控制 Pod 中容器是否可以共享宿主上的进程 ID 空间。 注意，如果与 ptrace 相结合，这种授权可能被利用，导致向容器外的特权逃逸 (默认情况下 ptrace 是被禁止的)。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;HostIPC&lt;&#x2F;strong&gt; - 控制 Pod 容器是否可共享宿主上的 IPC 名字空间。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;HostNetwork&lt;&#x2F;strong&gt; - 控制是否 Pod 可以使用节点的网络名字空间。 此类授权将允许 Pod 访问本地回路 (loopback) 设备、在本地主机 (localhost) 上监听的服务、还可能用来监听同一节点上其他 Pod 的网络活动。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;HostPorts&lt;&#x2F;strong&gt; -提供可以在宿主网络名字空间中可使用的端口范围列表。 该属性定义为一组 HostPortRange 对象的列表，每个对象中包含 min(含) 与 max(含) 值的设置。 默认不允许访问宿主端口。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;例如:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yml &quot;&gt;&lt;code class=&quot;language-yml&quot; data-lang=&quot;yml&quot;&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;hostNetwork&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;hostIPC&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;hostPID&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;shell
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;busybox
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;stdin&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tty&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;lifecycle&quot;&gt;Lifecycle&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;code&gt;Container Lifecycle Hooks&lt;&#x2F;code&gt;。顾名思义，是在容器状态发生变化时触发一系列 &lt;strong&gt;钩子&lt;&#x2F;strong&gt;。我们来看这样一个例子:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yml &quot;&gt;&lt;code class=&quot;language-yml&quot; data-lang=&quot;yml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;lifecycle-demo
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;lifecycle-demo-container
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;lifecycle&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;postStart&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;exec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;command&lt;&#x2F;span&gt;&lt;span&gt;: [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;sh&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;-c&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;echo Hello from the postStart handler &amp;gt; &#x2F;usr&#x2F;share&#x2F;message&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;preStop&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;exec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;command&lt;&#x2F;span&gt;&lt;span&gt;: [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;usr&#x2F;sbin&#x2F;nginx&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;-s&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;quit&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;PostStart&lt;&#x2F;strong&gt;: 这个回调在创建容器之后立即执行。 但是，不能保证回调会在容器入口点 &lt;code&gt;(ENTRYPOINT)&lt;&#x2F;code&gt; 之前执行。没有参数传递给处理程序。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;PreStop&lt;&#x2F;strong&gt;: 在容器因 API 请求或者管理事件 &lt;strong&gt;(诸如存活态探针失败、资源抢占、资源竞争等)&lt;&#x2F;strong&gt; 而被终止之前，此回调会被调用。如果容器已经处于终止或者完成状态，则对 preStop 回调的调用将失败。此调用是阻塞的，也是同步调用，因此必须在删除容器的调用之前完成。没有参数传递给处理程序。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;Kubernetes&lt;&#x2F;code&gt; 只有在 &lt;code&gt;Pod&lt;&#x2F;code&gt; 结束 &lt;strong&gt;(Terminated)&lt;&#x2F;strong&gt; 的时候才会发送 preStop 事件，这意味着在 Pod 完成 &lt;strong&gt;(Completed)&lt;&#x2F;strong&gt; 时 preStop 的事件处理逻辑不会被触发。这个限制在 &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;kubernetes&#x2F;kubernetes&#x2F;issues&#x2F;55807&quot;&gt;issue #55087&lt;&#x2F;a&gt; 中被追踪。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;有关终止行为的更详细描述，请参见 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;zh&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;pods&#x2F;pod-lifecycle&#x2F;#termination-of-pods&quot;&gt;终止 Pod&lt;&#x2F;a&gt;。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;status&quot;&gt;Status&lt;&#x2F;h2&gt;
+&lt;p&gt;Pending。Pod 已被 Kubernetes 系统接受 &lt;strong&gt;(YAML 文件已经提交给了 Kubernetes)&lt;&#x2F;strong&gt;，但有一个或者多个容器尚未创建亦未运行。此阶段包括等待 Pod 被调度的时间和通过网络下载镜像的时间，&lt;&#x2F;p&gt;
+&lt;p&gt;Running。Pod 已经绑定到了某个节点，Pod 中所有的容器都已被创建。至少有一个容器仍在运行，或者正处于启动或重启状态。&lt;&#x2F;p&gt;
+&lt;p&gt;Succeeded。Pod 中的所有容器都已成功终止，并且不会再重启。这种情况在运行一次性任务时最为常见。&lt;&#x2F;p&gt;
+&lt;p&gt;Failed。Pod 中的所有容器都已终止，并且至少有一个容器是因为失败终止。也就是说，容器以非 &lt;code&gt;0&lt;&#x2F;code&gt; 状态退出或者被系统终止。这个状态的出现，意味着你得想办法 Debug 这个容器的应用，比如查看 Pod 的 Events 和日志。&lt;&#x2F;p&gt;
+&lt;p&gt;Unknown。这是一个异常状态，意味着 Pod 的状态不能持续地被 kubelet 汇报给 kube-apiserver，这很有可能是主从节点(Master 和 Kubelet)间的通信出现了问题。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;can-kao-wen-dang&quot;&gt;参考文档&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;zh&#x2F;docs&#x2F;tasks&#x2F;configure-pod-container&#x2F;share-process-namespace&#x2F;&quot;&gt;在 Pod 中的容器之间共享进程命名空间&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;tasks&#x2F;configure-pod-container&#x2F;share-process-namespace&#x2F;&quot;&gt;Share Process Namespace between Containers in a Pod&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;zh&#x2F;docs&#x2F;concepts&#x2F;policy&#x2F;pod-security-policy&#x2F;&quot;&gt;Pod 安全策略&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;policy&#x2F;pod-security-policy&#x2F;&quot;&gt;Pod Security Policies&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;zh&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;pods&#x2F;pod-lifecycle&#x2F;&quot;&gt;Pod 的生命周期&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;pods&#x2F;pod-lifecycle&#x2F;&quot;&gt;Pod Lifecycle&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;zh&#x2F;docs&#x2F;tasks&#x2F;configure-pod-container&#x2F;attach-handler-lifecycle-event&#x2F;&quot;&gt;为容器的生命周期事件设置处理函数&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;zh&#x2F;docs&#x2F;concepts&#x2F;containers&#x2F;container-lifecycle-hooks&#x2F;&quot;&gt;容器生命周期回调&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Pod 的意义</title>
+		<published>2020-08-31T16:34:52+00:00</published>
+		<updated>2020-08-31T16:34:52+00:00</updated>
+		<link href="https://blog.kiyoko.io/why-do-we-need-pods/" type="text/html"/>
+		<id>https://blog.kiyoko.io/why-do-we-need-pods/</id>
+		<content type="html">&lt;h2 id=&quot;rong-qi-de-ju-xian-xing&quot;&gt;容器的局限性&lt;&#x2F;h2&gt;
+&lt;p&gt;既然要讨论 &lt;code&gt;Pod&lt;&#x2F;code&gt; 的意义，或许可以想象一个如果没有 &lt;code&gt;Pod&lt;&#x2F;code&gt; 会是什么样子。&lt;&#x2F;p&gt;
+&lt;p&gt;假设，有如下需求: 使用容器化来部署一个支持自动更新数据的文件服务。可以使用如下方法解决:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;在一个容器中，同时运行两个进程，一个进程提供文件服务，一个进程定时更新数据。
+&lt;ul&gt;
+&lt;li&gt;优点:
+&lt;ol&gt;
+&lt;li&gt;无论是编码，还是部署都十分的容易，就像在物理机或者虚拟机里面一样&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;缺点:
+&lt;ol&gt;
+&lt;li&gt;容器的本质是进程，对操作系统而言是那个由 &lt;code&gt;entrypoint&lt;&#x2F;code&gt; 指定的进程，其他进程都是其子进程，或子进程的子进程等。而且，&lt;code&gt;entrypoint&lt;&#x2F;code&gt; 没有回收僵尸进程的能力。&lt;&#x2F;li&gt;
+&lt;li&gt;耦合严重&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;每个进程分别位于各自的容器，两个容器之间通过挂载相同的外部 &lt;code&gt;volume&lt;&#x2F;code&gt; 实现容器间共享文件系统。
+&lt;ul&gt;
+&lt;li&gt;优点:
+&lt;ol&gt;
+&lt;li&gt;将两个容器解耦，保证功能单一性&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;缺点:
+&lt;ol&gt;
+&lt;li&gt;通过共享外部 &lt;code&gt;volume&lt;&#x2F;code&gt; 的方式无法保证数据安全性，其他容器，或宿主机也能直接访问 &lt;code&gt;volume&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;在上一个方法的基础上，通过 &lt;code&gt;--volume-from&lt;&#x2F;code&gt; 指定从其他的 &lt;code&gt;container&lt;&#x2F;code&gt; 挂载 &lt;code&gt;volume&lt;&#x2F;code&gt;。
+&lt;ul&gt;
+&lt;li&gt;优点:
+&lt;ol&gt;
+&lt;li&gt;避免对外直接暴露 &lt;code&gt;volume&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;到此为止，一切似乎很顺利，没有在创建 &lt;code&gt;Pod&lt;&#x2F;code&gt; 这样一个新的概念。&lt;&#x2F;p&gt;
+&lt;p&gt;但上述方案有一个局限性，&lt;code&gt;--volume-from&lt;&#x2F;code&gt; 的目标容器只能是本地的其他 &lt;code&gt;container&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;假设，使用 &lt;code&gt;Docker Swarm&lt;&#x2F;code&gt; 部署服务。为了便于叙述，做出如下定义:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;集群中存在两个节点。&lt;strong&gt;&lt;code&gt;node-0&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; 剩余 &lt;code&gt;2G&lt;&#x2F;code&gt; 内存，&lt;strong&gt;&lt;code&gt;node-1&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; 剩余 &lt;code&gt;1.5G&lt;&#x2F;code&gt; 内存&lt;&#x2F;li&gt;
+&lt;li&gt;两个容器 &lt;code&gt;container-0&lt;&#x2F;code&gt; 与 &lt;code&gt;container-1&lt;&#x2F;code&gt; 各需要 &lt;code&gt;1G&lt;&#x2F;code&gt; 内存&lt;&#x2F;li&gt;
+&lt;li&gt;部署过程，先启动 &lt;code&gt;container-0&lt;&#x2F;code&gt;，后启动 &lt;code&gt;container-1&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;因此，为了让两个容器能够运行在同一个 &lt;code&gt;Node&lt;&#x2F;code&gt; 上，需要在启动 &lt;code&gt;container-1&lt;&#x2F;code&gt; 时增加限制 &lt;code&gt;affinity=container-0&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;此时，如果 &lt;code&gt;container-0&lt;&#x2F;code&gt; 被调度到了 &lt;code&gt;node-1&lt;&#x2F;code&gt; 上，&lt;code&gt;node-1&lt;&#x2F;code&gt; 将剩余 &lt;code&gt;0.5G&lt;&#x2F;code&gt; 内存。接下来，调度 &lt;code&gt;container-1&lt;&#x2F;code&gt; 时，&lt;code&gt;Docker Swarm&lt;&#x2F;code&gt; 就会发现无法找到一个合适的 &lt;code&gt;Node&lt;&#x2F;code&gt; 来启动 &lt;code&gt;container-1&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;以上问题被称作 &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Gang_scheduling&quot;&gt;Gang Scheduling&lt;&#x2F;a&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;而 &lt;code&gt;Kuberntes&lt;&#x2F;code&gt; 则通过 &lt;code&gt;Pod&lt;&#x2F;code&gt; 解决了这个问题。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;Pod&lt;&#x2F;code&gt; 是 &lt;code&gt;Kubernetes&lt;&#x2F;code&gt; 中最小的可调度计算单元。在处理上述问题中，如果将 &lt;code&gt;container-0&lt;&#x2F;code&gt; 与 &lt;code&gt;container-1&lt;&#x2F;code&gt; 同时包含在一个 &lt;code&gt;Pod&lt;&#x2F;code&gt; 中，&lt;code&gt;Kubernetes&lt;&#x2F;code&gt; 在调度这个 &lt;code&gt;Pod&lt;&#x2F;code&gt; 时就只会考虑剩余内存不小于 &lt;code&gt;2G&lt;&#x2F;code&gt; 的 &lt;code&gt;node-0&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;对于上面这种，相互之间直接访问文件系统、使用 &lt;code&gt;localhost&lt;&#x2F;code&gt; 或 &lt;code&gt;socket&lt;&#x2F;code&gt; 文件进行本地通信，共享某些 &lt;code&gt;Namespace&lt;&#x2F;code&gt; 的一组容器，称之为 &lt;strong&gt;超亲密关系&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;pod-shi-xian-yuan-li&quot;&gt;Pod 实现原理&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;code&gt;Pod&lt;&#x2F;code&gt; 是一个逻辑概念。其本质是一组共享了 &lt;code&gt;Network Namespace&lt;&#x2F;code&gt;，并且可以声明共享同一个 &lt;code&gt;Volume&lt;&#x2F;code&gt; 的容器。&lt;&#x2F;p&gt;
+&lt;p&gt;比如，一个包含了 &lt;code&gt;A&lt;&#x2F;code&gt; 与 &lt;code&gt;B&lt;&#x2F;code&gt; 两个容器的 &lt;code&gt;Pod&lt;&#x2F;code&gt;，按照 &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;pods&#x2F;#what-is-a-pod&quot;&gt;定义&lt;&#x2F;a&gt; 的描述，可以使用如下 &lt;code&gt;Docker&lt;&#x2F;code&gt; 命令模拟:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# start container A
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; docker run&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --net&lt;&#x2F;span&gt;&lt;span&gt;=B&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --volumes-from&lt;&#x2F;span&gt;&lt;span&gt;=B&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --name&lt;&#x2F;span&gt;&lt;span&gt;=A image-A ...
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;但此时会发现，&lt;code&gt;Pod&lt;&#x2F;code&gt; 内的一组容器要遵循某个特定的顺序启动，容器与容器之间不再是对等关系，而是拓扑关系。&lt;&#x2F;p&gt;
+&lt;p&gt;所以，在 &lt;code&gt;Kubernetes&lt;&#x2F;code&gt; 项目里，通过增加一个被称作 &lt;code&gt;Infra&lt;&#x2F;code&gt; 的容器作为 &lt;code&gt;Pod&lt;&#x2F;code&gt; 里第一个启动的容器。用户定义的其他容器通过 &lt;code&gt;Join Network Namespace&lt;&#x2F;code&gt; 的方式，关联到 &lt;code&gt;Infra&lt;&#x2F;code&gt; 容器。这样的组织关系，可以用下面这样一个示意图来表达:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;images&#x2F;why-do-we-need-pods&#x2F;01.png&quot; alt=&quot;pause container&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;如上图所示，这个 &lt;code&gt;Pod&lt;&#x2F;code&gt; 里有两个用户容器 &lt;code&gt;A&lt;&#x2F;code&gt; 和 &lt;code&gt;B&lt;&#x2F;code&gt;，还有一个 &lt;code&gt;Infra&lt;&#x2F;code&gt; 容器。这个特殊容器的镜像地址为 &lt;code&gt;k8s.gcr.io&#x2F;pause&lt;&#x2F;code&gt;，源代码位于 &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;kubernetes&#x2F;kubernetes&#x2F;blob&#x2F;master&#x2F;build&#x2F;pause&#x2F;pause.c&quot;&gt;github&lt;&#x2F;a&gt;。同时，&lt;code&gt;kubelet&lt;&#x2F;code&gt; 提供参数 &lt;code&gt;--pod-infra-container-image&lt;&#x2F;code&gt; 支持自定义镜像。&lt;&#x2F;p&gt;
+&lt;p&gt;所以，当容器 &lt;code&gt;A&lt;&#x2F;code&gt;、&lt;code&gt;B&lt;&#x2F;code&gt; 加入到 &lt;code&gt;Infra&lt;&#x2F;code&gt; 容器的 &lt;code&gt;Network Namespace&lt;&#x2F;code&gt; 后，对于容器 &lt;code&gt;A&lt;&#x2F;code&gt;、&lt;code&gt;B&lt;&#x2F;code&gt; 而言:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;可以直接使用 &lt;code&gt;localhost&lt;&#x2F;code&gt; 进行通信&lt;&#x2F;li&gt;
+&lt;li&gt;看到的网络设备跟 &lt;code&gt;Infra&lt;&#x2F;code&gt; 容器看到的完全一样&lt;&#x2F;li&gt;
+&lt;li&gt;一个 &lt;code&gt;Pod&lt;&#x2F;code&gt; 只有一个 &lt;code&gt;IP&lt;&#x2F;code&gt; 地址，也就是这个 &lt;code&gt;Pod&lt;&#x2F;code&gt; 的 &lt;code&gt;Network Namespace&lt;&#x2F;code&gt; 对应的 &lt;code&gt;IP&lt;&#x2F;code&gt; 地址&lt;&#x2F;li&gt;
+&lt;li&gt;其他的所有网络资源，都是一个 &lt;code&gt;Pod&lt;&#x2F;code&gt; 一份，并且被该 &lt;code&gt;Pod&lt;&#x2F;code&gt; 中的所有容器共享&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;Pod&lt;&#x2F;code&gt; 的生命周期只跟 &lt;code&gt;Infra&lt;&#x2F;code&gt; 容器一致，而与容器 &lt;code&gt;A&lt;&#x2F;code&gt;、&lt;code&gt;B&lt;&#x2F;code&gt; 无关。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;而对于同一个 &lt;code&gt;Pod&lt;&#x2F;code&gt; 里面的所有用户容器来说，它们的进出流量，也可以认为都是通过 &lt;code&gt;Infra&lt;&#x2F;code&gt; 容器完成的。这一点很重要，因此为 &lt;code&gt;Kubernetes&lt;&#x2F;code&gt; 开发网络插件时，应该重点考虑的是如何配置这个 &lt;code&gt;Pod&lt;&#x2F;code&gt; 的 &lt;code&gt;Network Namespace&lt;&#x2F;code&gt;，而不是每一个用户容器如何使用网络配置。&lt;&#x2F;p&gt;
+&lt;p&gt;而且，在这这个设计模型之下，可以方便的共享 &lt;code&gt;volume&lt;&#x2F;code&gt;: &lt;code&gt;Kubernetes&lt;&#x2F;code&gt; 项目只要把所有 &lt;code&gt;volume&lt;&#x2F;code&gt; 的定义都设计在 &lt;code&gt;Pod&lt;&#x2F;code&gt; 层级即可。之后，&lt;code&gt;Pod&lt;&#x2F;code&gt; 内的容器再声明挂载这个 &lt;code&gt;volume&lt;&#x2F;code&gt; 从而达到共享 &lt;code&gt;volume&lt;&#x2F;code&gt; 的目的。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yml &quot;&gt;&lt;code class=&quot;language-yml&quot; data-lang=&quot;yml&quot;&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;two-containers
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;restartPolicy&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Never
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumes&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;shared-data
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;hostPath&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;data
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx-container
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nginx
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumeMounts&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;shared-data
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mountPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;debian-container
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;debian
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumeMounts&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;shared-data
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mountPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;pod-data
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;command&lt;&#x2F;span&gt;&lt;span&gt;: [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;bin&#x2F;sh&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;args&lt;&#x2F;span&gt;&lt;span&gt;: [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;-c&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;echo Hello from the debian container &amp;gt; &#x2F;pod-data&#x2F;index.html&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;rong-qi-she-ji-mo-shi&quot;&gt;容器设计模式&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;code&gt;Pod&lt;&#x2F;code&gt; 这种 &lt;strong&gt;超亲密关系&lt;&#x2F;strong&gt; 容器的设计思想，实际上就是希望，当用户想在一个容器里运行多个功能并不相关的应用时，应该优先考虑它们是不是更应该被描述成一个 &lt;code&gt;Pod&lt;&#x2F;code&gt; 里的多个容器。&lt;&#x2F;p&gt;
+&lt;p&gt;要理解这个概念，也很容易。只需要将 &lt;code&gt;Pod&lt;&#x2F;code&gt; 理解为原来的虚拟机即可。&lt;&#x2F;p&gt;
+&lt;p&gt;在虚拟机时代，服务之间也存在一定的关系。有上述那样需要共享本地文件系统的关系，也有 &lt;code&gt;API Service&lt;&#x2F;code&gt; 与 &lt;code&gt;DB&lt;&#x2F;code&gt; 之间的关系。&lt;&#x2F;p&gt;
+&lt;p&gt;当需要考虑是否需要将多个容器描述成一个 &lt;code&gt;Pod&lt;&#x2F;code&gt; 时，可以想象一下: 如果使用虚拟机部署，是否应该将这些服务部署在同一台虚拟机上。如果需要部署在一台虚拟机才能工作，那么就需要描述为一个 &lt;code&gt;Pod&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;can-kao-wen-dang&quot;&gt;参考文档&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;workloads&#x2F;pods&#x2F;&quot;&gt;Kuberntes Documentation: Pod&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;cloud.tencent.com&#x2F;developer&#x2F;article&#x2F;1513369&quot;&gt;为什么说容器是单进程模型&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;forums.docker.com&#x2F;t&#x2F;use-affinity-filter-in-docker-service-create&#x2F;78402&quot;&gt;Use “affinity filter” in “docker service create”&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.ianlewis.org&#x2F;en&#x2F;almighty-pause-container&quot;&gt;The Almighty Pause Container&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;developers.redhat.com&#x2F;blog&#x2F;2019&#x2F;01&#x2F;15&#x2F;podman-managing-containers-pods&#x2F;&quot;&gt;Podman: Managing pods and containers in a local container runtime&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.usenix.org&#x2F;system&#x2F;files&#x2F;conference&#x2F;hotcloud16&#x2F;hotcloud16_burns.pdf&quot;&gt;Design patterns for container-based distributed systems&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+</feed>

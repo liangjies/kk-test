@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 设置容器内的 locale</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/set-locale-inside-a-container/#zai-rong-qi-nei-chu-li" class="toc-link">在容器内处理</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/set-locale-inside-a-container/#zai-dockerfile-zhong-chu-li" class="toc-link">在 Dockerfile 中处理</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;set-locale-inside-a-container&#x2F;">设置容器内的 locale</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-11-30</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>解决办法面向 <strong>Ubuntu/Debian</strong> 系列，<strong>CentOS</strong> 系列方法类似。</p>
+<h2 id="zai-rong-qi-nei-chu-li">在容器内处理</h2>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">apt</span><span> update</span><span style="color:#bf616a;"> --fix-missing
+</span><span style="color:#bf616a;">apt</span><span> install</span><span style="color:#bf616a;"> -y</span><span> locales
+</span><span style="color:#bf616a;">sed -i </span><span>&#39;</span><span style="color:#a3be8c;">/en_US.UTF-8/s/^# //g</span><span>&#39; /etc/locale.gen
+</span><span style="color:#bf616a;">locale-gen
+</span><span style="color:#96b5b4;">echo </span><span>&quot;</span><span style="color:#a3be8c;">export LANG=en_US.UTF-8</span><span>&quot; &gt;&gt; </span><span style="color:#bf616a;">~</span><span>/.bashrc
+</span><span style="color:#96b5b4;">echo </span><span>&quot;</span><span style="color:#a3be8c;">export LANGUAGE=en_US.UTF-8</span><span>&quot; &gt;&gt; </span><span style="color:#bf616a;">~</span><span>/.bashrc
+</span><span style="color:#96b5b4;">echo </span><span>&quot;</span><span style="color:#a3be8c;">export LC_ALL=en_US.UTF-8</span><span>&quot; &gt;&gt; </span><span style="color:#bf616a;">~</span><span>/.bashrc
+</span><span style="color:#96b5b4;">echo </span><span>&quot;</span><span style="color:#a3be8c;">set fileencodings=utf-8,ucs-bom,gb18030,gbk,gb2312,cp936</span><span>&quot; &gt;&gt; </span><span style="color:#bf616a;">~</span><span>/.vimrc
+</span><span style="color:#96b5b4;">echo </span><span>&quot;</span><span style="color:#a3be8c;">set termencoding=utf-8</span><span>&quot; &gt;&gt; </span><span style="color:#bf616a;">~</span><span>/.vimrc
+</span><span style="color:#96b5b4;">echo </span><span>&quot;</span><span style="color:#a3be8c;">set encoding=utf-8</span><span>&quot; &gt;&gt; </span><span style="color:#bf616a;">~</span><span>/.vimrc
+</span></code></pre>
+<h2 id="zai-dockerfile-zhong-chu-li">在 Dockerfile 中处理</h2>
+<pre data-lang="dockerfile" style="background-color:#2b303b;color:#c0c5ce;" class="language-dockerfile "><code class="language-dockerfile" data-lang="dockerfile"><span>RUN apt update --fix-missing \
+</span><span>    &amp;&amp; apt install -y locales \
+</span><span>    &amp;&amp; sed -i &#39;/en_US.UTF-8/s/^# //g&#39; /etc/locale.gen \
+</span><span>    &amp;&amp; locale-gen
+</span><span>
+</span><span>RUN echo &quot;set fileencodings=utf-8,ucs-bom,gb18030,gbk,gb2312,cp936&quot; &gt;&gt; ~/.vimrc \
+</span><span>    &amp;&amp; echo &quot;set termencoding=utf-8&quot; &gt;&gt; ~/.vimrc \
+</span><span>    &amp;&amp; echo &quot;set encoding=utf-8&quot; &gt;&gt; ~/.vimrc
+</span><span>
+</span><span>ENV LANG en_US.UTF-8
+</span><span>ENV LANGUAGE en_US.UTF-8
+</span><span>ENV LC_ALL en_US.UTF-8
+</span></code></pre>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/container/">#container</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/linux/">#linux</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;introduction-to-parallel-programming&#x2F;">‹ 并行程序设计</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;delete-all-evicted-pods&#x2F;">删除所有 Evicted 状态的 Pod ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

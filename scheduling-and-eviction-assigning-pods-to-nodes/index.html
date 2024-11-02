@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 调度与驱逐 —— 将 Pod 分配到节点上</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/scheduling-and-eviction-assigning-pods-to-nodes/#nodeselector" class="toc-link">nodeSelector</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/scheduling-and-eviction-assigning-pods-to-nodes/#get-nodes" class="toc-link">Get nodes</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/scheduling-and-eviction-assigning-pods-to-nodes/#get-the-names-of-cluster-s-nodes" class="toc-link">Get the names of cluster&#x27;s nodes</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/scheduling-and-eviction-assigning-pods-to-nodes/#attach-label-to-the-node" class="toc-link">Attach label to the node</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/scheduling-and-eviction-assigning-pods-to-nodes/#add-a-nodeselector-field-to-your-pod-configuration" class="toc-link">Add a nodeSelector field to your pod configuration</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/scheduling-and-eviction-assigning-pods-to-nodes/#affinity-and-anti-affinity" class="toc-link">Affinity and anti-affinity</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/scheduling-and-eviction-assigning-pods-to-nodes/#can-kao-wen-dang" class="toc-link">参考文档</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;scheduling-and-eviction-assigning-pods-to-nodes&#x2F;">调度与驱逐 —— 将 Pod 分配到节点上</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-11-15</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>Kubernetes 允许用户强制 Pod 只能在特定的 Node(s) 上，或者建议优先在特定的 Node(s) 上运行。常规方法是使用 <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/">Labels and Selectors</a> 来选择。该约束为可选项，默认情况下调度器将自动进行合理的调度，比如，将 pod 分散到节点上，而非在可用资源不足的节点上。但在某些情况下，用户期望对调度 Pod 的 Node(s) 有更多控制，例如，确保 pod 最终落在有 SSD 的机器上，或者将若干有大量通信的服务的 pod 放置在同一个可用区。</p>
+<h2 id="nodeselector">nodeSelector</h2>
+<p><strong>nodeSelector</strong> 是最简单推荐形式的节点选择约束。nodeSelector 是 PodSpec 的一个字段，其包含键值对映射。为了使 pod 可以在某个节点上运行，约束键值对构成的集合必须是节点标签集合的子集。</p>
+<h3 id="get-nodes">Get nodes</h3>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> get nodes
+</span></code></pre>
+<h3 id="get-the-names-of-cluster-s-nodes">Get the names of cluster's nodes</h3>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> get nodes
+</span></code></pre>
+<h3 id="attach-label-to-the-node">Attach label to the node</h3>
+<p>规则为:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> label nodes &lt;node-name&gt; &lt;label-key&gt;=&lt;label-value&gt;
+</span></code></pre>
+<p>例如，节点 'kubernetes-foo-node-1.c.a-robinson.internal'，标签 'disktype=ssd'，则可以执行:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> label nodes kubernetes-foo-node-1.c.a-robinson.internal disktype=ssd
+</span></code></pre>
+<p>通过命令验证:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> get nodes</span><span style="color:#bf616a;"> --show-labels
+</span></code></pre>
+<p>或者:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> describe node &lt;node-name&gt;
+</span></code></pre>
+<h3 id="add-a-nodeselector-field-to-your-pod-configuration">Add a nodeSelector field to your pod configuration</h3>
+<p>如下为原始 Pod 配置文件:</p>
+<pre data-lang="yaml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yaml "><code class="language-yaml" data-lang="yaml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Pod
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>  </span><span style="color:#bf616a;">labels</span><span>:
+</span><span>    </span><span style="color:#bf616a;">env</span><span>: </span><span style="color:#a3be8c;">test
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>    </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">nginx
+</span></code></pre>
+<p>在此基础上，添加 nodeSelector:</p>
+<pre data-lang="yaml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yaml "><code class="language-yaml" data-lang="yaml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Pod
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>  </span><span style="color:#bf616a;">labels</span><span>:
+</span><span>    </span><span style="color:#bf616a;">env</span><span>: </span><span style="color:#a3be8c;">test
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>    </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>    </span><span style="color:#bf616a;">imagePullPolicy</span><span>: </span><span style="color:#a3be8c;">IfNotPresent
+</span><span>  </span><span style="color:#bf616a;">nodeSelector</span><span>:
+</span><span>    </span><span style="color:#bf616a;">disktype</span><span>: </span><span style="color:#a3be8c;">ssd
+</span></code></pre>
+<p>而改文件可以在 <a href="https://k8s.io/examples/pods/pod-nginx.yaml">https://k8s.io/examples/pods/pod-nginx.yaml</a> 得到。因此，使用如下命令创建 Pod:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> apply</span><span style="color:#bf616a;"> -f</span><span> https://k8s.io/examples/pods/pod-nginx.yaml
+</span></code></pre>
+<p>之后，查看 Pod 所在的 Node 并验证约束是否有效:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> get pods</span><span style="color:#bf616a;"> -o</span><span> wide
+</span><span>
+</span><span style="color:#bf616a;">kubectl</span><span> describe node &lt;node-name&gt;
+</span></code></pre>
+<h3 id="affinity-and-anti-affinity">Affinity and anti-affinity</h3>
+<p>Affinity and anti-affinity (亲和与反亲和) 是 nodeSelector 提供的一种非常简单的将 pod 约束到具有特定标签的节点上的方法，极大地扩展了用户可以表达约束的类型。关键增强表现为:</p>
+<ol>
+<li>语言更具表现力，不只是 “完全匹配的 AND” 语义</li>
+<li>规则可以是一种建议性的，而非硬性要求，即使调度器无法找到满足要求的 Node，依旧会调度该 pod</li>
+<li>除了可以使用 Node 本身的标签作为约束之外，还可以使用运行在 Node 上的 pod 的标签作为约束，表明可以或者不可以与哪些 pod 运行在同一 Node 上。</li>
+</ol>
+<p>Affinity 功能包含两种类型的 affinity: <strong>node affinity</strong> 与 <strong>inter-pod affinity/anti-affinity</strong>。<strong>node affinity</strong> 类似于 <strong>nodeSelector</strong>，对应上述 <strong>1,2</strong> 两点优势。而 <strong>inter-pod affinity/anti-affinity</strong> 具有上述 <strong>1,2,3</strong> 三点优势。</p>
+<h4 id="node-affinity">Node affinity</h4>
+<p><strong>Node affinity</strong> 概念上类似于 <strong>nodeSelector</strong>，可以根据节点上的标签来约束 pod 可以调度到哪些节点。</p>
+<p>目前有两种类型的 Node affinity，分别为 <strong>requiredDuringSchedulingIgnoredDuringExecution</strong> 和 <strong>preferredDuringSchedulingIgnoredDuringExecution</strong>。</p>
+<p><strong>requiredDuringSchedulingIgnoredDuringExecution</strong> 指定了将 pod 调度到一个节点上必须满足的规则，原则上等同于 nodeSelector，但语法更具有表现力。</p>
+<p><strong>preferredDuringSchedulingIgnoredDuringExecution</strong> 指定调度器将尝试执行但不能保证的偏好。</p>
+<p>名称中 <strong>IgnoredDuringExecution</strong> 类似于 <strong>nodeSelector</strong> 的用法，表明如果节点的标签在 Pod 运行时发生变更，从而不再满足 pod 上的 affinity 规则时，pod 将仍然继续运行在原节点上。<strong>requiredDuringSchedulingRequiredDuringExecution</strong> 还只存在于计划中。</p>
+<p>因此，在下面的示例中:</p>
+<ul>
+<li><strong>requiredDuringSchedulingIgnoredDuringExecution</strong> 的含义为: <strong>必须将 pod 运行在具有 kubernetes.io/e2e-az-name=e2e-az1 或 kubernetes.io/e2e-az-name=e2e-az2 标签的 Node 上</strong></li>
+<li><strong>preferredDuringSchedulingIgnoredDuringExecution</strong> 的含义为: <strong>尝试将 pod 运行具有 another-node-label-key=another-node-label-value 标签的 Node 上，如果这不可能的话，则允许 pod 在其他地方运行</strong></li>
+</ul>
+<pre data-lang="yaml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yaml "><code class="language-yaml" data-lang="yaml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Pod
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">with-node-affinity
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">affinity</span><span>:
+</span><span>    </span><span style="color:#bf616a;">nodeAffinity</span><span>:
+</span><span>      </span><span style="color:#bf616a;">requiredDuringSchedulingIgnoredDuringExecution</span><span>:
+</span><span>        </span><span style="color:#bf616a;">nodeSelectorTerms</span><span>:
+</span><span>        - </span><span style="color:#bf616a;">matchExpressions</span><span>:
+</span><span>          - </span><span style="color:#bf616a;">key</span><span>: </span><span style="color:#a3be8c;">kubernetes.io/e2e-az-name
+</span><span>            </span><span style="color:#bf616a;">operator</span><span>: </span><span style="color:#a3be8c;">In
+</span><span>            </span><span style="color:#bf616a;">values</span><span>:
+</span><span>            - </span><span style="color:#a3be8c;">e2e-az1
+</span><span>            - </span><span style="color:#a3be8c;">e2e-az2
+</span><span>      </span><span style="color:#bf616a;">preferredDuringSchedulingIgnoredDuringExecution</span><span>:
+</span><span>      - </span><span style="color:#bf616a;">weight</span><span>: </span><span style="color:#d08770;">1
+</span><span>        </span><span style="color:#bf616a;">preference</span><span>:
+</span><span>          </span><span style="color:#bf616a;">matchExpressions</span><span>:
+</span><span>          - </span><span style="color:#bf616a;">key</span><span>: </span><span style="color:#a3be8c;">another-node-label-key
+</span><span>            </span><span style="color:#bf616a;">operator</span><span>: </span><span style="color:#a3be8c;">In
+</span><span>            </span><span style="color:#bf616a;">values</span><span>:
+</span><span>            - </span><span style="color:#a3be8c;">another-node-label-value
+</span><span>  </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>  - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">with-node-affinity
+</span><span>    </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">k8s.gcr.io/pause:2.0
+</span></code></pre>
+<p>Node affinity 语法支持的操作符: In，NotIn，Exists，DoesNotExist，Gt，Lt。使用 NotIn 和 DoesNotExist 来实现 <strong>node anti-affinity</strong> 行为，或者使用 <a href="https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/">node taints(节点污点将)</a> pod 从特定节点中驱逐。</p>
+<p>如果同时指定了 <strong>nodeSelector</strong> 和 <strong>nodeAffinity</strong>，则要求两者必须同时满足，才能将 pod 调度到候选 Node 上。</p>
+<p>如果指定了多个与 <strong>nodeAffinity</strong> 类型关联的 <strong>nodeSelectorTerms</strong>，则 Node 只需要满足其中任何一个 nodeSelectorTerms 即可将 pod 调度到 Node 上。</p>
+<p>如果指定了多个与 <strong>nodeSelectorTerms</strong> 关联的 <strong>matchExpressions</strong>，则当且仅当所有 <strong>matchExpressions</strong> 得到满足时才将 pod 调度到该 Node 上。</p>
+<h2 id="can-kao-wen-dang">参考文档</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/">Assigning Pods to Nodes</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/kubernetes/">#kubernetes</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/scheduling/">#scheduling</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-device-plugin&#x2F;">‹ Kubernetes Device Plugin</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;volcano&#x2F;">Volcano ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

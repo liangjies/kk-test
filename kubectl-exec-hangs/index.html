@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - Kubectl Exec 无响应</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubectl-exec-hangs/#qi-yin" class="toc-link">起因</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubectl-exec-hangs/#ding-wei-wen-ti" class="toc-link">定位问题</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubectl-exec-hangs/#que-ren-kubelet-wen-ti" class="toc-link">确认 kubelet 问题</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubectl-exec-hangs/#cha-kan-docker-daemon-profile" class="toc-link">查看 Docker Daemon Profile</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubectl-exec-hangs/#cha-kan-jin-cheng-zhuang-tai" class="toc-link">查看进程状态</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubectl-exec-hangs&#x2F;">Kubectl Exec 无响应</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-03-16</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <h2 id="qi-yin">起因</h2>
+<p>在使用 <code>kubectl exec</code> 进入到 <code>pod</code> 时，进程会停止响应。</p>
+<h2 id="ding-wei-wen-ti">定位问题</h2>
+<h3 id="que-ren-kubelet-wen-ti">确认 kubelet 问题</h3>
+<p>由于 <code>kubectl exec</code> 这个命令的实际执行链路非常长，所以，先简单粗暴的确认一下问题是否与 <code>kubelet</code> 有关。</p>
+<p>登录到异常 <code>pod</code> 所在的节点，查看问题容器的 <code>container id</code>:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> docker ps
+</span><span>
+</span><span style="color:#bf616a;">CONTAINER</span><span> ID   IMAGE                      COMMAND                  CREATED        STATUS        PORTS     NAMES
+</span><span style="color:#bf616a;">0253de11b8f1</span><span>   nvidia/k8s-device-plugin   &quot;</span><span style="color:#a3be8c;">nvidia-device-plugi…</span><span>&quot;   10 hours ago   Up 10 hours             k8s_nvidia-device-plugin-ctr_nvidia-device-plugin-daemonset-jzrz7_kube-system_164ea21a-cc71-4cb0-8f83-6d160a720163_0
+</span><span style="color:#bf616a;">ecaa1fd07ce8</span><span>   k8s.gcr.io/pause:3.1       &quot;</span><span style="color:#a3be8c;">/pause</span><span>&quot;                 10 hours ago   Up 10 hours             k8s_POD_nvidia-device-plugin-daemonset-jzrz7_kube-system_164ea21a-cc71-4cb0-8f83-6d160a720163_0
+</span><span style="color:#bf616a;">e318f67bce5c</span><span>   bdb21b3e4fdf               &quot;</span><span style="color:#a3be8c;">/bin/bash -c &#39;sleep…</span><span>&quot;   15 hours ago   Up 15 hours             k8s_namespace-job_pod-w9lsq_xxxx_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx_0
+</span><span style="color:#bf616a;">c8d5fa9327ab</span><span>   k8s.gcr.io/pause:3.1       &quot;</span><span style="color:#a3be8c;">/pause</span><span>&quot;                 15 hours ago   Up 15 hours             k8s_POD_job-w9lsq_xxxx_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx_0
+</span></code></pre>
+<p>确认异常容器为 <code>e318f67bce5c</code>。</p>
+<p>验证是否可以进入容器:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> docker exec</span><span style="color:#bf616a;"> -ti</span><span> e318f67bce5c /bin/bash
+</span><span style="color:#65737e;"># 无响应
+</span></code></pre>
+<p>此处的现象与 <code>kubectl exec</code> 如出一辙。因此，可以确定 <code>docker</code> 之后的链路一定有问题，所以先忽略 <code>kubelet</code>。</p>
+<h3 id="cha-kan-docker-daemon-profile">查看 Docker Daemon Profile</h3>
+<p><code>Docker Daemon</code> 进程监听的是 <code>UNIX Socket</code>，通过 <code>socat</code> 转为 <code>TCP</code> 流量:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">socat -d -d</span><span> TCP-LISTEN:8080,fork,bind=10.100.200.27 UNIX:/var/run/docker.sock
+</span></code></pre>
+<p>访问 <code>pprof</code> 的接口下载 <code>goroutine</code> 信息:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">wget -O</span><span> all_goroutines http://10.100.200.27:8080/debug/pprof/goroutine?debug=2
+</span></code></pre>
+<p>精简之后，得到如下重要信息:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cat all_goroutines
+</span><span>
+</span><span style="color:#bf616a;">goroutine</span><span> 87725 </span><span style="color:#b48ead;">[</span><span>select, 635 minutes</span><span style="color:#b48ead;">]</span><span>:
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/github.com/containerd/fifo.</span><span>(*fifo)</span><span style="color:#bf616a;">.Write</span><span>(0xc001768000, 0xc001282000, 0x1, 0x8000, 0x1, 0x0, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/github.com/containerd/fifo/fifo.go:195</span><span> +0xdb
+</span><span style="color:#bf616a;">io.copyBuffer</span><span>(0x7f72d86f92a8, 0xc001cba740, 0x563d49513f80, 0xc0019983b0, 0xc001282000, 0x8000, 0x8000, 0x0, 0x1, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/io/io.go:404</span><span> +0x1fd
+</span><span style="color:#bf616a;">io.CopyBuffer</span><span>(0x7f72d86f92a8, 0xc001cba740, 0x563d49513f80, 0xc0019983b0, 0xc001282000, 0x8000, 0x8000, 0xc0011e4f90, 0xc0011e4f50, 0x563d465a9277)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/io/io.go:375</span><span> +0x84
+</span><span style="color:#bf616a;">github.com/docker/docker/pkg/pools.Copy</span><span>(0x7f72d86f92a8, 0xc001cba740, 0x563d49513f80, 0xc0019983b0, 0xc0019983b0, 0x1, 0x563d465d6bd8)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/pkg/pools/pools.go:81</span><span> +0xa6
+</span><span style="color:#bf616a;">github.com/docker/docker/container/stream.</span><span>(*Config)</span><span style="color:#bf616a;">.CopyToPipe.func2</span><span>(0xc001092c60, 0x563d4954ce80, 0xc0019983b0)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/container/stream/streams.go:142</span><span> +0xad
+</span><span style="color:#bf616a;">created</span><span> by github.com/docker/docker/container/stream.(*Config)</span><span style="color:#bf616a;">.CopyToPipe
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/container/stream/streams.go:141</span><span> +0xbb
+</span><span>
+</span><span style="color:#bf616a;">goroutine</span><span> 87733 </span><span style="color:#b48ead;">[</span><span>select, 777 minutes</span><span style="color:#b48ead;">]</span><span>:
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/google.golang.org/grpc/internal/transport.</span><span>(*Stream)</span><span style="color:#bf616a;">.waitOnHeader</span><span>(0xc000a35a00)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/google.golang.org/grpc/internal/transport/transport.go:318</span><span> +0xce
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/google.golang.org/grpc/internal/transport.</span><span>(*Stream)</span><span style="color:#bf616a;">.RecvCompress</span><span>(...)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/google.golang.org/grpc/internal/transport/transport.go:333
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/google.golang.org/grpc.</span><span>(*csAttempt)</span><span style="color:#bf616a;">.recvMsg</span><span>(0xc000b12e00, 0x563d4934b1a0, 0xc001e683c0, 0x0, 0xc0012f0360, 0x84)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/google.golang.org/grpc/stream.go:871</span><span> +0x755
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/google.golang.org/grpc.</span><span>(*clientStream)</span><span style="color:#bf616a;">.RecvMsg.func1</span><span>(0xc000b12e00, 0x84, 0x84)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/google.golang.org/grpc/stream.go:736</span><span> +0x48
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/google.golang.org/grpc.</span><span>(*clientStream)</span><span style="color:#bf616a;">.withRetry</span><span>(0xc0013eeea0, 0xc000adab30, 0xc000adab00, 0xc0012f0360, 0xc0016eedb8)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/google.golang.org/grpc/stream.go:594</span><span> +0x9e
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/google.golang.org/grpc.</span><span>(*clientStream)</span><span style="color:#bf616a;">.RecvMsg</span><span>(0xc0013eeea0, 0x563d4934b1a0, 0xc001e683c0, 0x0, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/google.golang.org/grpc/stream.go:735</span><span> +0x105
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/google.golang.org/grpc.invoke</span><span>(0x563d495784c0, 0xc001e684b0, 0x563d481cdc32, 0x29, 0x563d49352ae0, 0xc00157aa40, 0x563d4934b1a0, 0xc001e683c0, 0xc000968380, 0xc0009fdda0, ...)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/google.golang.org/grpc/call.go:73</span><span> +0x13d
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/github.com/containerd/containerd.namespaceInterceptor.unary</span><span>(0x563d4816cc49, 0x4, 0x563d49578440, 0xc000052038, 0x563d481cdc32, 0x29, 0x563d49352ae0, 0xc00157aa40, 0x563d4934b1a0, 0xc001e683c0, ...)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/github.com/containerd/containerd/grpc.go:35</span><span> +0xf4
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/google.golang.org/grpc.</span><span>(*ClientConn)</span><span style="color:#bf616a;">.Invoke</span><span>(0xc000968380, 0x563d49578440, 0xc000052038, 0x563d481cdc32, 0x29, 0x563d49352ae0, 0xc00157aa40, 0x563d4934b1a0, 0xc001e683c0, 0x0, ...)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/google.golang.org/grpc/call.go:35</span><span> +0x10b
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/github.com/containerd/containerd/api/services/tasks/v1.</span><span>(*tasksClient)</span><span style="color:#bf616a;">.Start</span><span>(0xc001574758, 0x563d49578440, 0xc000052038, 0xc00157aa40, 0x0, 0x0, 0x0, 0x1, 0xc0018b4210, 0xa2)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/github.com/containerd/containerd/api/services/tasks/v1/tasks.pb.go:1309</span><span> +0xd1
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/github.com/containerd/containerd.</span><span>(*process)</span><span style="color:#bf616a;">.Start</span><span>(0xc001e68390, 0x563d49578440, 0xc000052038, 0xc001634f40, 0x40)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/github.com/containerd/containerd/process.go:118</span><span> +0xef
+</span><span style="color:#bf616a;">github.com/docker/docker/libcontainerd/remote.</span><span>(*client)</span><span style="color:#bf616a;">.Exec</span><span>(0xc0001ee0e0, 0x563d49578440, 0xc000052038, 0xc00098bb80, 0x40, 0xc001634f40, 0x40, 0xc0009a4690, 0x1, 0xc001df0b00, ...)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/libcontainerd/remote/client.go:324</span><span> +0x8cc
+</span><span style="color:#bf616a;">github.com/docker/docker/daemon.</span><span>(*Daemon)</span><span style="color:#bf616a;">.ContainerExecStart</span><span>(0xc00000c1e0, 0x563d49578440, 0xc000052038, 0xc000f5200b, 0x40, 0x563d495141e0, 0xc001998398, 0x7f72d86f9198, 0xc001998398, 0x0, ...)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/daemon/exec.go:263</span><span> +0xd51
+</span><span style="color:#bf616a;">github.com/docker/docker/api/server/router/container.</span><span>(*containerRouter)</span><span style="color:#bf616a;">.postContainerExecStart</span><span>(0xc001516d40, 0x563d495784c0, 0xc001ca0f30, 0x563d495683c0, 0xc000284d20, 0xc001fb6900, 0xc001ca0e70, 0x0, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/api/server/router/container/exec.go:132</span><span> +0x42a
+</span><span style="color:#bf616a;">github.com/docker/docker/api/server/middleware.ExperimentalMiddleware.WrapHandler.func1</span><span>(0x563d495784c0, 0xc001ca0f30, 0x563d495683c0, 0xc000284d20, 0xc001fb6900, 0xc001ca0e70, 0x563d495784c0, 0xc001ca0f30)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/api/server/middleware/experimental.go:26</span><span> +0x177
+</span><span style="color:#bf616a;">github.com/docker/docker/api/server/middleware.VersionMiddleware.WrapHandler.func1</span><span>(0x563d495784c0, 0xc001ca0f00, 0x563d495683c0, 0xc000284d20, 0xc001fb6900, 0xc001ca0e70, 0x203000, 0x203000)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/api/server/middleware/version.go:62</span><span> +0x5fb
+</span><span style="color:#bf616a;">github.com/docker/docker/pkg/authorization.</span><span>(*Middleware)</span><span style="color:#bf616a;">.WrapHandler.func1</span><span>(0x563d495784c0, 0xc001ca0f00, 0x563d495683c0, 0xc000284d20, 0xc001fb6900, 0xc001ca0e70, 0x563d495784c0, 0xc001ca0f00)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/pkg/authorization/middleware.go:59</span><span> +0x826
+</span><span style="color:#bf616a;">github.com/docker/docker/api/server.</span><span>(*Server)</span><span style="color:#bf616a;">.makeHTTPHandler.func1</span><span>(0x563d495683c0, 0xc000284d20, 0xc001fb6800)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/api/server/server.go:141</span><span> +0x241
+</span><span style="color:#bf616a;">net/http.HandlerFunc.ServeHTTP</span><span>(0xc000afa820, 0x563d495683c0, 0xc000284d20, 0xc001fb6800)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/net/http/server.go:2036</span><span> +0x46
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/github.com/gorilla/mux.</span><span>(*Router)</span><span style="color:#bf616a;">.ServeHTTP</span><span>(0xc00143c0c0, 0x563d495683c0, 0xc000284d20, 0xc001fb6600)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/github.com/gorilla/mux/mux.go:210</span><span> +0xe4
+</span><span style="color:#bf616a;">net/http.serverHandler.ServeHTTP</span><span>(0xc000b6e000, 0x563d495683c0, 0xc000284d20, 0xc001fb6600)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/net/http/server.go:2831</span><span> +0xa6
+</span><span style="color:#bf616a;">net/http.</span><span>(*conn)</span><span style="color:#bf616a;">.serve</span><span>(0xc00140a0a0, 0x563d49578400, 0xc00190b3c0)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/net/http/server.go:1919</span><span> +0x877
+</span><span style="color:#bf616a;">created</span><span> by net/http.(*Server)</span><span style="color:#bf616a;">.Serve
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/net/http/server.go:2957</span><span> +0x386
+</span><span>
+</span><span>
+</span><span style="color:#bf616a;">goroutine</span><span> 87735 </span><span style="color:#b48ead;">[</span><span>select, 773 minutes</span><span style="color:#b48ead;">]</span><span>:
+</span><span style="color:#bf616a;">io.</span><span>(*pipe)</span><span style="color:#bf616a;">.Write</span><span>(0xc000456640, 0xc0011be000, 0x1, 0x8000, 0x0, 0x0, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/io/pipe.go:87</span><span> +0x1fd
+</span><span style="color:#bf616a;">io.</span><span>(*PipeWriter)</span><span style="color:#bf616a;">.Write</span><span>(0xc0019983a8, 0xc0011be000, 0x1, 0x8000, 0x1, 0x0, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/io/pipe.go:153</span><span> +0x4e
+</span><span style="color:#bf616a;">io.copyBuffer</span><span>(0x563d49513fa0, 0xc0019983a8, 0x563d495141e0, 0xc001998398, 0xc0011be000, 0x8000, 0x8000, 0x0, 0x2, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/io/io.go:404</span><span> +0x1fd
+</span><span style="color:#bf616a;">io.CopyBuffer</span><span>(0x563d49513fa0, 0xc0019983a8, 0x563d495141e0, 0xc001998398, 0xc0011be000, 0x8000, 0x8000, 0xc000a32600, 0xc0001aca80, 0x7f72fccad008)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/io/io.go:375</span><span> +0x84
+</span><span style="color:#bf616a;">github.com/docker/docker/pkg/pools.Copy</span><span>(0x563d49513fa0, 0xc0019983a8, 0x563d495141e0, 0xc001998398, 0x4, 0xc0017e7f40, 0x563d465e2671)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/pkg/pools/pools.go:81</span><span> +0xa6
+</span><span style="color:#bf616a;">github.com/docker/docker/daemon.</span><span>(*Daemon)</span><span style="color:#bf616a;">.ContainerExecStart.func2</span><span>(0xc0019983a8, 0x563d495141e0, 0xc001998398)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/daemon/exec.go:204</span><span> +0x119
+</span><span style="color:#bf616a;">created</span><span> by github.com/docker/docker/daemon.(*Daemon)</span><span style="color:#bf616a;">.ContainerExecStart
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/daemon/exec.go:201</span><span> +0x1a8c
+</span><span>
+</span><span>
+</span><span style="color:#bf616a;">goroutine</span><span> 1428 </span><span style="color:#b48ead;">[</span><span>IO wait, 990 minutes</span><span style="color:#b48ead;">]</span><span>:
+</span><span style="color:#bf616a;">internal/poll.runtime_pollWait</span><span>(0x7f72fcc11230, 0x72, 0xffffffffffffffff)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/runtime/netpoll.go:184</span><span> +0x57
+</span><span style="color:#bf616a;">internal/poll.</span><span>(*pollDesc)</span><span style="color:#bf616a;">.wait</span><span>(0xc001654d98, 0x72, 0x8001, 0x8000, 0xffffffffffffffff)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/internal/poll/fd_poll_runtime.go:87</span><span> +0x47
+</span><span style="color:#bf616a;">internal/poll.</span><span>(*pollDesc)</span><span style="color:#bf616a;">.waitRead</span><span>(...)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
+</span><span style="color:#bf616a;">internal/poll.</span><span>(*FD)</span><span style="color:#bf616a;">.Read</span><span>(0xc001654d80, 0xc001820000, 0x8000, 0x8000, 0x0, 0x0, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/internal/poll/fd_unix.go:169</span><span> +0x1d1
+</span><span style="color:#bf616a;">os.</span><span>(*File)</span><span style="color:#bf616a;">.read</span><span>(...)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/os/file_unix.go:259
+</span><span style="color:#bf616a;">os.</span><span>(*File)</span><span style="color:#bf616a;">.Read</span><span>(0xc000a74130, 0xc001820000, 0x8000, 0x8000, 0xc00003c000, 0x563d490e5d40, 0x563d49134140)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/os/file.go:116</span><span> +0x73
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/github.com/containerd/fifo.</span><span>(*fifo)</span><span style="color:#bf616a;">.Read</span><span>(0xc001149d40, 0xc001820000, 0x8000, 0x8000, 0x0, 0xc0004cfe00, 0x563d4661ce19)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/github.com/containerd/fifo/fifo.go:179</span><span> +0x165
+</span><span style="color:#bf616a;">io.copyBuffer</span><span>(0x563d49510a40, 0xc000afbcc0, 0x7f72fcc20678, 0xc001149d40, 0xc001820000, 0x8000, 0x8000, 0x563d48efedc0, 0x0, 0xc000e90ce0)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/io/io.go:402</span><span> +0x124
+</span><span style="color:#bf616a;">io.CopyBuffer</span><span>(0x563d49510a40, 0xc000afbcc0, 0x7f72fcc20678, 0xc001149d40, 0xc001820000, 0x8000, 0x8000, 0xc000d50fc0, 0xc0004cff50, 0x563d465a9277)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/io/io.go:375</span><span> +0x84
+</span><span style="color:#bf616a;">github.com/docker/docker/pkg/pools.Copy</span><span>(0x563d49510a40, 0xc000afbcc0, 0x7f72fcc20678, 0xc001149d40, 0xc001149d40, 0xc00194d2c0, 0x7f72fcbc9c50)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/pkg/pools/pools.go:81</span><span> +0xa6
+</span><span style="color:#bf616a;">github.com/docker/docker/container/stream.</span><span>(*Config)</span><span style="color:#bf616a;">.CopyToPipe.func1.1</span><span>(0x563d49510a40, 0xc000afbcc0, 0x7f72fcc5e830, 0xc001149d40, 0xc000f09810)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/container/stream/streams.go:124</span><span> +0x73
+</span><span style="color:#bf616a;">created</span><span> by github.com/docker/docker/container/stream.(*Config)</span><span style="color:#bf616a;">.CopyToPipe.func1
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/container/stream/streams.go:123</span><span> +0x86
+</span><span>
+</span><span>
+</span><span style="color:#bf616a;">goroutine</span><span> 364 </span><span style="color:#b48ead;">[</span><span>IO wait, 990 minutes</span><span style="color:#b48ead;">]</span><span>:
+</span><span style="color:#bf616a;">internal/poll.runtime_pollWait</span><span>(0x7f72fcc11090, 0x72, 0xffffffffffffffff)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/runtime/netpoll.go:184</span><span> +0x57
+</span><span style="color:#bf616a;">internal/poll.</span><span>(*pollDesc)</span><span style="color:#bf616a;">.wait</span><span>(0xc00131c1f8, 0x72, 0x8001, 0x8000, 0xffffffffffffffff)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/internal/poll/fd_poll_runtime.go:87</span><span> +0x47
+</span><span style="color:#bf616a;">internal/poll.</span><span>(*pollDesc)</span><span style="color:#bf616a;">.waitRead</span><span>(...)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/internal/poll/fd_poll_runtime.go:92
+</span><span style="color:#bf616a;">internal/poll.</span><span>(*FD)</span><span style="color:#bf616a;">.Read</span><span>(0xc00131c1e0, 0xc00173c000, 0x8000, 0x8000, 0x0, 0x0, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/internal/poll/fd_unix.go:169</span><span> +0x1d1
+</span><span style="color:#bf616a;">os.</span><span>(*File)</span><span style="color:#bf616a;">.read</span><span>(...)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/os/file_unix.go:259
+</span><span style="color:#bf616a;">os.</span><span>(*File)</span><span style="color:#bf616a;">.Read</span><span>(0xc001998040, 0xc00173c000, 0x8000, 0x8000, 0x2b, 0x0, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/os/file.go:116</span><span> +0x73
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/github.com/containerd/fifo.</span><span>(*fifo)</span><span style="color:#bf616a;">.Read</span><span>(0xc000f30660, 0xc00173c000, 0x8000, 0x8000, 0x2b, 0x0, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/github.com/containerd/fifo/fifo.go:174</span><span> +0x1d8
+</span><span style="color:#bf616a;">io.copyBuffer</span><span>(0x563d49510a40, 0xc0012ce520, 0x7f72fcc20678, 0xc000f30660, 0xc00173c000, 0x8000, 0x8000, 0x0, 0x0, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/io/io.go:402</span><span> +0x124
+</span><span style="color:#bf616a;">io.CopyBuffer</span><span>(0x563d49510a40, 0xc0012ce520, 0x7f72fcc20678, 0xc000f30660, 0xc00173c000, 0x8000, 0x8000, 0xc000a8d790, 0xc000a8d750, 0x563d465a9277)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/io/io.go:375</span><span> +0x84
+</span><span style="color:#bf616a;">github.com/docker/docker/pkg/pools.Copy</span><span>(0x563d49510a40, 0xc0012ce520, 0x7f72fcc20678, 0xc000f30660, 0xc000f30660, 0x1, 0x563d465d6bd8)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/pkg/pools/pools.go:81</span><span> +0xa6
+</span><span style="color:#bf616a;">github.com/docker/docker/container/stream.</span><span>(*Config)</span><span style="color:#bf616a;">.CopyToPipe.func1.1</span><span>(0x563d49510a40, 0xc0012ce520, 0x7f72fcc5e830, 0xc000f30660, 0xc000e93860)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/container/stream/streams.go:124</span><span> +0x73
+</span><span style="color:#bf616a;">created</span><span> by github.com/docker/docker/container/stream.(*Config)</span><span style="color:#bf616a;">.CopyToPipe.func1
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/container/stream/streams.go:123</span><span> +0x86
+</span><span>
+</span><span>
+</span><span style="color:#bf616a;">goroutine</span><span> 101639 </span><span style="color:#b48ead;">[</span><span>semacquire, 120 minutes</span><span style="color:#b48ead;">]</span><span>:
+</span><span style="color:#bf616a;">sync.runtime_SemacquireMutex</span><span>(0xc000b3a1f4, 0xc00255f600, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/runtime/sema.go:71</span><span> +0x49
+</span><span style="color:#bf616a;">sync.</span><span>(*RWMutex)</span><span style="color:#bf616a;">.RLock</span><span>(...)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/sync/rwmutex.go:50
+</span><span style="color:#bf616a;">github.com/docker/docker/daemon/exec.</span><span>(*Store)</span><span style="color:#bf616a;">.List</span><span>(0xc000b3a1e0, 0xed7e1415b, 0x0, 0x563d481ba268)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/daemon/exec/exec.go:141</span><span> +0x1eb
+</span><span style="color:#bf616a;">github.com/docker/docker/container.</span><span>(*Container)</span><span style="color:#bf616a;">.GetExecIDs</span><span>(...)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/container/container.go:464
+</span><span style="color:#bf616a;">github.com/docker/docker/daemon.</span><span>(*Daemon)</span><span style="color:#bf616a;">.getInspectData</span><span>(0xc00000c1e0, 0xc001a1a280, 0x40, 0xc001a1a280, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/daemon/inspect.go:178</span><span> +0x5d2
+</span><span style="color:#bf616a;">github.com/docker/docker/daemon.</span><span>(*Daemon)</span><span style="color:#bf616a;">.ContainerInspectCurrent</span><span>(0xc00000c1e0, 0xc000a9d390, 0x40, 0x0, 0x1, 0xc000c5f8c8, 0xc00055ddc0)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/daemon/inspect.go:42</span><span> +0xb4
+</span><span style="color:#bf616a;">github.com/docker/docker/daemon.</span><span>(*Daemon)</span><span style="color:#bf616a;">.ContainerInspect</span><span>(0xc00000c1e0, 0xc000a9d390, 0x40, 0x0, 0x563d4816c341, 0x4, 0xc000e0a700, 0x563d466a4f34, 0x8, 0x10)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/daemon/inspect.go:29</span><span> +0x11b
+</span><span style="color:#bf616a;">github.com/docker/docker/api/server/router/container.</span><span>(*containerRouter)</span><span style="color:#bf616a;">.getContainersByName</span><span>(0xc001516d40, 0x563d495784c0, 0xc0014d4e40, 0x563d495683c0, 0xc0021d37a0, 0xc000a35e00, 0xc0014d4d80, 0xc000e0a701, 0xc00239a160)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/api/server/router/container/inspect.go:15</span><span> +0x116
+</span><span style="color:#bf616a;">github.com/docker/docker/api/server/middleware.ExperimentalMiddleware.WrapHandler.func1</span><span>(0x563d495784c0, 0xc0014d4e40, 0x563d495683c0, 0xc0021d37a0, 0xc000a35e00, 0xc0014d4d80, 0x563d495784c0, 0xc0014d4e40)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/api/server/middleware/experimental.go:26</span><span> +0x177
+</span><span style="color:#bf616a;">github.com/docker/docker/api/server/middleware.VersionMiddleware.WrapHandler.func1</span><span>(0x563d495784c0, 0xc0014d4e10, 0x563d495683c0, 0xc0021d37a0, 0xc000a35e00, 0xc0014d4d80, 0x203000, 0x203000)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/api/server/middleware/version.go:62</span><span> +0x5fb
+</span><span style="color:#bf616a;">github.com/docker/docker/pkg/authorization.</span><span>(*Middleware)</span><span style="color:#bf616a;">.WrapHandler.func1</span><span>(0x563d495784c0, 0xc0014d4e10, 0x563d495683c0, 0xc0021d37a0, 0xc000a35e00, 0xc0014d4d80, 0x563d495784c0, 0xc0014d4e10)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/pkg/authorization/middleware.go:59</span><span> +0x826
+</span><span style="color:#bf616a;">github.com/docker/docker/api/server.</span><span>(*Server)</span><span style="color:#bf616a;">.makeHTTPHandler.func1</span><span>(0x563d495683c0, 0xc0021d37a0, 0xc000a35d00)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/api/server/server.go:141</span><span> +0x241
+</span><span style="color:#bf616a;">net/http.HandlerFunc.ServeHTTP</span><span>(0xc0013cf660, 0x563d495683c0, 0xc0021d37a0, 0xc000a35d00)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/net/http/server.go:2036</span><span> +0x46
+</span><span style="color:#bf616a;">github.com/docker/docker/vendor/github.com/gorilla/mux.</span><span>(*Router)</span><span style="color:#bf616a;">.ServeHTTP</span><span>(0xc00143c0c0, 0x563d495683c0, 0xc0021d37a0, 0xc000a53400)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/vendor/github.com/gorilla/mux/mux.go:210</span><span> +0xe4
+</span><span style="color:#bf616a;">net/http.serverHandler.ServeHTTP</span><span>(0xc000b6e000, 0x563d495683c0, 0xc0021d37a0, 0xc000a53400)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/net/http/server.go:2831</span><span> +0xa6
+</span><span style="color:#bf616a;">net/http.</span><span>(*conn)</span><span style="color:#bf616a;">.serve</span><span>(0xc001693c20, 0x563d49578400, 0xc0014a2480)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/net/http/server.go:1919</span><span> +0x877
+</span><span style="color:#bf616a;">created</span><span> by net/http.(*Server)</span><span style="color:#bf616a;">.Serve
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/net/http/server.go:2957</span><span> +0x386
+</span><span>
+</span><span>
+</span><span style="color:#bf616a;">goroutine</span><span> 65 </span><span style="color:#b48ead;">[</span><span>semacquire, 776 minutes</span><span style="color:#b48ead;">]</span><span>:
+</span><span style="color:#bf616a;">sync.runtime_SemacquireMutex</span><span>(0xc000b3a1f4, 0xc002094d00, 0x0)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/runtime/sema.go:71</span><span> +0x49
+</span><span style="color:#bf616a;">sync.</span><span>(*RWMutex)</span><span style="color:#bf616a;">.RLock</span><span>(...)
+</span><span>  </span><span style="color:#bf616a;">/usr/local/go/src/sync/rwmutex.go:50
+</span><span style="color:#bf616a;">github.com/docker/docker/daemon/exec.</span><span>(*Store)</span><span style="color:#bf616a;">.List</span><span>(0xc000b3a1e0, 0xc0009a4a50, 0x1d, 0x1d)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/daemon/exec/exec.go:141</span><span> +0x1eb
+</span><span style="color:#bf616a;">github.com/docker/docker/daemon.</span><span>(*Daemon)</span><span style="color:#bf616a;">.containerExecIds</span><span>(0xc00000c1e0, 0xc002094f50)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/daemon/exec.go:335</span><span> +0x95
+</span><span style="color:#bf616a;">github.com/docker/docker/daemon.</span><span>(*Daemon)</span><span style="color:#bf616a;">.execCommandGC</span><span>(0xc00000c1e0)
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/daemon/exec.go:312</span><span> +0x178
+</span><span style="color:#bf616a;">created</span><span> by github.com/docker/docker/daemon.NewDaemon
+</span><span>  </span><span style="color:#bf616a;">/root/rpmbuild/BUILD/src/engine/.gopath/src/github.com/docker/docker/daemon/daemon.go:1136</span><span> +0x2aa0
+</span></code></pre>
+<p>通过 <code>kubectl</code> 得到 <code>docker</code> 版本信息:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> kubectl get node</span><span style="color:#bf616a;"> -o</span><span> wide
+</span><span>
+</span><span style="color:#bf616a;">NAME</span><span>                          STATUS   ROLES    AGE    VERSION    INTERNAL-IP    EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME
+</span><span style="color:#bf616a;">n017.example.com</span><span>   Ready    &lt;none&gt;   </span><span style="color:#d08770;">39</span><span>d    v1.16.15   10.100.200.27   &lt;none&gt;        CentOS Linux 7 (Core)   </span><span style="color:#bf616a;">4.19.12-1.el7.elrepo.x86_64</span><span>   docker://20.10.3
+</span></code></pre>
+<p>下载 <code>docker</code> 源码:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">mkdir -p </span><span>$</span><span style="color:#bf616a;">GOPATH</span><span>/github.com/docker/docker; </span><span style="color:#96b5b4;">cd </span><span>$</span><span style="color:#bf616a;">GOPATH</span><span>/github.com/docker/docker
+</span><span>
+</span><span style="color:#bf616a;">git</span><span> clone https://github.com/moby/moby.git .
+</span><span>
+</span><span style="color:#bf616a;">git</span><span> checkout v20.10.3
+</span></code></pre>
+<h4 id="yuan-ma-fen-xi">源码分析</h4>
+<h5 id="goroutine-87725">goroutine 87725</h5>
+<p>根据栈信息，可以得到调用链为:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#65737e;">// docker/container/stream/streams.go
+</span><span style="color:#65737e;">// CopyToPipe connects streamconfig with a libcontainerd.IOPipe
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">c </span><span>*</span><span style="color:#b48ead;">Config</span><span>) </span><span style="color:#8fa1b3;">CopyToPipe</span><span>(</span><span style="color:#bf616a;">iop </span><span>*</span><span style="color:#bf616a;">cio</span><span>.</span><span style="color:#b48ead;">DirectIO</span><span>) {
+</span><span>  </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">dio </span><span>= </span><span style="color:#bf616a;">iop
+</span><span>  </span><span style="color:#bf616a;">copyFunc </span><span>:= </span><span style="color:#b48ead;">func</span><span>(</span><span style="color:#bf616a;">w io</span><span>.</span><span style="color:#b48ead;">Writer</span><span>, </span><span style="color:#bf616a;">r io</span><span>.</span><span style="color:#b48ead;">ReadCloser</span><span>) {
+</span><span>    </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">wg</span><span>.</span><span style="color:#bf616a;">Add</span><span>(</span><span style="color:#d08770;">1</span><span>)
+</span><span>    </span><span style="color:#b48ead;">go func</span><span>() {
+</span><span>      </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">_</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">pools</span><span>.</span><span style="color:#bf616a;">Copy</span><span>(</span><span style="color:#bf616a;">w</span><span>, </span><span style="color:#bf616a;">r</span><span>); </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>        </span><span style="color:#bf616a;">logrus</span><span>.</span><span style="color:#bf616a;">Errorf</span><span>(&quot;</span><span style="color:#a3be8c;">stream copy error: </span><span style="color:#d08770;">%v</span><span>&quot;, </span><span style="color:#bf616a;">err</span><span>)
+</span><span>      }
+</span><span>      </span><span style="color:#bf616a;">r</span><span>.</span><span style="color:#bf616a;">Close</span><span>()
+</span><span>      </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">wg</span><span>.</span><span style="color:#bf616a;">Done</span><span>()
+</span><span>    }()
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">iop</span><span>.</span><span style="color:#bf616a;">Stdout </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#bf616a;">copyFunc</span><span>(</span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">Stdout</span><span>(), </span><span style="color:#bf616a;">iop</span><span>.</span><span style="color:#bf616a;">Stdout</span><span>)
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">iop</span><span>.</span><span style="color:#bf616a;">Stderr </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#bf616a;">copyFunc</span><span>(</span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">Stderr</span><span>(), </span><span style="color:#bf616a;">iop</span><span>.</span><span style="color:#bf616a;">Stderr</span><span>)
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">stdin </span><span>:= </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">Stdin</span><span>(); </span><span style="color:#bf616a;">stdin </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">iop</span><span>.</span><span style="color:#bf616a;">Stdin </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>      </span><span style="color:#b48ead;">go func</span><span>() {
+</span><span>        </span><span style="color:#bf616a;">pools</span><span>.</span><span style="color:#bf616a;">Copy</span><span>(</span><span style="color:#bf616a;">iop</span><span>.</span><span style="color:#bf616a;">Stdin</span><span>, </span><span style="color:#bf616a;">stdin</span><span>)
+</span><span>        </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">iop</span><span>.</span><span style="color:#bf616a;">Stdin</span><span>.</span><span style="color:#bf616a;">Close</span><span>(); </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>          </span><span style="color:#bf616a;">logrus</span><span>.</span><span style="color:#bf616a;">Warnf</span><span>(&quot;</span><span style="color:#a3be8c;">failed to close stdin: </span><span style="color:#d08770;">%v</span><span>&quot;, </span><span style="color:#bf616a;">err</span><span>)
+</span><span>        }
+</span><span>      }()
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span><span>
+</span><span style="color:#65737e;">// docker/pkg/pools/pools.go
+</span><span style="color:#65737e;">// Copy is a convenience wrapper which uses a buffer to avoid allocation in io.Copy.
+</span><span style="color:#b48ead;">func </span><span style="color:#8fa1b3;">Copy</span><span>(</span><span style="color:#bf616a;">dst io</span><span>.</span><span style="color:#b48ead;">Writer</span><span>, </span><span style="color:#bf616a;">src io</span><span>.</span><span style="color:#b48ead;">Reader</span><span>) (</span><span style="color:#bf616a;">written </span><span style="color:#b48ead;">int64</span><span>, </span><span style="color:#bf616a;">err </span><span style="color:#b48ead;">error</span><span>) {
+</span><span>  </span><span style="color:#bf616a;">buf </span><span>:= </span><span style="color:#bf616a;">buffer32KPool</span><span>.</span><span style="color:#bf616a;">Get</span><span>()
+</span><span>  </span><span style="color:#bf616a;">written</span><span>, </span><span style="color:#bf616a;">err </span><span>= </span><span style="color:#bf616a;">io</span><span>.</span><span style="color:#bf616a;">CopyBuffer</span><span>(</span><span style="color:#bf616a;">dst</span><span>, </span><span style="color:#bf616a;">src</span><span>, *</span><span style="color:#bf616a;">buf</span><span>)
+</span><span>  </span><span style="color:#bf616a;">buffer32KPool</span><span>.</span><span style="color:#bf616a;">Put</span><span>(</span><span style="color:#bf616a;">buf</span><span>)
+</span><span>  </span><span style="color:#b48ead;">return
+</span><span>}
+</span><span>
+</span><span style="color:#65737e;">// io/io.go
+</span><span>
+</span><span style="color:#b48ead;">func </span><span style="color:#8fa1b3;">CopyBuffer</span><span>(</span><span style="color:#bf616a;">dst </span><span style="color:#b48ead;">Writer</span><span>, </span><span style="color:#bf616a;">src </span><span style="color:#b48ead;">Reader</span><span>, </span><span style="color:#bf616a;">buf </span><span>[]</span><span style="color:#b48ead;">byte</span><span>) (</span><span style="color:#bf616a;">written </span><span style="color:#b48ead;">int64</span><span>, </span><span style="color:#bf616a;">err </span><span style="color:#b48ead;">error</span><span>) {
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">buf </span><span>!= </span><span style="color:#d08770;">nil </span><span>&amp;&amp; </span><span style="color:#96b5b4;">len</span><span>(</span><span style="color:#bf616a;">buf</span><span>) == </span><span style="color:#d08770;">0 </span><span>{
+</span><span>    </span><span style="color:#96b5b4;">panic</span><span>(&quot;</span><span style="color:#a3be8c;">empty buffer in CopyBuffer</span><span>&quot;)
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">copyBuffer</span><span>(</span><span style="color:#bf616a;">dst</span><span>, </span><span style="color:#bf616a;">src</span><span>, </span><span style="color:#bf616a;">buf</span><span>)
+</span><span>}
+</span><span>
+</span><span>
+</span><span style="color:#b48ead;">func </span><span style="color:#8fa1b3;">copyBuffer</span><span>(</span><span style="color:#bf616a;">dst </span><span style="color:#b48ead;">Writer</span><span>, </span><span style="color:#bf616a;">src </span><span style="color:#b48ead;">Reader</span><span>, </span><span style="color:#bf616a;">buf </span><span>[]</span><span style="color:#b48ead;">byte</span><span>) (</span><span style="color:#bf616a;">written </span><span style="color:#b48ead;">int64</span><span>, </span><span style="color:#bf616a;">err </span><span style="color:#b48ead;">error</span><span>) {
+</span><span>  </span><span style="color:#65737e;">// If the reader has a WriteTo method, use it to do the copy.
+</span><span>  </span><span style="color:#65737e;">// Avoids an allocation and a copy.
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">wt</span><span>, </span><span style="color:#bf616a;">ok </span><span>:= </span><span style="color:#bf616a;">src</span><span>.(</span><span style="color:#b48ead;">WriterTo</span><span>); </span><span style="color:#bf616a;">ok </span><span>{
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">wt</span><span>.</span><span style="color:#bf616a;">WriteTo</span><span>(</span><span style="color:#bf616a;">dst</span><span>)
+</span><span>  }
+</span><span>  </span><span style="color:#65737e;">// ...
+</span><span>  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">written</span><span>, </span><span style="color:#bf616a;">err
+</span><span>}
+</span><span>
+</span><span style="color:#65737e;">// Write from byte array to a fifo.
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">f </span><span>*</span><span style="color:#b48ead;">fifo</span><span>) </span><span style="color:#8fa1b3;">Write</span><span>(</span><span style="color:#bf616a;">b </span><span>[]</span><span style="color:#b48ead;">byte</span><span>) (</span><span style="color:#b48ead;">int</span><span>, </span><span style="color:#b48ead;">error</span><span>) {
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">flag</span><span>&amp;(</span><span style="color:#bf616a;">syscall</span><span>.</span><span style="color:#bf616a;">O_WRONLY</span><span>|</span><span style="color:#bf616a;">syscall</span><span>.</span><span style="color:#bf616a;">O_RDWR</span><span>) == </span><span style="color:#d08770;">0 </span><span>{
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">0</span><span>, </span><span style="color:#bf616a;">ErrWrToRDONLY
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">select </span><span>{
+</span><span>  </span><span style="color:#b48ead;">case </span><span>&lt;-</span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">opened</span><span>:
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">file</span><span>.</span><span style="color:#bf616a;">Write</span><span>(</span><span style="color:#bf616a;">b</span><span>)
+</span><span>  </span><span style="color:#b48ead;">default</span><span>:
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">select </span><span>{ </span><span style="color:#65737e;">// 阻塞在这里
+</span><span>  </span><span style="color:#b48ead;">case </span><span>&lt;-</span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">opened</span><span>:
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">file</span><span>.</span><span style="color:#bf616a;">Write</span><span>(</span><span style="color:#bf616a;">b</span><span>)
+</span><span>  </span><span style="color:#b48ead;">case </span><span>&lt;-</span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">closed</span><span>:
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">0</span><span>, </span><span style="color:#bf616a;">ErrWriteClosed
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p><code>goroutine</code> 阻塞在 <code>*fifo.Write</code> 函数中，只有当 <code>fifo.opened</code> 可读时，可以写入数据，当 <code>fifo.closed</code> 可读时，返回一个错误。</p>
+<p>因此，找到有哪些情况 <code>fifo.opened</code> 可读，最后只找到了一种情况:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#65737e;">// docker/vendor/github.com/containerd/fifo/fifo.go
+</span><span>
+</span><span style="color:#65737e;">// OpenFifo opens a fifo. Returns io.ReadWriteCloser.
+</span><span style="color:#65737e;">// Context can be used to cancel this function until open(2) has not returned.
+</span><span style="color:#65737e;">// Accepted flags:
+</span><span style="color:#65737e;">// - syscall.O_CREAT - create new fifo if one doesn&#39;t exist
+</span><span style="color:#65737e;">// - syscall.O_RDONLY - open fifo only from reader side
+</span><span style="color:#65737e;">// - syscall.O_WRONLY - open fifo only from writer side
+</span><span style="color:#65737e;">// - syscall.O_RDWR - open fifo from both sides, never block on syscall level
+</span><span style="color:#65737e;">// - syscall.O_NONBLOCK - return io.ReadWriteCloser even if other side of the
+</span><span style="color:#65737e;">//     fifo isn&#39;t open. read/write will be connected after the actual fifo is
+</span><span style="color:#65737e;">//     open or after fifo is closed.
+</span><span style="color:#65737e;">//
+</span><span style="color:#65737e;">// 注意 fn 表示 filename，不是 function...
+</span><span style="color:#b48ead;">func </span><span style="color:#8fa1b3;">OpenFifo</span><span>(</span><span style="color:#bf616a;">ctx context</span><span>.</span><span style="color:#b48ead;">Context</span><span>, </span><span style="color:#bf616a;">fn </span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#bf616a;">flag </span><span style="color:#b48ead;">int</span><span>, </span><span style="color:#bf616a;">perm os</span><span>.</span><span style="color:#b48ead;">FileMode</span><span>) (</span><span style="color:#bf616a;">io</span><span>.</span><span style="color:#b48ead;">ReadWriteCloser</span><span>, </span><span style="color:#b48ead;">error</span><span>) {
+</span><span>  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">openFifo</span><span>(</span><span style="color:#bf616a;">ctx</span><span>, </span><span style="color:#bf616a;">fn</span><span>, </span><span style="color:#bf616a;">flag</span><span>, </span><span style="color:#bf616a;">perm</span><span>)
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">func </span><span style="color:#8fa1b3;">openFifo</span><span>(</span><span style="color:#bf616a;">ctx context</span><span>.</span><span style="color:#b48ead;">Context</span><span>, </span><span style="color:#bf616a;">fn </span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#bf616a;">flag </span><span style="color:#b48ead;">int</span><span>, </span><span style="color:#bf616a;">perm os</span><span>.</span><span style="color:#b48ead;">FileMode</span><span>) (*</span><span style="color:#b48ead;">fifo</span><span>, </span><span style="color:#b48ead;">error</span><span>) {
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">_</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">os</span><span>.</span><span style="color:#bf616a;">Stat</span><span>(</span><span style="color:#bf616a;">fn</span><span>); </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">os</span><span>.</span><span style="color:#bf616a;">IsNotExist</span><span>(</span><span style="color:#bf616a;">err</span><span>) &amp;&amp; </span><span style="color:#bf616a;">flag</span><span>&amp;</span><span style="color:#bf616a;">syscall</span><span>.</span><span style="color:#bf616a;">O_CREAT </span><span>!= </span><span style="color:#d08770;">0 </span><span>{
+</span><span>      </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">mkfifo</span><span>(</span><span style="color:#bf616a;">fn</span><span>, </span><span style="color:#bf616a;">uint32</span><span>(</span><span style="color:#bf616a;">perm</span><span>&amp;</span><span style="color:#bf616a;">os</span><span>.</span><span style="color:#bf616a;">ModePerm</span><span>)); </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>&amp;&amp; !</span><span style="color:#bf616a;">os</span><span>.</span><span style="color:#bf616a;">IsExist</span><span>(</span><span style="color:#bf616a;">err</span><span>) {
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">nil</span><span>, </span><span style="color:#bf616a;">errors</span><span>.</span><span style="color:#bf616a;">Wrapf</span><span>(</span><span style="color:#bf616a;">err</span><span>, &quot;</span><span style="color:#a3be8c;">error creating fifo </span><span style="color:#d08770;">%v</span><span>&quot;, </span><span style="color:#bf616a;">fn</span><span>)
+</span><span>      }
+</span><span>    } </span><span style="color:#b48ead;">else </span><span>{
+</span><span>      </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">nil</span><span>, </span><span style="color:#bf616a;">err
+</span><span>    }
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">block </span><span>:= </span><span style="color:#bf616a;">flag</span><span>&amp;</span><span style="color:#bf616a;">syscall</span><span>.</span><span style="color:#bf616a;">O_NONBLOCK </span><span>== </span><span style="color:#d08770;">0 </span><span>|| </span><span style="color:#bf616a;">flag</span><span>&amp;</span><span style="color:#bf616a;">syscall</span><span>.</span><span style="color:#bf616a;">O_RDWR </span><span>!= </span><span style="color:#d08770;">0
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">flag </span><span>&amp;= ^</span><span style="color:#bf616a;">syscall</span><span>.</span><span style="color:#bf616a;">O_CREAT
+</span><span>  </span><span style="color:#bf616a;">flag </span><span>&amp;= ^</span><span style="color:#bf616a;">syscall</span><span>.</span><span style="color:#bf616a;">O_NONBLOCK
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">h</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">getHandle</span><span>(</span><span style="color:#bf616a;">fn</span><span>)
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">nil</span><span>, </span><span style="color:#bf616a;">err
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">f </span><span>:= &amp;</span><span style="color:#bf616a;">fifo</span><span>{
+</span><span>    </span><span style="color:#bf616a;">handle</span><span>:  </span><span style="color:#bf616a;">h</span><span>,
+</span><span>    </span><span style="color:#bf616a;">flag</span><span>:    </span><span style="color:#bf616a;">flag</span><span>,
+</span><span>    </span><span style="color:#bf616a;">opened</span><span>:  </span><span style="color:#96b5b4;">make</span><span>(</span><span style="color:#b48ead;">chan struct</span><span>{}),
+</span><span>    </span><span style="color:#bf616a;">closed</span><span>:  </span><span style="color:#96b5b4;">make</span><span>(</span><span style="color:#b48ead;">chan struct</span><span>{}),
+</span><span>    </span><span style="color:#bf616a;">closing</span><span>: </span><span style="color:#96b5b4;">make</span><span>(</span><span style="color:#b48ead;">chan struct</span><span>{}),
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">wg </span><span>:= </span><span style="color:#bf616a;">leakCheckWg
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">wg </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#bf616a;">wg</span><span>.</span><span style="color:#bf616a;">Add</span><span>(</span><span style="color:#d08770;">2</span><span>)
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">go func</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">wg </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>      </span><span style="color:#b48ead;">defer </span><span style="color:#bf616a;">wg</span><span>.</span><span style="color:#bf616a;">Done</span><span>()
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">select </span><span>{
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&lt;-</span><span style="color:#bf616a;">ctx</span><span>.</span><span style="color:#bf616a;">Done</span><span>():
+</span><span>      </span><span style="color:#b48ead;">select </span><span>{
+</span><span>      </span><span style="color:#b48ead;">case </span><span>&lt;-</span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">opened</span><span>:
+</span><span>      </span><span style="color:#b48ead;">default</span><span>:
+</span><span>        </span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">Close</span><span>()
+</span><span>      }
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&lt;-</span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">opened</span><span>:
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&lt;-</span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">closed</span><span>:
+</span><span>    }
+</span><span>  }()
+</span><span>  </span><span style="color:#b48ead;">go func</span><span>() { </span><span style="color:#65737e;">// 这个 goroutine 中执行打开文件操作
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">wg </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>      </span><span style="color:#b48ead;">defer </span><span style="color:#bf616a;">wg</span><span>.</span><span style="color:#bf616a;">Done</span><span>()
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">file </span><span>*</span><span style="color:#bf616a;">os</span><span>.</span><span style="color:#b48ead;">File
+</span><span>    </span><span style="color:#bf616a;">fn</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">h</span><span>.</span><span style="color:#bf616a;">Path</span><span>()
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>== </span><span style="color:#d08770;">nil </span><span>{
+</span><span>      </span><span style="color:#bf616a;">file</span><span>, </span><span style="color:#bf616a;">err </span><span>= </span><span style="color:#bf616a;">os</span><span>.</span><span style="color:#bf616a;">OpenFile</span><span>(</span><span style="color:#bf616a;">fn</span><span>, </span><span style="color:#bf616a;">flag</span><span>, </span><span style="color:#d08770;">0</span><span>)
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">select </span><span>{
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&lt;-</span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">closing</span><span>:
+</span><span>      </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>== </span><span style="color:#d08770;">nil </span><span>{
+</span><span>        </span><span style="color:#b48ead;">select </span><span>{
+</span><span>        </span><span style="color:#b48ead;">case </span><span>&lt;-</span><span style="color:#bf616a;">ctx</span><span>.</span><span style="color:#bf616a;">Done</span><span>():
+</span><span>          </span><span style="color:#bf616a;">err </span><span>= </span><span style="color:#bf616a;">ctx</span><span>.</span><span style="color:#bf616a;">Err</span><span>()
+</span><span>        </span><span style="color:#b48ead;">default</span><span>:
+</span><span>          </span><span style="color:#bf616a;">err </span><span>= </span><span style="color:#bf616a;">errors</span><span>.</span><span style="color:#bf616a;">Errorf</span><span>(&quot;</span><span style="color:#a3be8c;">fifo </span><span style="color:#d08770;">%v</span><span style="color:#a3be8c;"> was closed before opening</span><span>&quot;, </span><span style="color:#bf616a;">h</span><span>.</span><span style="color:#bf616a;">Name</span><span>())
+</span><span>        }
+</span><span>        </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">file </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>          </span><span style="color:#bf616a;">file</span><span>.</span><span style="color:#bf616a;">Close</span><span>()
+</span><span>        }
+</span><span>      }
+</span><span>    </span><span style="color:#b48ead;">default</span><span>:
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>      </span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">closedOnce</span><span>.</span><span style="color:#bf616a;">Do</span><span>(</span><span style="color:#b48ead;">func</span><span>() {
+</span><span>        </span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">err </span><span>= </span><span style="color:#bf616a;">err
+</span><span>        </span><span style="color:#96b5b4;">close</span><span>(</span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">closed</span><span>)
+</span><span>      })
+</span><span>      </span><span style="color:#b48ead;">return
+</span><span>    }
+</span><span>    </span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">file </span><span>= </span><span style="color:#bf616a;">file
+</span><span>    </span><span style="color:#96b5b4;">close</span><span>(</span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">opened</span><span>) </span><span style="color:#65737e;">// 有且仅有一处可以触发 fifo.opened
+</span><span>  }()
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">block </span><span>{
+</span><span>    </span><span style="color:#b48ead;">select </span><span>{
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&lt;-</span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">opened</span><span>:
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&lt;-</span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">closed</span><span>:
+</span><span>      </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">nil</span><span>, </span><span style="color:#bf616a;">f</span><span>.</span><span style="color:#bf616a;">err
+</span><span>    }
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">f</span><span>, </span><span style="color:#d08770;">nil
+</span><span>}
+</span></code></pre>
+<p><code>OpenFifo</code> 与 <code>fifo.Write</code> 两个函数的调用一定是序列化的。因此，当成功获得一个 <code>fifo</code> 对象时，<code>fifo.opened</code> 就已经处于被关闭状态。并且，<code>fifo.opened</code> 是通过 <code>close(fifo.opened)</code> 的方式触发可读操作，所以，可以确认 <code>fifo.Write</code> 函数只可以写入一次:</p>
+<ul>
+<li>首次调用 <code>fifo.Write</code> 时，在第一个 <code>select</code> 中执行 <code>case &lt;-f.opened:</code> 语句，向 <code>fifo</code> 中写入数据。</li>
+<li>再次调用 <code>fifo.Write</code> 时，在第二个 <code>select</code> 中执行 <code>default:</code> 语句，等待 <code>fifo.closed</code> 可读事件。</li>
+</ul>
+<p>综上，当前 <code>goroutine</code> 在等待 <code>fifo.Close</code>。</p>
+<h5 id="goroutine-87733">goroutine 87733</h5>
+<p>根据堆栈信息，从下往上阅读，第一个重要的函数调用为 <code>docker/api/server/router/container/exec.go:132</code>，其中核心的逻辑如下:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#65737e;">// docker/api/server/router/container/exec.go:132
+</span><span>
+</span><span style="color:#65737e;">// TODO(vishh): Refactor the code to avoid having to specify stream config as part of both create and start.
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">s </span><span>*</span><span style="color:#b48ead;">containerRouter</span><span>) </span><span style="color:#8fa1b3;">postContainerExecStart</span><span>(</span><span style="color:#bf616a;">ctx context</span><span>.</span><span style="color:#b48ead;">Context</span><span>, </span><span style="color:#bf616a;">w http</span><span>.</span><span style="color:#b48ead;">ResponseWriter</span><span>, </span><span style="color:#bf616a;">r </span><span>*</span><span style="color:#bf616a;">http</span><span>.</span><span style="color:#b48ead;">Request</span><span>, </span><span style="color:#bf616a;">vars </span><span style="color:#b48ead;">map</span><span>[</span><span style="color:#b48ead;">string</span><span>]</span><span style="color:#b48ead;">string</span><span>) </span><span style="color:#b48ead;">error </span><span>{
+</span><span>  </span><span style="color:#65737e;">// ...
+</span><span>  </span><span style="color:#b48ead;">var </span><span>(
+</span><span>    </span><span style="color:#bf616a;">execName                  </span><span>= </span><span style="color:#bf616a;">vars</span><span>[&quot;</span><span style="color:#a3be8c;">name</span><span>&quot;]
+</span><span>    </span><span style="color:#bf616a;">stdin</span><span>, </span><span style="color:#bf616a;">inStream           io</span><span>.</span><span style="color:#b48ead;">ReadCloser
+</span><span>    </span><span style="color:#bf616a;">stdout</span><span>, </span><span style="color:#bf616a;">stderr</span><span>, </span><span style="color:#bf616a;">outStream io</span><span>.</span><span style="color:#b48ead;">Writer
+</span><span>  )
+</span><span>  </span><span style="color:#b48ead;">if </span><span>!</span><span style="color:#bf616a;">execStartCheck</span><span>.</span><span style="color:#bf616a;">Detach </span><span>{
+</span><span>    </span><span style="color:#bf616a;">inStream</span><span>, </span><span style="color:#bf616a;">outStream</span><span>, </span><span style="color:#bf616a;">_ </span><span>= </span><span style="color:#bf616a;">httputils</span><span>.</span><span style="color:#bf616a;">HijackConnection</span><span>(</span><span style="color:#bf616a;">w</span><span>)
+</span><span>
+</span><span>    </span><span style="color:#bf616a;">stdin </span><span>= </span><span style="color:#bf616a;">inStream
+</span><span>    </span><span style="color:#bf616a;">stdout </span><span>= </span><span style="color:#bf616a;">outStream
+</span><span>    </span><span style="color:#b48ead;">if </span><span>!</span><span style="color:#bf616a;">execStartCheck</span><span>.</span><span style="color:#bf616a;">Tty </span><span>{
+</span><span>      </span><span style="color:#bf616a;">stderr </span><span>= </span><span style="color:#bf616a;">stdcopy</span><span>.</span><span style="color:#bf616a;">NewStdWriter</span><span>(</span><span style="color:#bf616a;">outStream</span><span>, </span><span style="color:#bf616a;">stdcopy</span><span>.</span><span style="color:#bf616a;">Stderr</span><span>)
+</span><span>      </span><span style="color:#bf616a;">stdout </span><span>= </span><span style="color:#bf616a;">stdcopy</span><span>.</span><span style="color:#bf616a;">NewStdWriter</span><span>(</span><span style="color:#bf616a;">outStream</span><span>, </span><span style="color:#bf616a;">stdcopy</span><span>.</span><span style="color:#bf616a;">Stdout</span><span>)
+</span><span>    }
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#65737e;">// Now run the user process in container.
+</span><span>  </span><span style="color:#65737e;">// Maybe we should we pass ctx here if we&#39;re not detaching?
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">s</span><span>.</span><span style="color:#bf616a;">backend</span><span>.</span><span style="color:#bf616a;">ContainerExecStart</span><span>(</span><span style="color:#bf616a;">context</span><span>.</span><span style="color:#bf616a;">Background</span><span>(), </span><span style="color:#bf616a;">execName</span><span>, </span><span style="color:#bf616a;">stdin</span><span>, </span><span style="color:#bf616a;">stdout</span><span>, </span><span style="color:#bf616a;">stderr</span><span>); </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">execStartCheck</span><span>.</span><span style="color:#bf616a;">Detach </span><span>{
+</span><span>      </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">err
+</span><span>    }
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">nil
+</span><span>}
+</span></code></pre>
+<p>调用 <code>s.backend.ContainerExecStart</code> 开启 <code>exec</code> 命令。</p>
+<p><code>s.backend</code> 的类型是一个接口:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">type </span><span>Backend </span><span style="color:#b48ead;">interface </span><span>{
+</span><span>  </span><span style="color:#a3be8c;">commitBackend
+</span><span>  </span><span style="color:#a3be8c;">execBackend
+</span><span>  </span><span style="color:#a3be8c;">copyBackend
+</span><span>  </span><span style="color:#a3be8c;">stateBackend
+</span><span>  </span><span style="color:#a3be8c;">monitorBackend
+</span><span>  </span><span style="color:#a3be8c;">attachBackend
+</span><span>  </span><span style="color:#a3be8c;">systemBackend
+</span><span>}
+</span></code></pre>
+<p>其只有一个具体实现 <code>docker/daemon/daemon.go#Daemon</code></p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#65737e;">// ContainerExecStart starts a previously set up exec instance. The
+</span><span style="color:#65737e;">// std streams are set up.
+</span><span style="color:#65737e;">// If ctx is cancelled, the process is terminated.
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">daemon </span><span>*</span><span style="color:#b48ead;">Daemon</span><span>) </span><span style="color:#8fa1b3;">ContainerExecStart</span><span>(</span><span style="color:#bf616a;">ctx context</span><span>.</span><span style="color:#b48ead;">Context</span><span>, </span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#bf616a;">stdin io</span><span>.</span><span style="color:#b48ead;">Reader</span><span>, </span><span style="color:#bf616a;">stdout io</span><span>.</span><span style="color:#b48ead;">Writer</span><span>, </span><span style="color:#bf616a;">stderr io</span><span>.</span><span style="color:#b48ead;">Writer</span><span>) (</span><span style="color:#bf616a;">err </span><span style="color:#b48ead;">error</span><span>) {
+</span><span>  </span><span style="color:#b48ead;">var </span><span>(
+</span><span>    </span><span style="color:#bf616a;">cStdin           io</span><span>.</span><span style="color:#b48ead;">ReadCloser
+</span><span>    </span><span style="color:#bf616a;">cStdout</span><span>, </span><span style="color:#bf616a;">cStderr io</span><span>.</span><span style="color:#b48ead;">Writer
+</span><span>  )
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">ec</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">getExecConfig</span><span>(</span><span style="color:#bf616a;">name</span><span>)
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">errExecNotFound</span><span>(</span><span style="color:#bf616a;">name</span><span>)
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Lock</span><span>()
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">ExitCode </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Unlock</span><span>()
+</span><span>    </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">fmt</span><span>.</span><span style="color:#bf616a;">Errorf</span><span>(&quot;</span><span style="color:#a3be8c;">Error: Exec command </span><span style="color:#d08770;">%s</span><span style="color:#a3be8c;"> has already run</span><span>&quot;, </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">ID</span><span>)
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">errdefs</span><span>.</span><span style="color:#bf616a;">Conflict</span><span>(</span><span style="color:#bf616a;">err</span><span>)
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Running </span><span>{
+</span><span>    </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Unlock</span><span>()
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">errdefs</span><span>.</span><span style="color:#bf616a;">Conflict</span><span>(</span><span style="color:#bf616a;">fmt</span><span>.</span><span style="color:#bf616a;">Errorf</span><span>(&quot;</span><span style="color:#a3be8c;">Error: Exec command </span><span style="color:#d08770;">%s</span><span style="color:#a3be8c;"> is already running</span><span>&quot;, </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">ID</span><span>))
+</span><span>  }
+</span><span>  </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Running </span><span>= </span><span style="color:#d08770;">true
+</span><span>  </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Unlock</span><span>()
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">c </span><span>:= </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">containers</span><span>.</span><span style="color:#bf616a;">Get</span><span>(</span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">ContainerID</span><span>)
+</span><span>  </span><span style="color:#bf616a;">logrus</span><span>.</span><span style="color:#bf616a;">Debugf</span><span>(&quot;</span><span style="color:#a3be8c;">starting exec command </span><span style="color:#d08770;">%s</span><span style="color:#a3be8c;"> in container </span><span style="color:#d08770;">%s</span><span>&quot;, </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">ID</span><span>, </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ID</span><span>)
+</span><span>  </span><span style="color:#bf616a;">attributes </span><span>:= </span><span style="color:#b48ead;">map</span><span>[</span><span style="color:#b48ead;">string</span><span>]</span><span style="color:#b48ead;">string</span><span>{
+</span><span>    &quot;</span><span style="color:#a3be8c;">execID</span><span>&quot;: </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">ID</span><span>,
+</span><span>  }
+</span><span>  </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">LogContainerEventWithAttributes</span><span>(</span><span style="color:#bf616a;">c</span><span>, &quot;</span><span style="color:#a3be8c;">exec_start: </span><span>&quot;+</span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Entrypoint</span><span>+&quot; &quot;+</span><span style="color:#bf616a;">strings</span><span>.</span><span style="color:#bf616a;">Join</span><span>(</span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Args</span><span>, &quot; &quot;), </span><span style="color:#bf616a;">attributes</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">defer func</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>      </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Lock</span><span>()
+</span><span>      </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Running </span><span>= </span><span style="color:#d08770;">false
+</span><span>      </span><span style="color:#bf616a;">exitCode </span><span>:= </span><span style="color:#d08770;">126
+</span><span>      </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">ExitCode </span><span>= &amp;</span><span style="color:#bf616a;">exitCode
+</span><span>      </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">CloseStreams</span><span>(); </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>        </span><span style="color:#bf616a;">logrus</span><span>.</span><span style="color:#bf616a;">Errorf</span><span>(&quot;</span><span style="color:#a3be8c;">failed to cleanup exec </span><span style="color:#d08770;">%s</span><span style="color:#a3be8c;"> streams: </span><span style="color:#d08770;">%s</span><span>&quot;, </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ID</span><span>, </span><span style="color:#bf616a;">err</span><span>)
+</span><span>      }
+</span><span>      </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Unlock</span><span>()
+</span><span>      </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ExecCommands</span><span>.</span><span style="color:#bf616a;">Delete</span><span>(</span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">ID</span><span>, </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Pid</span><span>)
+</span><span>    }
+</span><span>  }()
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">OpenStdin </span><span>&amp;&amp; </span><span style="color:#bf616a;">stdin </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#bf616a;">r</span><span>, </span><span style="color:#bf616a;">w </span><span>:= </span><span style="color:#bf616a;">io</span><span>.</span><span style="color:#bf616a;">Pipe</span><span>()
+</span><span>    </span><span style="color:#b48ead;">go func</span><span>() {
+</span><span>      </span><span style="color:#b48ead;">defer </span><span style="color:#bf616a;">w</span><span>.</span><span style="color:#bf616a;">Close</span><span>()
+</span><span>      </span><span style="color:#b48ead;">defer </span><span style="color:#bf616a;">logrus</span><span>.</span><span style="color:#bf616a;">Debug</span><span>(&quot;</span><span style="color:#a3be8c;">Closing buffered stdin pipe</span><span>&quot;)
+</span><span>      </span><span style="color:#bf616a;">pools</span><span>.</span><span style="color:#bf616a;">Copy</span><span>(</span><span style="color:#bf616a;">w</span><span>, </span><span style="color:#bf616a;">stdin</span><span>)
+</span><span>    }()
+</span><span>    </span><span style="color:#bf616a;">cStdin </span><span>= </span><span style="color:#bf616a;">r
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">OpenStdout </span><span>{
+</span><span>    </span><span style="color:#bf616a;">cStdout </span><span>= </span><span style="color:#bf616a;">stdout
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">OpenStderr </span><span>{
+</span><span>    </span><span style="color:#bf616a;">cStderr </span><span>= </span><span style="color:#bf616a;">stderr
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">OpenStdin </span><span>{
+</span><span>    </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">StreamConfig</span><span>.</span><span style="color:#bf616a;">NewInputPipes</span><span>()
+</span><span>  } </span><span style="color:#b48ead;">else </span><span>{
+</span><span>    </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">StreamConfig</span><span>.</span><span style="color:#bf616a;">NewNopInputPipe</span><span>()
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">p </span><span>:= &amp;</span><span style="color:#bf616a;">specs</span><span>.</span><span style="color:#bf616a;">Process</span><span>{}
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">runtime</span><span>.</span><span style="color:#bf616a;">GOOS </span><span>!= &quot;</span><span style="color:#a3be8c;">windows</span><span>&quot; {
+</span><span>    </span><span style="color:#bf616a;">ctr</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">containerdCli</span><span>.</span><span style="color:#bf616a;">LoadContainer</span><span>(</span><span style="color:#bf616a;">ctx</span><span>, </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">ContainerID</span><span>)
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>      </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">err
+</span><span>    }
+</span><span>    </span><span style="color:#bf616a;">spec</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">ctr</span><span>.</span><span style="color:#bf616a;">Spec</span><span>(</span><span style="color:#bf616a;">ctx</span><span>)
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>      </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">err
+</span><span>    }
+</span><span>    </span><span style="color:#bf616a;">p </span><span>= </span><span style="color:#bf616a;">spec</span><span>.</span><span style="color:#bf616a;">Process
+</span><span>  }
+</span><span>  </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">Args </span><span>= </span><span style="color:#96b5b4;">append</span><span>([]</span><span style="color:#b48ead;">string</span><span>{</span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Entrypoint</span><span>}, </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Args</span><span>...)
+</span><span>  </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">Env </span><span>= </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Env
+</span><span>  </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">Cwd </span><span>= </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">WorkingDir
+</span><span>  </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">Terminal </span><span>= </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Tty
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">Cwd </span><span>== &quot;&quot; {
+</span><span>    </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">Cwd </span><span>= &quot;</span><span style="color:#a3be8c;">/</span><span>&quot;
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">execSetPlatformOpt</span><span>(</span><span style="color:#bf616a;">c</span><span>, </span><span style="color:#bf616a;">ec</span><span>, </span><span style="color:#bf616a;">p</span><span>); </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">err
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">attachConfig </span><span>:= </span><span style="color:#bf616a;">stream</span><span>.</span><span style="color:#bf616a;">AttachConfig</span><span>{
+</span><span>    </span><span style="color:#bf616a;">TTY</span><span>:        </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Tty</span><span>,
+</span><span>    </span><span style="color:#bf616a;">UseStdin</span><span>:   </span><span style="color:#bf616a;">cStdin </span><span>!= </span><span style="color:#d08770;">nil</span><span>,
+</span><span>    </span><span style="color:#bf616a;">UseStdout</span><span>:  </span><span style="color:#bf616a;">cStdout </span><span>!= </span><span style="color:#d08770;">nil</span><span>,
+</span><span>    </span><span style="color:#bf616a;">UseStderr</span><span>:  </span><span style="color:#bf616a;">cStderr </span><span>!= </span><span style="color:#d08770;">nil</span><span>,
+</span><span>    </span><span style="color:#bf616a;">Stdin</span><span>:      </span><span style="color:#bf616a;">cStdin</span><span>,
+</span><span>    </span><span style="color:#bf616a;">Stdout</span><span>:     </span><span style="color:#bf616a;">cStdout</span><span>,
+</span><span>    </span><span style="color:#bf616a;">Stderr</span><span>:     </span><span style="color:#bf616a;">cStderr</span><span>,
+</span><span>    </span><span style="color:#bf616a;">DetachKeys</span><span>: </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">DetachKeys</span><span>,
+</span><span>    </span><span style="color:#bf616a;">CloseStdin</span><span>: </span><span style="color:#d08770;">true</span><span>,
+</span><span>  }
+</span><span>  </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">StreamConfig</span><span>.</span><span style="color:#bf616a;">AttachStreams</span><span>(&amp;</span><span style="color:#bf616a;">attachConfig</span><span>)
+</span><span>  </span><span style="color:#bf616a;">attachErr </span><span>:= </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">StreamConfig</span><span>.</span><span style="color:#bf616a;">CopyStreams</span><span>(</span><span style="color:#bf616a;">ctx</span><span>, &amp;</span><span style="color:#bf616a;">attachConfig</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#65737e;">// Synchronize with libcontainerd event loop
+</span><span>  </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Lock</span><span>()
+</span><span>  </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ExecCommands</span><span>.</span><span style="color:#bf616a;">Lock</span><span>()
+</span><span>  </span><span style="color:#bf616a;">systemPid</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">containerd</span><span>.</span><span style="color:#bf616a;">Exec</span><span>(</span><span style="color:#bf616a;">ctx</span><span>, </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ID</span><span>, </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">ID</span><span>, </span><span style="color:#bf616a;">p</span><span>, </span><span style="color:#bf616a;">cStdin </span><span>!= </span><span style="color:#d08770;">nil</span><span>, </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">InitializeStdio</span><span>)
+</span><span>  </span><span style="color:#65737e;">// the exec context should be ready, or error happened.
+</span><span>  </span><span style="color:#65737e;">// close the chan to notify readiness
+</span><span>  </span><span style="color:#96b5b4;">close</span><span>(</span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Started</span><span>)
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ExecCommands</span><span>.</span><span style="color:#bf616a;">Unlock</span><span>()
+</span><span>    </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Unlock</span><span>()
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">translateContainerdStartErr</span><span>(</span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Entrypoint</span><span>, </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">SetExitCode</span><span>, </span><span style="color:#bf616a;">err</span><span>)
+</span><span>  }
+</span><span>  </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Pid </span><span>= </span><span style="color:#bf616a;">systemPid
+</span><span>  </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ExecCommands</span><span>.</span><span style="color:#bf616a;">Unlock</span><span>()
+</span><span>  </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Unlock</span><span>()
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">select </span><span>{
+</span><span>  </span><span style="color:#b48ead;">case </span><span>&lt;-</span><span style="color:#bf616a;">ctx</span><span>.</span><span style="color:#bf616a;">Done</span><span>():
+</span><span>    </span><span style="color:#bf616a;">logrus</span><span>.</span><span style="color:#bf616a;">Debugf</span><span>(&quot;</span><span style="color:#a3be8c;">Sending TERM signal to process </span><span style="color:#d08770;">%v</span><span style="color:#a3be8c;"> in container </span><span style="color:#d08770;">%v</span><span>&quot;, </span><span style="color:#bf616a;">name</span><span>, </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ID</span><span>)
+</span><span>    </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">containerd</span><span>.</span><span style="color:#bf616a;">SignalProcess</span><span>(</span><span style="color:#bf616a;">ctx</span><span>, </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ID</span><span>, </span><span style="color:#bf616a;">name</span><span>, </span><span style="color:#bf616a;">int</span><span>(</span><span style="color:#bf616a;">signal</span><span>.</span><span style="color:#bf616a;">SignalMap</span><span>[&quot;</span><span style="color:#a3be8c;">TERM</span><span>&quot;]))
+</span><span>
+</span><span>    </span><span style="color:#bf616a;">timeout </span><span>:= </span><span style="color:#bf616a;">time</span><span>.</span><span style="color:#bf616a;">NewTimer</span><span>(</span><span style="color:#bf616a;">termProcessTimeout</span><span>)
+</span><span>    </span><span style="color:#b48ead;">defer </span><span style="color:#bf616a;">timeout</span><span>.</span><span style="color:#bf616a;">Stop</span><span>()
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">select </span><span>{
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&lt;-</span><span style="color:#bf616a;">timeout</span><span>.</span><span style="color:#bf616a;">C</span><span>:
+</span><span>      </span><span style="color:#bf616a;">logrus</span><span>.</span><span style="color:#bf616a;">Infof</span><span>(&quot;</span><span style="color:#a3be8c;">Container </span><span style="color:#d08770;">%v</span><span style="color:#a3be8c;">, process </span><span style="color:#d08770;">%v</span><span style="color:#a3be8c;"> failed to exit within </span><span style="color:#d08770;">%v</span><span style="color:#a3be8c;"> of signal TERM - using the force</span><span>&quot;, </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ID</span><span>, </span><span style="color:#bf616a;">name</span><span>, </span><span style="color:#bf616a;">termProcessTimeout</span><span>)
+</span><span>      </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">containerd</span><span>.</span><span style="color:#bf616a;">SignalProcess</span><span>(</span><span style="color:#bf616a;">ctx</span><span>, </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ID</span><span>, </span><span style="color:#bf616a;">name</span><span>, </span><span style="color:#bf616a;">int</span><span>(</span><span style="color:#bf616a;">signal</span><span>.</span><span style="color:#bf616a;">SignalMap</span><span>[&quot;</span><span style="color:#a3be8c;">KILL</span><span>&quot;]))
+</span><span>    </span><span style="color:#b48ead;">case </span><span>&lt;-</span><span style="color:#bf616a;">attachErr</span><span>:
+</span><span>      </span><span style="color:#65737e;">// TERM signal worked
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">ctx</span><span>.</span><span style="color:#bf616a;">Err</span><span>()
+</span><span>  </span><span style="color:#b48ead;">case </span><span style="color:#bf616a;">err </span><span>:= &lt;-</span><span style="color:#bf616a;">attachErr</span><span>:
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>      </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">_</span><span>, </span><span style="color:#bf616a;">ok </span><span>:= </span><span style="color:#bf616a;">err</span><span>.(</span><span style="color:#bf616a;">term</span><span>.</span><span style="color:#b48ead;">EscapeError</span><span>); !</span><span style="color:#bf616a;">ok </span><span>{
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">errdefs</span><span>.</span><span style="color:#bf616a;">System</span><span>(</span><span style="color:#bf616a;">errors</span><span>.</span><span style="color:#bf616a;">Wrap</span><span>(</span><span style="color:#bf616a;">err</span><span>, &quot;</span><span style="color:#a3be8c;">exec attach failed</span><span>&quot;))
+</span><span>      }
+</span><span>      </span><span style="color:#bf616a;">attributes </span><span>:= </span><span style="color:#b48ead;">map</span><span>[</span><span style="color:#b48ead;">string</span><span>]</span><span style="color:#b48ead;">string</span><span>{
+</span><span>        &quot;</span><span style="color:#a3be8c;">execID</span><span>&quot;: </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">ID</span><span>,
+</span><span>      }
+</span><span>      </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">LogContainerEventWithAttributes</span><span>(</span><span style="color:#bf616a;">c</span><span>, &quot;</span><span style="color:#a3be8c;">exec_detach</span><span>&quot;, </span><span style="color:#bf616a;">attributes</span><span>)
+</span><span>    }
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">nil
+</span><span>}
+</span></code></pre>
+<p>根据调用栈可以看到，接下来会执行到 <code>daemon.containerd.Exec</code> 函数调用。首先将上述代码精简:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#65737e;">// getExecConfig looks up the exec instance by name. If the container associated
+</span><span style="color:#65737e;">// with the exec instance is stopped or paused, it will return an error.
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">daemon </span><span>*</span><span style="color:#b48ead;">Daemon</span><span>) </span><span style="color:#8fa1b3;">getExecConfig</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>) (*</span><span style="color:#bf616a;">exec</span><span>.</span><span style="color:#b48ead;">Config</span><span>, </span><span style="color:#b48ead;">error</span><span>) {
+</span><span>  </span><span style="color:#bf616a;">ec </span><span>:= </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">execCommands</span><span>.</span><span style="color:#bf616a;">Get</span><span>(</span><span style="color:#bf616a;">name</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">ctr </span><span>:= </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">containers</span><span>.</span><span style="color:#bf616a;">Get</span><span>(</span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">ContainerID</span><span>)
+</span><span>  </span><span style="color:#65737e;">// ...
+</span><span>  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">ec</span><span>, </span><span style="color:#d08770;">nil
+</span><span>}
+</span></code></pre>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">daemon </span><span>*</span><span style="color:#b48ead;">Daemon</span><span>) </span><span style="color:#8fa1b3;">ContainerExecStart</span><span>(</span><span style="color:#bf616a;">ctx context</span><span>.</span><span style="color:#b48ead;">Context</span><span>, </span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#bf616a;">stdin io</span><span>.</span><span style="color:#b48ead;">Reader</span><span>, </span><span style="color:#bf616a;">stdout io</span><span>.</span><span style="color:#b48ead;">Writer</span><span>, </span><span style="color:#bf616a;">stderr io</span><span>.</span><span style="color:#b48ead;">Writer</span><span>) (</span><span style="color:#bf616a;">err </span><span style="color:#b48ead;">error</span><span>) {
+</span><span>  </span><span style="color:#bf616a;">ec</span><span>, </span><span style="color:#bf616a;">_ </span><span>:= </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">getExecConfig</span><span>(</span><span style="color:#bf616a;">name</span><span>)
+</span><span>  </span><span style="color:#bf616a;">c </span><span>:= </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">containers</span><span>.</span><span style="color:#bf616a;">Get</span><span>(</span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">ContainerID</span><span>)
+</span><span>  </span><span style="color:#65737e;">// Synchronize with libcontainerd event loop
+</span><span>  </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Lock</span><span>()
+</span><span>  </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ExecCommands</span><span>.</span><span style="color:#bf616a;">Lock</span><span>()
+</span><span>  </span><span style="color:#bf616a;">systemPid</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">containerd</span><span>.</span><span style="color:#bf616a;">Exec</span><span>(</span><span style="color:#bf616a;">ctx</span><span>, </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ID</span><span>, </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">ID</span><span>, </span><span style="color:#bf616a;">p</span><span>, </span><span style="color:#bf616a;">cStdin </span><span>!= </span><span style="color:#d08770;">nil</span><span>, </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">InitializeStdio</span><span>)
+</span><span>  </span><span style="color:#65737e;">// the exec context should be ready, or error happened.
+</span><span>  </span><span style="color:#65737e;">// close the chan to notify readiness
+</span><span>  </span><span style="color:#96b5b4;">close</span><span>(</span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Started</span><span>)
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ExecCommands</span><span>.</span><span style="color:#bf616a;">Unlock</span><span>()
+</span><span>    </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Unlock</span><span>()
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">translateContainerdStartErr</span><span>(</span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Entrypoint</span><span>, </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">SetExitCode</span><span>, </span><span style="color:#bf616a;">err</span><span>)
+</span><span>  }
+</span><span>  </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Pid </span><span>= </span><span style="color:#bf616a;">systemPid
+</span><span>  </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">ExecCommands</span><span>.</span><span style="color:#bf616a;">Unlock</span><span>()
+</span><span>  </span><span style="color:#bf616a;">ec</span><span>.</span><span style="color:#bf616a;">Unlock</span><span>()
+</span><span>}
+</span></code></pre>
+<p>在上面的函数中，通过 <code>name</code> 获取到了一个 <code>ec</code>，通过 <code>ec.ContainerID</code> 获取到了 <code>container</code>，然后对 <code>ec</code> 与 <code>container.ExecCommands</code> 加锁。</p>
+<p>根据调用链可知当前 <code>goroutine</code> 执行进入了 <code>daemon.containerd.Exec</code>，所以执行函数之前锁住的两把锁都没有被释放，那么现在就有一个问题: 锁的粒度有多大？</p>
+<p>为了解决这个疑问，就需要找到锁的源头: <code>name</code> 的来源，因为 <code>name</code> -&gt; <code>ec</code> -&gt; <code>Lock</code> / <code>Container</code> -&gt; <code>Lock</code>。</p>
+<p>回溯调用关系，<code>*Daemon.ContainerExecStart</code> 的调用者是路由回调函数 <code>*containerRouter.postContainerExecStart</code>，<code>*Daemon.ContainerExecStart</code> 的入参 <code>name</code> 是 <code>*containerRouter.postContainerExecStart</code> 的局部变量 <code>execName</code>。近一步回溯，<code>execName</code> 的来源是路由变量 <code>:name</code>，路由如下:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#bf616a;">router</span><span>.</span><span style="color:#bf616a;">NewPostRoute</span><span>(&quot;</span><span style="color:#a3be8c;">/exec/{name:.*}/start</span><span>&quot;, </span><span style="color:#bf616a;">r</span><span>.</span><span style="color:#bf616a;">postContainerExecStart</span><span>)
+</span></code></pre>
+<p>为了知道 <code>name</code> 是什么，则需要查看 <code>Docker</code> 的 <code>API</code> 文档。</p>
+<p>首先，通过命令 <code>docker version</code> 可以确定 <code>docker v20.10.3</code> 使用的 <code>API</code> 版本如下:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> docker version
+</span><span style="color:#bf616a;">Client:</span><span> Docker Engine - Community
+</span><span> </span><span style="color:#bf616a;">Version:</span><span>           20.10.3
+</span><span> </span><span style="color:#bf616a;">API</span><span> version:       1.41
+</span><span> </span><span style="color:#bf616a;">Go</span><span> version:        go1.13.15
+</span><span> </span><span style="color:#bf616a;">Git</span><span> commit:        48d30b5
+</span><span> </span><span style="color:#bf616a;">Built:</span><span>             Fri Jan 29 14:34:14 2021
+</span><span> </span><span style="color:#bf616a;">OS/Arch:</span><span>           linux/amd64
+</span><span> </span><span style="color:#bf616a;">Context:</span><span>           default
+</span><span> </span><span style="color:#bf616a;">Experimental:</span><span>      true
+</span><span>
+</span><span style="color:#bf616a;">Server:</span><span> Docker Engine - Community
+</span><span> </span><span style="color:#bf616a;">Engine:
+</span><span>  </span><span style="color:#bf616a;">Version:</span><span>          20.10.3
+</span><span>  </span><span style="color:#bf616a;">API</span><span> version:      1.41 (minimum version 1.12)
+</span><span>  </span><span style="color:#bf616a;">Go</span><span> version:       go1.13.15
+</span><span>  </span><span style="color:#bf616a;">Git</span><span> commit:       46229ca
+</span><span>  </span><span style="color:#bf616a;">Built:</span><span>            Fri Jan 29 14:32:37 2021
+</span><span>  </span><span style="color:#bf616a;">OS/Arch:</span><span>          linux/amd64
+</span><span>  </span><span style="color:#bf616a;">Experimental:</span><span>     false
+</span><span> </span><span style="color:#bf616a;">containerd:
+</span><span>  </span><span style="color:#bf616a;">Version:</span><span>          1.4.3
+</span><span>  </span><span style="color:#bf616a;">GitCommit:</span><span>        269548fa27e0089a8b8278fc4fc781d7f65a939b
+</span><span> </span><span style="color:#bf616a;">nvidia:
+</span><span>  </span><span style="color:#bf616a;">Version:</span><span>          1.0.0-rc92
+</span><span>  </span><span style="color:#bf616a;">GitCommit:</span><span>        ff819c7e9184c13b7c2607fe6c30ae19403a7aff
+</span><span> </span><span style="color:#bf616a;">docker-init:
+</span><span>  </span><span style="color:#bf616a;">Version:</span><span>          0.19.0
+</span><span>  </span><span style="color:#bf616a;">GitCommit:</span><span>        de40ad0
+</span></code></pre>
+<p>即版本是 <code>API version: 1.41 (minimum version 1.12)</code>。</p>
+<p>通过查阅 <a href="https://docs.docker.com/engine/api">Docker API Reference</a> 获取具体的 <a href="https://docs.docker.com/engine/api/v1.41/#operation/ExecStart"><code>API</code></a>:</p>
+<pre data-lang="HTTP" style="background-color:#2b303b;color:#c0c5ce;" class="language-HTTP "><code class="language-HTTP" data-lang="HTTP"><span>POST /exec/{id}/start
+</span><span>
+</span><span>{
+</span><span>  &quot;Detach&quot;: false,
+</span><span>  &quot;Tty&quot;: false
+</span><span>}
+</span></code></pre>
+<blockquote>
+<p>Path Parameters:</p>
+<ul>
+<li>id
+<ul>
+<li>string Required</li>
+<li>Exec instance ID</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<p>易得，<code>API</code> 文档中的 <code>id</code> 就是代码中的 <code>name</code>。</p>
+<p>而 <code>exec id</code> 是通过如下 <a href="https://docs.docker.com/engine/api/v1.41/#operation/ContainerExec"><code>API</code></a> 获得(当然，这个属于盲猜，应该可以通过查阅 <code>docker client</code> 的 <code>exec</code> 命令部分的源码就能确定):</p>
+<pre data-lang="HTTP" style="background-color:#2b303b;color:#c0c5ce;" class="language-HTTP "><code class="language-HTTP" data-lang="HTTP"><span>POST /containers/{id}/exec
+</span><span>
+</span><span>{
+</span><span>  &quot;AttachStdin&quot;: false,
+</span><span>  &quot;AttachStdout&quot;: true,
+</span><span>  &quot;AttachStderr&quot;: true,
+</span><span>  &quot;DetachKeys&quot;: &quot;ctrl-p,ctrl-q&quot;,
+</span><span>  &quot;Tty&quot;: false,
+</span><span>  &quot;Cmd&quot;: [
+</span><span>    &quot;date&quot;
+</span><span>  ],
+</span><span>  &quot;Env&quot;: [
+</span><span>    &quot;FOO=bar&quot;,
+</span><span>    &quot;BAZ=quux&quot;
+</span><span>  ]
+</span><span>}
+</span></code></pre>
+<blockquote>
+<p>Path Parameters:</p>
+<ul>
+<li>id
+<ul>
+<li>string Required</li>
+<li>ID or name of container</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<p>因此，可以得出结论，先调用 <code>ContainerExec</code> 通过 <code>container id</code> 获取 <code>exec id</code>，然后使用上面获得的 <code>exec id</code>调用 <code>ExecStart</code>。</p>
+<p>但是，到此为止只是清楚了逻辑关系，还无法解答锁的粒度，或许应该看一下 <code>ContainerExec</code> 的逻辑。</p>
+<p>根据路由信息 <code>router.NewPostRoute(&quot;/containers/{name:.*}/exec&quot;, r.postContainerExecCreate)</code>，找到 <code>ContainerExec</code> 的处理函数 <code>postContainerExecCreate</code> 中关于 <code>exec id</code> 部分的逻辑:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">s </span><span>*</span><span style="color:#b48ead;">containerRouter</span><span>) </span><span style="color:#8fa1b3;">postContainerExecCreate</span><span>(</span><span style="color:#bf616a;">ctx context</span><span>.</span><span style="color:#b48ead;">Context</span><span>, </span><span style="color:#bf616a;">w http</span><span>.</span><span style="color:#b48ead;">ResponseWriter</span><span>, </span><span style="color:#bf616a;">r </span><span>*</span><span style="color:#bf616a;">http</span><span>.</span><span style="color:#b48ead;">Request</span><span>, </span><span style="color:#bf616a;">vars </span><span style="color:#b48ead;">map</span><span>[</span><span style="color:#b48ead;">string</span><span>]</span><span style="color:#b48ead;">string</span><span>) </span><span style="color:#b48ead;">error </span><span>{
+</span><span>  </span><span style="color:#65737e;">// ...
+</span><span>  </span><span style="color:#bf616a;">name </span><span>:= </span><span style="color:#bf616a;">vars</span><span>[&quot;</span><span style="color:#a3be8c;">name</span><span>&quot;]
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">execConfig </span><span>:= &amp;</span><span style="color:#bf616a;">types</span><span>.</span><span style="color:#bf616a;">ExecConfig</span><span>{}
+</span><span>  </span><span style="color:#bf616a;">json</span><span>.</span><span style="color:#bf616a;">NewDecoder</span><span>(</span><span style="color:#bf616a;">r</span><span>.</span><span style="color:#bf616a;">Body</span><span>).</span><span style="color:#bf616a;">Decode</span><span>(</span><span style="color:#bf616a;">execConfig</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#65737e;">// Register an instance of Exec in container.
+</span><span>  </span><span style="color:#bf616a;">id</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">s</span><span>.</span><span style="color:#bf616a;">backend</span><span>.</span><span style="color:#bf616a;">ContainerExecCreate</span><span>(</span><span style="color:#bf616a;">name</span><span>, </span><span style="color:#bf616a;">execConfig</span><span>)
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#bf616a;">logrus</span><span>.</span><span style="color:#bf616a;">Errorf</span><span>(&quot;</span><span style="color:#a3be8c;">Error setting up exec command in container </span><span style="color:#d08770;">%s</span><span style="color:#a3be8c;">: </span><span style="color:#d08770;">%v</span><span>&quot;, </span><span style="color:#bf616a;">name</span><span>, </span><span style="color:#bf616a;">err</span><span>)
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">err
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">httputils</span><span>.</span><span style="color:#bf616a;">WriteJSON</span><span>(</span><span style="color:#bf616a;">w</span><span>, </span><span style="color:#bf616a;">http</span><span>.</span><span style="color:#bf616a;">StatusCreated</span><span>, &amp;</span><span style="color:#bf616a;">types</span><span>.</span><span style="color:#bf616a;">IDResponse</span><span>{
+</span><span>    </span><span style="color:#bf616a;">ID</span><span>: </span><span style="color:#bf616a;">id</span><span>,
+</span><span>  })
+</span><span>}
+</span></code></pre>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#65737e;">// ContainerExecCreate sets up an exec in a running container.
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">daemon </span><span>*</span><span style="color:#b48ead;">Daemon</span><span>) </span><span style="color:#8fa1b3;">ContainerExecCreate</span><span>(</span><span style="color:#bf616a;">name </span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#bf616a;">config </span><span>*</span><span style="color:#bf616a;">types</span><span>.</span><span style="color:#b48ead;">ExecConfig</span><span>) (</span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#b48ead;">error</span><span>) {
+</span><span>  </span><span style="color:#65737e;">// 通过 container name 获取当前处于活跃状态的 container
+</span><span>  </span><span style="color:#bf616a;">cntr</span><span>, </span><span style="color:#bf616a;">_ </span><span>:= </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">getActiveContainer</span><span>(</span><span style="color:#bf616a;">name</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">cmd </span><span>:= </span><span style="color:#bf616a;">strslice</span><span>.</span><span style="color:#bf616a;">StrSlice</span><span>(</span><span style="color:#bf616a;">config</span><span>.</span><span style="color:#bf616a;">Cmd</span><span>)
+</span><span>  </span><span style="color:#bf616a;">entrypoint</span><span>, </span><span style="color:#bf616a;">args </span><span>:= </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">getEntrypointAndArgs</span><span>(</span><span style="color:#bf616a;">strslice</span><span>.</span><span style="color:#bf616a;">StrSlice</span><span>{}, </span><span style="color:#bf616a;">cmd</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">keys </span><span>:= []</span><span style="color:#b48ead;">byte</span><span>{}
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">config</span><span>.</span><span style="color:#bf616a;">DetachKeys </span><span>!= &quot;&quot; {
+</span><span>    </span><span style="color:#bf616a;">keys</span><span>, </span><span style="color:#bf616a;">_ </span><span>= </span><span style="color:#bf616a;">term</span><span>.</span><span style="color:#bf616a;">ToBytes</span><span>(</span><span style="color:#bf616a;">config</span><span>.</span><span style="color:#bf616a;">DetachKeys</span><span>)
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">execConfig </span><span>:= </span><span style="color:#bf616a;">exec</span><span>.</span><span style="color:#bf616a;">NewConfig</span><span>()
+</span><span>  </span><span style="color:#bf616a;">execConfig</span><span>.</span><span style="color:#bf616a;">OpenStdin </span><span>= </span><span style="color:#bf616a;">config</span><span>.</span><span style="color:#bf616a;">AttachStdin
+</span><span>  </span><span style="color:#bf616a;">execConfig</span><span>.</span><span style="color:#bf616a;">OpenStdout </span><span>= </span><span style="color:#bf616a;">config</span><span>.</span><span style="color:#bf616a;">AttachStdout
+</span><span>  </span><span style="color:#bf616a;">execConfig</span><span>.</span><span style="color:#bf616a;">OpenStderr </span><span>= </span><span style="color:#bf616a;">config</span><span>.</span><span style="color:#bf616a;">AttachStderr
+</span><span>  </span><span style="color:#65737e;">// config 的 container id 就是 container.ID 即容器的 ID
+</span><span>  </span><span style="color:#bf616a;">execConfig</span><span>.</span><span style="color:#bf616a;">ContainerID </span><span>= </span><span style="color:#bf616a;">cntr</span><span>.</span><span style="color:#bf616a;">ID
+</span><span>  </span><span style="color:#bf616a;">execConfig</span><span>.</span><span style="color:#bf616a;">DetachKeys </span><span>= </span><span style="color:#bf616a;">keys
+</span><span>  </span><span style="color:#bf616a;">execConfig</span><span>.</span><span style="color:#bf616a;">Entrypoint </span><span>= </span><span style="color:#bf616a;">entrypoint
+</span><span>  </span><span style="color:#bf616a;">execConfig</span><span>.</span><span style="color:#bf616a;">Args </span><span>= </span><span style="color:#bf616a;">args
+</span><span>  </span><span style="color:#bf616a;">execConfig</span><span>.</span><span style="color:#bf616a;">Tty </span><span>= </span><span style="color:#bf616a;">config</span><span>.</span><span style="color:#bf616a;">Tty
+</span><span>  </span><span style="color:#bf616a;">execConfig</span><span>.</span><span style="color:#bf616a;">Privileged </span><span>= </span><span style="color:#bf616a;">config</span><span>.</span><span style="color:#bf616a;">Privileged
+</span><span>  </span><span style="color:#bf616a;">execConfig</span><span>.</span><span style="color:#bf616a;">User </span><span>= </span><span style="color:#bf616a;">config</span><span>.</span><span style="color:#bf616a;">User
+</span><span>  </span><span style="color:#bf616a;">execConfig</span><span>.</span><span style="color:#bf616a;">WorkingDir </span><span>= </span><span style="color:#bf616a;">config</span><span>.</span><span style="color:#bf616a;">WorkingDir
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">registerExecCommand</span><span>(</span><span style="color:#bf616a;">cntr</span><span>, </span><span style="color:#bf616a;">execConfig</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">execConfig</span><span>.</span><span style="color:#bf616a;">ID</span><span>, </span><span style="color:#d08770;">nil
+</span><span>}
+</span></code></pre>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#65737e;">// NewConfig initializes the a new exec configuration
+</span><span style="color:#b48ead;">func </span><span style="color:#8fa1b3;">NewConfig</span><span>() *</span><span style="color:#b48ead;">Config </span><span>{
+</span><span>   </span><span style="color:#b48ead;">return </span><span>&amp;</span><span style="color:#bf616a;">Config</span><span>{
+</span><span>      </span><span style="color:#bf616a;">ID</span><span>:           </span><span style="color:#bf616a;">stringid</span><span>.</span><span style="color:#bf616a;">GenerateRandomID</span><span>(),
+</span><span>      </span><span style="color:#bf616a;">StreamConfig</span><span>: </span><span style="color:#bf616a;">stream</span><span>.</span><span style="color:#bf616a;">NewConfig</span><span>(),
+</span><span>      </span><span style="color:#bf616a;">Started</span><span>:      </span><span style="color:#96b5b4;">make</span><span>(</span><span style="color:#b48ead;">chan struct</span><span>{}),
+</span><span>   }
+</span><span>}
+</span></code></pre>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">daemon </span><span>*</span><span style="color:#b48ead;">Daemon</span><span>) </span><span style="color:#8fa1b3;">registerExecCommand</span><span>(</span><span style="color:#bf616a;">container </span><span>*</span><span style="color:#bf616a;">container</span><span>.</span><span style="color:#b48ead;">Container</span><span>, </span><span style="color:#bf616a;">config </span><span>*</span><span style="color:#bf616a;">exec</span><span>.</span><span style="color:#b48ead;">Config</span><span>) {
+</span><span>  </span><span style="color:#65737e;">// Storing execs in container in order to kill them gracefully whenever the container is stopped or removed.
+</span><span>  </span><span style="color:#bf616a;">container</span><span>.</span><span style="color:#bf616a;">ExecCommands</span><span>.</span><span style="color:#bf616a;">Add</span><span>(</span><span style="color:#bf616a;">config</span><span>.</span><span style="color:#bf616a;">ID</span><span>, </span><span style="color:#bf616a;">config</span><span>)
+</span><span>  </span><span style="color:#65737e;">// Storing execs in daemon for easy access via Engine API.
+</span><span>  </span><span style="color:#bf616a;">daemon</span><span>.</span><span style="color:#bf616a;">execCommands</span><span>.</span><span style="color:#bf616a;">Add</span><span>(</span><span style="color:#bf616a;">config</span><span>.</span><span style="color:#bf616a;">ID</span><span>, </span><span style="color:#bf616a;">config</span><span>)
+</span><span>}
+</span></code></pre>
+<p>到此为止，逻辑关系就比较清晰了。<code>postContainerExecCreate</code> 的路由参数 <code>name</code> 就是 <code>container id</code>。<code>*Daemon.ContainerExecCreate</code> 内部创建了一个随机的 <code>exec id</code> 保存在 <code>execConfig</code> 中，同时在 <code>execConfig</code> 持有了 <code>container id</code>。所以，对于一个 <code>container</code> 的多次 <code>exec</code> 命令使用不同的 <code>exec id</code>，但他们共同持有相同的 <code>container id</code>。而后调用 <code>*Daemon.registerExecCommand</code> 将 <code>execConfig</code> 以 <code>exec id</code> 作为索引添加到缓存中。</p>
+<p>回到函数 <code>func (daemon *Daemon) ContainerExecStart</code>，通过 <code>exec id</code> 可以获取到不同的 <code>ec</code> 对象，调用 <code>ec.Lock()</code> 的锁粒度为 <code>exec id</code>，对于同一个 <code>container</code> 的多次执行 <code>exec</code>，他们持有的 <code>container id</code> 是相同的，因此 <code>c.ExecCommands.Lock()</code> 的锁粒度是 <code>container</code> 级别。</p>
+<p>综上所述，可以确定当前 <code>goroutine</code> 未释放两把锁资源，会导致之后的 <code>exec</code> 操作是一定会失败的。但阻塞在这里的原因还不清晰。从函数调用栈可以看到当前 <code>goroutine</code> 在等待 <code>gRPC</code> 的响应。</p>
+<p><code>daemon.containerd</code> 的类型是接口 <code>github.com/docker/docker/libcontainerd/types.Client</code>，其实现者是位于 <code>docker/libcontainerd/remote/client.go</code> 的 <code>struct client</code> 类型:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">type </span><span>client </span><span style="color:#b48ead;">struct </span><span>{
+</span><span>  </span><span style="color:#bf616a;">client   </span><span>*</span><span style="color:#bf616a;">containerd</span><span>.</span><span style="color:#b48ead;">Client
+</span><span>  </span><span style="color:#bf616a;">stateDir </span><span style="color:#b48ead;">string
+</span><span>  </span><span style="color:#bf616a;">logger   </span><span>*</span><span style="color:#bf616a;">logrus</span><span>.</span><span style="color:#b48ead;">Entry
+</span><span>  </span><span style="color:#bf616a;">ns       </span><span style="color:#b48ead;">string
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">backend         libcontainerdtypes</span><span>.</span><span style="color:#b48ead;">Backend
+</span><span>  </span><span style="color:#bf616a;">eventQ          queue</span><span>.</span><span style="color:#b48ead;">Queue
+</span><span>  </span><span style="color:#bf616a;">oomMu           sync</span><span>.</span><span style="color:#b48ead;">Mutex
+</span><span>  </span><span style="color:#bf616a;">oom             </span><span style="color:#b48ead;">map</span><span>[</span><span style="color:#b48ead;">string</span><span>]</span><span style="color:#b48ead;">bool
+</span><span>  </span><span style="color:#bf616a;">v2runcoptionsMu sync</span><span>.</span><span style="color:#b48ead;">Mutex
+</span><span>  </span><span style="color:#65737e;">// v2runcoptions is used for copying options specified on Create() to Start()
+</span><span>  </span><span style="color:#bf616a;">v2runcoptions </span><span style="color:#b48ead;">map</span><span>[</span><span style="color:#b48ead;">string</span><span>]</span><span style="color:#bf616a;">v2runcoptions</span><span>.</span><span style="color:#b48ead;">Options
+</span><span>}
+</span></code></pre>
+<p>其内部包含字段 <code>client</code> 是 <code>github.com/containerd/containerd/client.go</code> 的 <code>Client</code> 类型。</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#65737e;">// docker/libcontainerd/remote/client.go:L265
+</span><span>
+</span><span style="color:#65737e;">// Exec creates exec process.
+</span><span style="color:#65737e;">//
+</span><span style="color:#65737e;">// The containerd client calls Exec to register the exec config in the shim side.
+</span><span style="color:#65737e;">// When the client calls Start, the shim will create stdin fifo if needs. But
+</span><span style="color:#65737e;">// for the container main process, the stdin fifo will be created in Create not
+</span><span style="color:#65737e;">// the Start call. stdinCloseSync channel should be closed after Start exec
+</span><span style="color:#65737e;">// process.
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">c </span><span>*</span><span style="color:#b48ead;">client</span><span>) </span><span style="color:#8fa1b3;">Exec</span><span>(</span><span style="color:#bf616a;">ctx context</span><span>.</span><span style="color:#b48ead;">Context</span><span>, </span><span style="color:#bf616a;">containerID</span><span>, </span><span style="color:#bf616a;">processID </span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#bf616a;">spec </span><span>*</span><span style="color:#bf616a;">specs</span><span>.</span><span style="color:#b48ead;">Process</span><span>, </span><span style="color:#bf616a;">withStdin </span><span style="color:#b48ead;">bool</span><span>, </span><span style="color:#bf616a;">attachStdio libcontainerdtypes</span><span>.</span><span style="color:#b48ead;">StdioCallback</span><span>) (</span><span style="color:#b48ead;">int</span><span>, </span><span style="color:#b48ead;">error</span><span>) {
+</span><span>  </span><span style="color:#65737e;">// 根据 containerID，获取到对应的 container 对象，
+</span><span>  </span><span style="color:#65737e;">// ctr 的类型是接口 github.com/containerd/containerd.Container
+</span><span>  </span><span style="color:#65737e;">// 其具体实现者是类型 *github.com/containerd/containerd.container
+</span><span>  </span><span style="color:#bf616a;">ctr</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">getContainer</span><span>(</span><span style="color:#bf616a;">ctx</span><span>, </span><span style="color:#bf616a;">containerID</span><span>)
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#b48ead;">return </span><span>-</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#bf616a;">err
+</span><span>  }
+</span><span>  </span><span style="color:#65737e;">// Task is the executable object within containerd
+</span><span>  </span><span style="color:#65737e;">//
+</span><span>  </span><span style="color:#65737e;">// 通过 container 创建一个 github.com/containerd/containerd.task 类型，其实现了 Task 接口
+</span><span>  </span><span style="color:#65737e;">// 对 container 的每一次操作，都是一个 Task
+</span><span>  </span><span style="color:#bf616a;">t</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">ctr</span><span>.</span><span style="color:#bf616a;">Task</span><span>(</span><span style="color:#bf616a;">ctx</span><span>, </span><span style="color:#d08770;">nil</span><span>)
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">containerderrors</span><span>.</span><span style="color:#bf616a;">IsNotFound</span><span>(</span><span style="color:#bf616a;">err</span><span>) {
+</span><span>      </span><span style="color:#b48ead;">return </span><span>-</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#bf616a;">errors</span><span>.</span><span style="color:#bf616a;">WithStack</span><span>(</span><span style="color:#bf616a;">errdefs</span><span>.</span><span style="color:#bf616a;">InvalidParameter</span><span>(</span><span style="color:#bf616a;">errors</span><span>.</span><span style="color:#bf616a;">New</span><span>(&quot;</span><span style="color:#a3be8c;">container is not running</span><span>&quot;)))
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">return </span><span>-</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#bf616a;">wrapError</span><span>(</span><span style="color:#bf616a;">err</span><span>)
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">var </span><span>(
+</span><span>    </span><span style="color:#bf616a;">p              containerd</span><span>.</span><span style="color:#b48ead;">Process
+</span><span>    </span><span style="color:#bf616a;">rio            cio</span><span>.</span><span style="color:#b48ead;">IO
+</span><span>    </span><span style="color:#bf616a;">stdinCloseSync </span><span>= </span><span style="color:#96b5b4;">make</span><span>(</span><span style="color:#b48ead;">chan struct</span><span>{})
+</span><span>  )
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">labels</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">ctr</span><span>.</span><span style="color:#bf616a;">Labels</span><span>(</span><span style="color:#bf616a;">ctx</span><span>)
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#b48ead;">return </span><span>-</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#bf616a;">wrapError</span><span>(</span><span style="color:#bf616a;">err</span><span>)
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">fifos </span><span>:= </span><span style="color:#bf616a;">newFIFOSet</span><span>(</span><span style="color:#bf616a;">labels</span><span>[</span><span style="color:#bf616a;">DockerContainerBundlePath</span><span>], </span><span style="color:#bf616a;">processID</span><span>, </span><span style="color:#bf616a;">withStdin</span><span>, </span><span style="color:#bf616a;">spec</span><span>.</span><span style="color:#bf616a;">Terminal</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">defer func</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>      </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">rio </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>        </span><span style="color:#bf616a;">rio</span><span>.</span><span style="color:#bf616a;">Cancel</span><span>()
+</span><span>        </span><span style="color:#bf616a;">rio</span><span>.</span><span style="color:#bf616a;">Close</span><span>()
+</span><span>      }
+</span><span>    }
+</span><span>  }()
+</span><span>
+</span><span>  </span><span style="color:#65737e;">// Exec creates a new process inside the task
+</span><span>
+</span><span>  </span><span style="color:#bf616a;">p</span><span>, </span><span style="color:#bf616a;">err </span><span>= </span><span style="color:#bf616a;">t</span><span>.</span><span style="color:#bf616a;">Exec</span><span>(</span><span style="color:#bf616a;">ctx</span><span>, </span><span style="color:#bf616a;">processID</span><span>, </span><span style="color:#bf616a;">spec</span><span>, </span><span style="color:#b48ead;">func</span><span>(</span><span style="color:#bf616a;">id </span><span style="color:#b48ead;">string</span><span>) (</span><span style="color:#bf616a;">cio</span><span>.</span><span style="color:#b48ead;">IO</span><span>, </span><span style="color:#b48ead;">error</span><span>) {
+</span><span>    </span><span style="color:#bf616a;">rio</span><span>, </span><span style="color:#bf616a;">err </span><span>= </span><span style="color:#bf616a;">c</span><span>.</span><span style="color:#bf616a;">createIO</span><span>(</span><span style="color:#bf616a;">fifos</span><span>, </span><span style="color:#bf616a;">containerID</span><span>, </span><span style="color:#bf616a;">processID</span><span>, </span><span style="color:#bf616a;">stdinCloseSync</span><span>, </span><span style="color:#bf616a;">attachStdio</span><span>)
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">rio</span><span>, </span><span style="color:#bf616a;">err
+</span><span>  })
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#96b5b4;">close</span><span>(</span><span style="color:#bf616a;">stdinCloseSync</span><span>)
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">containerderrors</span><span>.</span><span style="color:#bf616a;">IsAlreadyExists</span><span>(</span><span style="color:#bf616a;">err</span><span>) {
+</span><span>      </span><span style="color:#b48ead;">return </span><span>-</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#bf616a;">errors</span><span>.</span><span style="color:#bf616a;">WithStack</span><span>(</span><span style="color:#bf616a;">errdefs</span><span>.</span><span style="color:#bf616a;">Conflict</span><span>(</span><span style="color:#bf616a;">errors</span><span>.</span><span style="color:#bf616a;">New</span><span>(&quot;</span><span style="color:#a3be8c;">id already in use</span><span>&quot;)))
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">return </span><span>-</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#bf616a;">wrapError</span><span>(</span><span style="color:#bf616a;">err</span><span>)
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#65737e;">// Signal c.createIO that it can call CloseIO
+</span><span>  </span><span style="color:#65737e;">//
+</span><span>  </span><span style="color:#65737e;">// the stdin of exec process will be created after p.Start in containerd
+</span><span>  </span><span style="color:#b48ead;">defer </span><span style="color:#96b5b4;">close</span><span>(</span><span style="color:#bf616a;">stdinCloseSync</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>= </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">Start</span><span>(</span><span style="color:#bf616a;">ctx</span><span>); </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#65737e;">// use new context for cleanup because old one may be cancelled by user, but leave a timeout to make sure
+</span><span>    </span><span style="color:#65737e;">// we are not waiting forever if containerd is unresponsive or to work around fifo cancelling issues in
+</span><span>    </span><span style="color:#65737e;">// older containerd-shim
+</span><span>    </span><span style="color:#bf616a;">ctx</span><span>, </span><span style="color:#bf616a;">cancel </span><span>:= </span><span style="color:#bf616a;">context</span><span>.</span><span style="color:#bf616a;">WithTimeout</span><span>(</span><span style="color:#bf616a;">context</span><span>.</span><span style="color:#bf616a;">Background</span><span>(), </span><span style="color:#d08770;">45</span><span>*</span><span style="color:#bf616a;">time</span><span>.</span><span style="color:#bf616a;">Second</span><span>)
+</span><span>    </span><span style="color:#b48ead;">defer </span><span style="color:#bf616a;">cancel</span><span>()
+</span><span>    </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">Delete</span><span>(</span><span style="color:#bf616a;">ctx</span><span>)
+</span><span>    </span><span style="color:#b48ead;">return </span><span>-</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#bf616a;">wrapError</span><span>(</span><span style="color:#bf616a;">err</span><span>)
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">int</span><span>(</span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">Pid</span><span>()), </span><span style="color:#d08770;">nil
+</span><span>}
+</span></code></pre>
+<p>如下是函数 <code>task.Exec</code>，其内部调用了 <code>github.com/containerd/containerd.Client.TaskService().Exec</code> 函数执行 <code>Exec</code> 操作:</p>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">t </span><span>*</span><span style="color:#b48ead;">task</span><span>) </span><span style="color:#8fa1b3;">Exec</span><span>(</span><span style="color:#bf616a;">ctx context</span><span>.</span><span style="color:#b48ead;">Context</span><span>, </span><span style="color:#bf616a;">id </span><span style="color:#b48ead;">string</span><span>, </span><span style="color:#bf616a;">spec </span><span>*</span><span style="color:#bf616a;">specs</span><span>.</span><span style="color:#b48ead;">Process</span><span>, </span><span style="color:#bf616a;">ioCreate cio</span><span>.</span><span style="color:#b48ead;">Creator</span><span>) (</span><span style="color:#bf616a;">_ </span><span style="color:#b48ead;">Process</span><span>, </span><span style="color:#bf616a;">err </span><span style="color:#b48ead;">error</span><span>) {
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">id </span><span>== &quot;&quot; {
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">nil</span><span>, </span><span style="color:#bf616a;">errors</span><span>.</span><span style="color:#bf616a;">Wrapf</span><span>(</span><span style="color:#bf616a;">errdefs</span><span>.</span><span style="color:#bf616a;">ErrInvalidArgument</span><span>, &quot;</span><span style="color:#a3be8c;">exec id must not be empty</span><span>&quot;)
+</span><span>  }
+</span><span>  </span><span style="color:#bf616a;">i</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">ioCreate</span><span>(</span><span style="color:#bf616a;">id</span><span>)
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">nil</span><span>, </span><span style="color:#bf616a;">err
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">defer func</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>&amp;&amp; </span><span style="color:#bf616a;">i </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>      </span><span style="color:#bf616a;">i</span><span>.</span><span style="color:#bf616a;">Cancel</span><span>()
+</span><span>      </span><span style="color:#bf616a;">i</span><span>.</span><span style="color:#bf616a;">Close</span><span>()
+</span><span>    }
+</span><span>  }()
+</span><span>  </span><span style="color:#bf616a;">any</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">typeurl</span><span>.</span><span style="color:#bf616a;">MarshalAny</span><span>(</span><span style="color:#bf616a;">spec</span><span>)
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">nil</span><span>, </span><span style="color:#bf616a;">err
+</span><span>  }
+</span><span>  </span><span style="color:#bf616a;">cfg </span><span>:= </span><span style="color:#bf616a;">i</span><span>.</span><span style="color:#bf616a;">Config</span><span>()
+</span><span>  </span><span style="color:#bf616a;">request </span><span>:= &amp;</span><span style="color:#bf616a;">tasks</span><span>.</span><span style="color:#bf616a;">ExecProcessRequest</span><span>{
+</span><span>    </span><span style="color:#bf616a;">ContainerID</span><span>: </span><span style="color:#bf616a;">t</span><span>.</span><span style="color:#bf616a;">id</span><span>,
+</span><span>    </span><span style="color:#bf616a;">ExecID</span><span>:      </span><span style="color:#bf616a;">id</span><span>,
+</span><span>    </span><span style="color:#bf616a;">Terminal</span><span>:    </span><span style="color:#bf616a;">cfg</span><span>.</span><span style="color:#bf616a;">Terminal</span><span>,
+</span><span>    </span><span style="color:#bf616a;">Stdin</span><span>:       </span><span style="color:#bf616a;">cfg</span><span>.</span><span style="color:#bf616a;">Stdin</span><span>,
+</span><span>    </span><span style="color:#bf616a;">Stdout</span><span>:      </span><span style="color:#bf616a;">cfg</span><span>.</span><span style="color:#bf616a;">Stdout</span><span>,
+</span><span>    </span><span style="color:#bf616a;">Stderr</span><span>:      </span><span style="color:#bf616a;">cfg</span><span>.</span><span style="color:#bf616a;">Stderr</span><span>,
+</span><span>    </span><span style="color:#bf616a;">Spec</span><span>:        </span><span style="color:#bf616a;">any</span><span>,
+</span><span>  }
+</span><span>  </span><span style="color:#65737e;">// 这是一个 gRPC  请求
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">_</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">t</span><span>.</span><span style="color:#bf616a;">client</span><span>.</span><span style="color:#bf616a;">TaskService</span><span>().</span><span style="color:#bf616a;">Exec</span><span>(</span><span style="color:#bf616a;">ctx</span><span>, </span><span style="color:#bf616a;">request</span><span>); </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#bf616a;">i</span><span>.</span><span style="color:#bf616a;">Cancel</span><span>()
+</span><span>    </span><span style="color:#bf616a;">i</span><span>.</span><span style="color:#bf616a;">Wait</span><span>()
+</span><span>    </span><span style="color:#bf616a;">i</span><span>.</span><span style="color:#bf616a;">Close</span><span>()
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">nil</span><span>, </span><span style="color:#bf616a;">errdefs</span><span>.</span><span style="color:#bf616a;">FromGRPC</span><span>(</span><span style="color:#bf616a;">err</span><span>)
+</span><span>  }
+</span><span>  </span><span style="color:#b48ead;">return </span><span>&amp;</span><span style="color:#bf616a;">process</span><span>{
+</span><span>    </span><span style="color:#bf616a;">id</span><span>:   </span><span style="color:#bf616a;">id</span><span>,
+</span><span>    </span><span style="color:#bf616a;">task</span><span>: </span><span style="color:#bf616a;">t</span><span>,
+</span><span>    </span><span style="color:#bf616a;">io</span><span>:   </span><span style="color:#bf616a;">i</span><span>,
+</span><span>  }, </span><span style="color:#d08770;">nil
+</span><span>}
+</span></code></pre>
+<pre data-lang="go" style="background-color:#2b303b;color:#c0c5ce;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#65737e;">// Start starts the exec process
+</span><span style="color:#b48ead;">func </span><span>(</span><span style="color:#bf616a;">p </span><span>*</span><span style="color:#b48ead;">process</span><span>) </span><span style="color:#8fa1b3;">Start</span><span>(</span><span style="color:#bf616a;">ctx context</span><span>.</span><span style="color:#b48ead;">Context</span><span>) </span><span style="color:#b48ead;">error </span><span>{
+</span><span>  </span><span style="color:#bf616a;">r</span><span>, </span><span style="color:#bf616a;">err </span><span>:= </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">task</span><span>.</span><span style="color:#bf616a;">client</span><span>.</span><span style="color:#bf616a;">TaskService</span><span>().</span><span style="color:#bf616a;">Start</span><span>(</span><span style="color:#bf616a;">ctx</span><span>, &amp;</span><span style="color:#bf616a;">tasks</span><span>.</span><span style="color:#bf616a;">StartRequest</span><span>{
+</span><span>    </span><span style="color:#bf616a;">ContainerID</span><span>: </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">task</span><span>.</span><span style="color:#bf616a;">id</span><span>,
+</span><span>    </span><span style="color:#bf616a;">ExecID</span><span>:      </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">id</span><span>,
+</span><span>  })
+</span><span>  </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">err </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">io </span><span>!= </span><span style="color:#d08770;">nil </span><span>{
+</span><span>      </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">io</span><span>.</span><span style="color:#bf616a;">Cancel</span><span>()
+</span><span>      </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">io</span><span>.</span><span style="color:#bf616a;">Wait</span><span>()
+</span><span>      </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">io</span><span>.</span><span style="color:#bf616a;">Close</span><span>()
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">errdefs</span><span>.</span><span style="color:#bf616a;">FromGRPC</span><span>(</span><span style="color:#bf616a;">err</span><span>)
+</span><span>  }
+</span><span>  </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">pid </span><span>= </span><span style="color:#bf616a;">r</span><span>.</span><span style="color:#bf616a;">Pid
+</span><span>  </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">nil
+</span><span>}
+</span></code></pre>
+<h3 id="cha-kan-jin-cheng-zhuang-tai">查看进程状态</h3>
+<p>查看容器的 <code>pid</code>:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> docker inspect</span><span style="color:#bf616a;"> -f </span><span>{{.State.Pid}} e318f67bce5c
+</span><span>
+</span><span style="color:#bf616a;">^C
+</span></code></pre>
+<p>但很遗憾，当前无法执行 <code>docker inspect</code>。尝试根据 <code>container id</code> 获取 <code>pid</code>:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> ps</span><span style="color:#bf616a;"> -ef </span><span>| </span><span style="color:#bf616a;">grep</span><span> e318f67bce5c
+</span><span style="color:#bf616a;">root</span><span>      2645 12397  0 3月15 ?       00:00:00 /usr/bin/runc</span><span style="color:#bf616a;"> --root</span><span> /var/run/docker/runtime-runc/moby</span><span style="color:#bf616a;"> --log</span><span> /run/containerd/io.containerd.runtime.v2.task/moby/e318f67bce5c36e39bc2e0c136ea9cd366b22ba5ae216c485232ce4a0541858b/log.json</span><span style="color:#bf616a;"> --log-format</span><span> json exec</span><span style="color:#bf616a;"> --process</span><span> /tmp/runc-process256765632</span><span style="color:#bf616a;"> --console-socket</span><span> /tmp/pty518048165/pty.sock</span><span style="color:#bf616a;"> --detach --pid-file</span><span> /run/containerd/io.containerd.runtime.v2.task/moby/e318f67bce5c36e39bc2e0c136ea9cd366b22ba5ae216c485232ce4a0541858b/12895df315fe38432c96579dd329ac4468f373781ba36bf272bbe3829a4afbd6.pid e318f67bce5c36e39bc2e0c136ea9cd366b22ba5ae216c485232ce4a0541858b
+</span><span style="color:#bf616a;">root</span><span>     12397     1  0 3月15 ?       00:00:08 /usr/bin/containerd-shim-runc-v2</span><span style="color:#bf616a;"> -namespace</span><span> moby</span><span style="color:#bf616a;"> -id</span><span> e318f67bce5c36e39bc2e0c136ea9cd366b22ba5ae216c485232ce4a0541858b</span><span style="color:#bf616a;"> -address</span><span> /run/containerd/containerd.sock
+</span><span>
+</span><span style="color:#bf616a;">$</span><span> ps aux | </span><span style="color:#bf616a;">grep</span><span> e318f67bce5c
+</span><span style="color:#bf616a;">root</span><span>      2645  0.0  0.0 239068 18704 ?        Sl   3月15   0:00 /usr/bin/runc</span><span style="color:#bf616a;"> --root</span><span> /var/run/docker/runtime-runc/moby</span><span style="color:#bf616a;"> --log</span><span> /run/containerd/io.containerd.runtime.v2.task/moby/e318f67bce5c36e39bc2e0c136ea9cd366b22ba5ae216c485232ce4a0541858b/log.json</span><span style="color:#bf616a;"> --log-format</span><span> json exec</span><span style="color:#bf616a;"> --process</span><span> /tmp/runc-process256765632</span><span style="color:#bf616a;"> --console-socket</span><span> /tmp/pty518048165/pty.sock</span><span style="color:#bf616a;"> --detach --pid-file</span><span> /run/containerd/io.containerd.runtime.v2.task/moby/e318f67bce5c36e39bc2e0c136ea9cd366b22ba5ae216c485232ce4a0541858b/12895df315fe38432c96579dd329ac4468f373781ba36bf272bbe3829a4afbd6.pid e318f67bce5c36e39bc2e0c136ea9cd366b22ba5ae216c485232ce4a0541858b
+</span><span style="color:#bf616a;">root</span><span>     12397  0.0  0.0 111976 11632 ?        Sl   3月15   0:08 /usr/bin/containerd-shim-runc-v2</span><span style="color:#bf616a;"> -namespace</span><span> moby</span><span style="color:#bf616a;"> -id</span><span> e318f67bce5c36e39bc2e0c136ea9cd366b22ba5ae216c485232ce4a0541858b</span><span style="color:#bf616a;"> -address</span><span> /run/containerd/containerd.sock
+</span></code></pre>
+<p>果然可行，可以看到进程关系为 <code>pid 1</code> -&gt; <code>pid 12397</code> -&gt; <code>pid 2645</code>，即 <code>init</code> -&gt; <code>containerd-shim-runc-v2</code> -&gt; <code>runc</code>。</p>
+<p>查看容器进程组:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> pstree</span><span style="color:#bf616a;"> -ap</span><span> 2645
+</span><span style="color:#bf616a;">runc,2645 --root</span><span> /var/run/docker/runtime-runc/moby</span><span style="color:#bf616a;"> --log</span><span> /run/containerd/io.containerd.runtime.v2.task/moby/e318f67bce5c36e39bc2e0c136ea9cd366b22ba5ae216c485232ce4a0541858b/log.json</span><span style="color:#bf616a;"> --log-format</span><span> json exec</span><span style="color:#bf616a;"> --process</span><span> /tmp/runc-process256765632</span><span style="color:#bf616a;"> --console-socket</span><span>/tmp/pt
+</span><span>  </span><span style="color:#bf616a;">├─runc:[2:INIT],2658</span><span> init
+</span><span>  </span><span style="color:#bf616a;">│</span><span>   ├─{runc:</span><span style="color:#b48ead;">[</span><span>2:INIT</span><span style="color:#b48ead;">]</span><span>},2659
+</span><span>  </span><span style="color:#bf616a;">│</span><span>   ├─{runc:</span><span style="color:#b48ead;">[</span><span>2:INIT</span><span style="color:#b48ead;">]</span><span>},2660
+</span><span>  </span><span style="color:#bf616a;">│</span><span>   ├─{runc:</span><span style="color:#b48ead;">[</span><span>2:INIT</span><span style="color:#b48ead;">]</span><span>},2661
+</span><span>  </span><span style="color:#bf616a;">│</span><span>   ├─{runc:</span><span style="color:#b48ead;">[</span><span>2:INIT</span><span style="color:#b48ead;">]</span><span>},2662
+</span><span>  </span><span style="color:#bf616a;">│</span><span>   └─{runc:</span><span style="color:#b48ead;">[</span><span>2:INIT</span><span style="color:#b48ead;">]</span><span>},2663
+</span><span>  </span><span style="color:#bf616a;">├─{runc</span><span>}</span><span style="color:#bf616a;">,2650
+</span><span>  </span><span style="color:#bf616a;">├─{runc</span><span>}</span><span style="color:#bf616a;">,2651
+</span><span>  </span><span style="color:#bf616a;">├─{runc</span><span>}</span><span style="color:#bf616a;">,2652
+</span><span>  </span><span style="color:#bf616a;">├─{runc</span><span>}</span><span style="color:#bf616a;">,2653
+</span><span>  </span><span style="color:#bf616a;">├─{runc</span><span>}</span><span style="color:#bf616a;">,2654
+</span><span>  </span><span style="color:#bf616a;">└─{runc</span><span>}</span><span style="color:#bf616a;">,2655
+</span></code></pre>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> ls</span><span style="color:#bf616a;"> -al</span><span> /proc/2645/fd
+</span><span style="color:#bf616a;">总用量</span><span> 0
+</span><span style="color:#bf616a;">dr-x------</span><span> 2 root root  0 3月  16 12:46 .
+</span><span style="color:#bf616a;">dr-xr-xr-x</span><span> 9 root root  0 3月  15 23:20 ..
+</span><span style="color:#bf616a;">lr-x------</span><span> 1 root root 64 3月  16 12:46 0 -&gt; /dev/null
+</span><span style="color:#bf616a;">l-wx------</span><span> 1 root root 64 3月  16 12:46 1 -&gt; pipe:</span><span style="color:#b48ead;">[</span><span>1658705</span><span style="color:#b48ead;">]
+</span><span style="color:#bf616a;">l-wx------</span><span> 1 root root 64 3月  16 12:46 2 -&gt; pipe:</span><span style="color:#b48ead;">[</span><span>1658705</span><span style="color:#b48ead;">]
+</span><span style="color:#bf616a;">lrwx------</span><span> 1 root root 64 3月  16 12:46 27 -&gt; /dev/pts/ptmx
+</span><span style="color:#bf616a;">l-wx------</span><span> 1 root root 64 3月  16 12:46 3 -&gt; /run/containerd/io.containerd.runtime.v2.task/moby/e318f67bce5c36e39bc2e0c136ea9cd366b22ba5ae216c485232ce4a0541858b/log.json
+</span><span style="color:#bf616a;">lrwx------</span><span> 1 root root 64 3月  16 12:46 4 -&gt; anon_inode:</span><span style="color:#b48ead;">[</span><span>eventpoll</span><span style="color:#b48ead;">]
+</span><span style="color:#bf616a;">lrwx------</span><span> 1 root root 64 3月  16 12:46 5 -&gt; socket:</span><span style="color:#b48ead;">[</span><span>1727233</span><span style="color:#b48ead;">]
+</span><span style="color:#bf616a;">lrwx------</span><span> 1 root root 64 3月  16 12:46 6 -&gt; socket:</span><span style="color:#b48ead;">[</span><span>1727233</span><span style="color:#b48ead;">]
+</span><span style="color:#bf616a;">lrwx------</span><span> 1 root root 64 3月  16 12:46 8 -&gt; socket:</span><span style="color:#b48ead;">[</span><span>1727235</span><span style="color:#b48ead;">]
+</span><span style="color:#bf616a;">lr-x------</span><span> 1 root root 64 3月  16 12:46 9 -&gt; pipe:</span><span style="color:#b48ead;">[</span><span>1727236</span><span style="color:#b48ead;">]
+</span></code></pre>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> pstack 2645
+</span><span style="color:#bf616a;">Thread</span><span> 7 (Thread 0x7fdd5f98b700 (LWP 2650))</span><span style="color:#96b5b4;">:
+</span><span style="color:#65737e;">#0  runtime.futex () at /usr/local/go/src/runtime/sys_linux_amd64.s:536
+</span><span style="color:#65737e;">#1  0x000055dcaf1afd34 in runtime.futexsleep (addr=0x55dcafe6eb10 &lt;runtime.sched+272&gt;, val=0, ns=60000000000) at /usr/local/go/src/runtime/os_linux.go:50
+</span><span style="color:#65737e;">#2  0x000055dcaf18f3b0 in runtime.notetsleep_internal (n=0x55dcafe6eb10 &lt;runtime.sched+272&gt;, ns=60000000000, ~r2=&lt;optimized out&gt;) at /usr/local/go/src/runtime/lock_futex.go:193
+</span><span style="color:#65737e;">#3  0x000055dcaf18f485 in runtime.notetsleep (n=0x55dcafe6eb10 &lt;runtime.sched+272&gt;, ns=60000000000, ~r2=&lt;optimized out&gt;) at /usr/local/go/src/runtime/lock_futex.go:216
+</span><span style="color:#65737e;">#4  0x000055dcaf1bebf0 in runtime.sysmon () at /usr/local/go/src/runtime/proc.go:4322
+</span><span style="color:#65737e;">#5  0x000055dcaf1b6eb7 in runtime.mstart1 () at /usr/local/go/src/runtime/proc.go:1201
+</span><span style="color:#65737e;">#6  0x000055dcaf1b6dd0 in runtime.mstart () at /usr/local/go/src/runtime/proc.go:1167
+</span><span style="color:#65737e;">#7  0x000055dcaf63ef13 in crosscall_amd64 () at gcc_amd64.S:35
+</span><span style="color:#65737e;">#8  0x00007fdd5f98b700 in ?? ()
+</span><span style="color:#65737e;">#9  0x0000000000000000 in ?? ()
+</span><span style="color:#bf616a;">Thread</span><span> 6 (Thread 0x7fdd5f18a700 (LWP 2651))</span><span style="color:#96b5b4;">:
+</span><span style="color:#65737e;">#0  runtime.futex () at /usr/local/go/src/runtime/sys_linux_amd64.s:536
+</span><span style="color:#65737e;">#1  0x000055dcaf1afcb6 in runtime.futexsleep (addr=0xc000042848, val=0, ns=-1) at /usr/local/go/src/runtime/os_linux.go:44
+</span><span style="color:#65737e;">#2  0x000055dcaf18f223 in runtime.notesleep (n=0xc000042848) at /usr/local/go/src/runtime/lock_futex.go:151
+</span><span style="color:#65737e;">#3  0x000055dcaf1b8404 in runtime.stopm () at /usr/local/go/src/runtime/proc.go:1934
+</span><span style="color:#65737e;">#4  0x000055dcaf1b9535 in runtime.findrunnable (gp=0xc00002c000, inheritTime=false) at /usr/local/go/src/runtime/proc.go:2397
+</span><span style="color:#65737e;">#5  0x000055dcaf1ba1f2 in runtime.schedule () at /usr/local/go/src/runtime/proc.go:2530
+</span><span style="color:#65737e;">#6  0x000055dcaf1ba533 in runtime.park_m (gp=0xc000000180) at /usr/local/go/src/runtime/proc.go:2616
+</span><span style="color:#65737e;">#7  0x000055dcaf1de0e3 in runtime.mcall () at /usr/local/go/src/runtime/asm_amd64.s:318
+</span><span style="color:#65737e;">#8  0x0000000000000000 in ?? ()
+</span><span style="color:#bf616a;">Thread</span><span> 5 (Thread 0x7fdd5e989700 (LWP 2652))</span><span style="color:#96b5b4;">:
+</span><span style="color:#65737e;">#0  runtime.futex () at /usr/local/go/src/runtime/sys_linux_amd64.s:536
+</span><span style="color:#65737e;">#1  0x000055dcaf1afcb6 in runtime.futexsleep (addr=0x55dcafe8b560 &lt;runtime.sig&gt;, val=0, ns=-1) at /usr/local/go/src/runtime/os_linux.go:44
+</span><span style="color:#65737e;">#2  0x000055dcaf18f308 in runtime.notetsleep_internal (n=0x55dcafe8b560 &lt;runtime.sig&gt;, ns=-1, ~r2=&lt;optimized out&gt;) at /usr/local/go/src/runtime/lock_futex.go:174
+</span><span style="color:#65737e;">#3  0x000055dcaf18f510 in runtime.notetsleepg (n=0x55dcafe8b560 &lt;runtime.sig&gt;, ns=-1, ~r2=&lt;optimized out&gt;) at /usr/local/go/src/runtime/lock_futex.go:228
+</span><span style="color:#65737e;">#4  0x000055dcaf1c85be in os/signal.signal_recv (~r0=&lt;optimized out&gt;) at /usr/local/go/src/runtime/sigqueue.go:147
+</span><span style="color:#65737e;">#5  0x000055dcaf60ee84 in os/signal.loop () at /usr/local/go/src/os/signal/signal_unix.go:23
+</span><span style="color:#65737e;">#6  0x000055dcaf1e01f1 in runtime.goexit () at /usr/local/go/src/runtime/asm_amd64.s:1357
+</span><span style="color:#65737e;">#7  0x0000000000000000 in ?? ()
+</span><span style="color:#bf616a;">Thread</span><span> 4 (Thread 0x7fdd5e188700 (LWP 2653))</span><span style="color:#96b5b4;">:
+</span><span style="color:#65737e;">#0  runtime.epollwait () at /usr/local/go/src/runtime/sys_linux_amd64.s:673
+</span><span style="color:#65737e;">#1  0x000055dcaf1afb72 in runtime.netpoll (block=true, ~r1=...) at /usr/local/go/src/runtime/netpoll_epoll.go:71
+</span><span style="color:#65737e;">#2  0x000055dcaf1b950b in runtime.findrunnable (gp=0xc000030a00, inheritTime=false) at /usr/local/go/src/runtime/proc.go:2378
+</span><span style="color:#65737e;">#3  0x000055dcaf1ba1f2 in runtime.schedule () at /usr/local/go/src/runtime/proc.go:2530
+</span><span style="color:#65737e;">#4  0x000055dcaf1ba533 in runtime.park_m (gp=0xc0001ba480) at /usr/local/go/src/runtime/proc.go:2616
+</span><span style="color:#65737e;">#5  0x000055dcaf1de0e3 in runtime.mcall () at /usr/local/go/src/runtime/asm_amd64.s:318
+</span><span style="color:#65737e;">#6  0x0000000000000000 in ?? ()
+</span><span style="color:#bf616a;">Thread</span><span> 3 (Thread 0x7fdd5d987700 (LWP 2654))</span><span style="color:#96b5b4;">:
+</span><span style="color:#65737e;">#0  runtime.futex () at /usr/local/go/src/runtime/sys_linux_amd64.s:536
+</span><span style="color:#65737e;">#1  0x000055dcaf1afcb6 in runtime.futexsleep (addr=0x55dcafe8b478 &lt;runtime.newmHandoff+24&gt;, val=0, ns=-1) at /usr/local/go/src/runtime/os_linux.go:44
+</span><span style="color:#65737e;">#2  0x000055dcaf18f223 in runtime.notesleep (n=0x55dcafe8b478 &lt;runtime.newmHandoff+24&gt;) at /usr/local/go/src/runtime/lock_futex.go:151
+</span><span style="color:#65737e;">#3  0x000055dcaf1b8324 in runtime.templateThread () at /usr/local/go/src/runtime/proc.go:1912
+</span><span style="color:#65737e;">#4  0x000055dcaf1b6eb7 in runtime.mstart1 () at /usr/local/go/src/runtime/proc.go:1201
+</span><span style="color:#65737e;">#5  0x000055dcaf1b6dd0 in runtime.mstart () at /usr/local/go/src/runtime/proc.go:1167
+</span><span style="color:#65737e;">#6  0x000055dcaf63ef13 in crosscall_amd64 () at gcc_amd64.S:35
+</span><span style="color:#65737e;">#7  0x00007fdd5d987700 in ?? ()
+</span><span style="color:#65737e;">#8  0x0000000000000000 in ?? ()
+</span><span style="color:#bf616a;">Thread</span><span> 2 (Thread 0x7fdd5d186700 (LWP 2655))</span><span style="color:#96b5b4;">:
+</span><span style="color:#65737e;">#0  syscall.Syscall () at /usr/local/go/src/syscall/asm_linux_amd64.s:27
+</span><span style="color:#65737e;">#1  0x000055dcaf233f4c in syscall.read (fd=8, p=&lt;error reading variable: access outside bounds of object referenced via synthetic pointer&gt;, n=&lt;optimized out&gt;, err=...) at /usr/local/go/src/syscall/zsyscall_linux_amd64.go:732
+</span><span style="color:#65737e;">#2  0x000055dcaf24c986 in syscall.Read (fd=&lt;optimized out&gt;, p=..., n=&lt;optimized out&gt;, err=...) at /usr/local/go/src/syscall/syscall_unix.go:183
+</span><span style="color:#65737e;">#3  internal/poll.(*FD).Read (fd=0xc00014f080, p=..., ~r1=&lt;optimized out&gt;, ~r2=...) at /usr/local/go/src/internal/poll/fd_unix.go:165
+</span><span style="color:#65737e;">#4  0x000055dcaf254813 in os.(*File).read (f=0xc000154818, b=..., n=&lt;optimized out&gt;, err=...) at /usr/local/go/src/os/file_unix.go:259
+</span><span style="color:#65737e;">#5  os.(*File).Read (f=0xc000154818, b=..., n=&lt;optimized out&gt;, err=...) at /usr/local/go/src/os/file.go:116
+</span><span style="color:#65737e;">#6  0x000055dcaf37a54d in encoding/json.(*Decoder).refill (dec=0xc0001cec60, ~r0=...) at /usr/local/go/src/encoding/json/stream.go:161
+</span><span style="color:#65737e;">#7  0x000055dcaf37a2de in encoding/json.(*Decoder).readValue (dec=0xc0001cec60, ~r0=&lt;optimized out&gt;, ~r1=...) at /usr/local/go/src/encoding/json/stream.go:136
+</span><span style="color:#65737e;">#8  0x000055dcaf379dab in encoding/json.(*Decoder).Decode (dec=0xc0001cec60, v=..., ~r1=...) at /usr/local/go/src/encoding/json/stream.go:63
+</span><span style="color:#65737e;">#9  0x000055dcaf5ca997 in github.com/opencontainers/runc/libcontainer.parseSync (pipe=..., fn={void (github.com/opencontainers/runc/libcontainer.syncT *, error *)} 0xc0001a28f8, ~r2=...) at /go/src/github.com/opencontainers/runc/libcontainer/sync.go:76
+</span><span style="color:#65737e;">#10 0x000055dcaf5bc1ff in github.com/opencontainers/runc/libcontainer.(*setnsProcess).start (p=0xc00022e6c0, err=...) at /go/src/github.com/opencontainers/runc/libcontainer/process_linux.go:146
+</span><span style="color:#65737e;">#11 0x000055dcaf5a3564 in github.com/opencontainers/runc/libcontainer.(*linuxContainer).start (c=0xc00020c000, process=0xc00017d540, ~r1=...) at /go/src/github.com/opencontainers/runc/libcontainer/container_linux.go:365
+</span><span style="color:#65737e;">#12 0x000055dcaf5a2a8d in github.com/opencontainers/runc/libcontainer.(*linuxContainer).Start (c=0xc00020c000, process=0xc00017d540, ~r1=...) at /go/src/github.com/opencontainers/runc/libcontainer/container_linux.go:262
+</span><span style="color:#65737e;">#13 0x000055dcaf5a2c6b in github.com/opencontainers/runc/libcontainer.(*linuxContainer).Run (c=0xc00020c000, process=0xc00017d540, ~r1=...) at /go/src/github.com/opencontainers/runc/libcontainer/container_linux.go:272
+</span><span style="color:#65737e;">#14 0x000055dcaf633fb8 in main.(*runner).run (r=0xc0001a3490, config=0xc00020c0f0, ~r1=&lt;optimized out&gt;, ~r2=...) at /go/src/github.com/opencontainers/runc/utils_linux.go:322
+</span><span style="color:#65737e;">#15 0x000055dcaf629394 in main.execProcess (context=0xc0001ce160, ~r1=&lt;optimized out&gt;, ~r2=...) at /go/src/github.com/opencontainers/runc/exec.go:157
+</span><span style="color:#65737e;">#16 0x000055dcaf636635 in main.glob..func5 (context=0xc0001ce160, ~r1=...) at /go/src/github.com/opencontainers/runc/exec.go:104
+</span><span style="color:#65737e;">#17 0x000055dcaf5f3180 in github.com/urfave/cli.HandleAction (action=..., context=0xc0001ce160, err=...) at /go/src/github.com/opencontainers/runc/vendor/github.com/urfave/cli/app.go:523
+</span><span style="color:#65737e;">#18 0x000055dcaf5f3eee in github.com/urfave/cli.Command.Run (c=..., ctx=0xc0001ce000, err=...) at /go/src/github.com/opencontainers/runc/vendor/github.com/urfave/cli/command.go:174
+</span><span style="color:#65737e;">#19 0x000055dcaf5f122a in github.com/urfave/cli.(*App).Run (a=0xc0001c2000, arguments=..., err=...) at /go/src/github.com/opencontainers/runc/vendor/github.com/urfave/cli/app.go:276
+</span><span style="color:#65737e;">#20 0x000055dcaf62c4b9 in main.main () at /go/src/github.com/opencontainers/runc/main.go:151
+</span><span style="color:#bf616a;">Thread</span><span> 1 (Thread 0x7fdd625dc740 (LWP 2645))</span><span style="color:#96b5b4;">:
+</span><span style="color:#65737e;">#0  runtime.futex () at /usr/local/go/src/runtime/sys_linux_amd64.s:536
+</span><span style="color:#65737e;">#1  0x000055dcaf1afcb6 in runtime.futexsleep (addr=0x55dcafe6f448 &lt;runtime.m0+328&gt;, val=0, ns=-1) at /usr/local/go/src/runtime/os_linux.go:44
+</span><span style="color:#65737e;">#2  0x000055dcaf18f223 in runtime.notesleep (n=0x55dcafe6f448 &lt;runtime.m0+328&gt;) at /usr/local/go/src/runtime/lock_futex.go:151
+</span><span style="color:#65737e;">#3  0x000055dcaf1b8a6c in runtime.stoplockedm () at /usr/local/go/src/runtime/proc.go:2074
+</span><span style="color:#65737e;">#4  0x000055dcaf1ba3b9 in runtime.schedule () at /usr/local/go/src/runtime/proc.go:2475
+</span><span style="color:#65737e;">#5  0x000055dcaf1ba533 in runtime.park_m (gp=0xc0001ba300) at /usr/local/go/src/runtime/proc.go:2616
+</span><span style="color:#65737e;">#6  0x000055dcaf1de0e3 in runtime.mcall () at /usr/local/go/src/runtime/asm_amd64.s:318
+</span><span style="color:#65737e;">#7  0x000055dcaf1de008 in runtime.rt0_go () at /usr/local/go/src/runtime/asm_amd64.s:220
+</span><span style="color:#65737e;">#8  0x0000000000000000 in ?? ()
+</span></code></pre>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> pstack 2658
+</span><span style="color:#65737e;"># 此处无响应
+</span><span style="color:#65737e;"># killall -9 pstack
+</span><span style="color:#65737e;"># killall -9 gdb
+</span></code></pre>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cat /proc/2658/stack
+</span><span style="color:#bf616a;">[</span><span>&lt;</span><span style="color:#d08770;">0</span><span>&gt;] ceph_mdsc_do_request+0x186/0x240 </span><span style="color:#b48ead;">[</span><span>ceph</span><span style="color:#b48ead;">]
+</span><span style="color:#bf616a;">[</span><span>&lt;</span><span style="color:#d08770;">0</span><span>&gt;] __ceph_do_getattr+0x9d/0x200 </span><span style="color:#b48ead;">[</span><span>ceph</span><span style="color:#b48ead;">]
+</span><span style="color:#bf616a;">[</span><span>&lt;</span><span style="color:#d08770;">0</span><span>&gt;] ceph_permission+0x2a/0x50 </span><span style="color:#b48ead;">[</span><span>ceph</span><span style="color:#b48ead;">]
+</span><span style="color:#bf616a;">[</span><span>&lt;</span><span style="color:#d08770;">0</span><span>&gt;] inode_permission+0xc0/0x150
+</span><span style="color:#bf616a;">[</span><span>&lt;</span><span style="color:#d08770;">0</span><span>&gt;] ksys_chdir+0x59/0xd0
+</span><span style="color:#bf616a;">[</span><span>&lt;</span><span style="color:#d08770;">0</span><span>&gt;] __x64_sys_chdir+0x12/0x20
+</span><span style="color:#bf616a;">[</span><span>&lt;</span><span style="color:#d08770;">0</span><span>&gt;] do_syscall_64+0x60/0x190
+</span><span style="color:#bf616a;">[</span><span>&lt;</span><span style="color:#d08770;">0</span><span>&gt;] entry_SYSCALL_64_after_hwframe+0x44/0xa9
+</span><span style="color:#bf616a;">[</span><span>&lt;</span><span style="color:#d08770;">0</span><span>&gt;] 0xffffffffffffffff
+</span></code></pre>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/linux/">#linux</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/docker/">#docker</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/containerd/">#containerd</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;pod-stuck-in-terminating-state&#x2F;">‹ Pod 持续处于 Terminating 状态</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;docker-container-exitcode-137-without-oomkilled-flag-set&#x2F;">Docker container 137 错误码异常退出 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

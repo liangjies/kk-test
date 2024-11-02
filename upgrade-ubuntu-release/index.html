@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - 升级 Ubuntu 发行版</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;upgrade-ubuntu-release&#x2F;">升级 Ubuntu 发行版</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-10-20</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p><strong>Install all available updates for your release before upgrading.</strong></p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> apt update &amp;&amp; </span><span style="color:#bf616a;">sudo</span><span> apt upgrade</span><span style="color:#bf616a;"> -y
+</span></code></pre>
+<p><strong>Reboot system.</strong></p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> reboot
+</span></code></pre>
+<p><strong>Install the Ubuntu update tool.</strong></p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> apt install</span><span style="color:#bf616a;"> -y</span><span> update-manager-core
+</span></code></pre>
+<p><strong>Start the upgrade procdure.</strong></p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> do-release-upgrade
+</span></code></pre>
+<p>不建议升级过程通过 <strong>ssh</strong> 连接运行，可以运行在 <strong>tmux</strong> 会话中。</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo do-release-upgrade
+</span><span style="color:#bf616a;">Checking</span><span> for a new Ubuntu release
+</span><span style="color:#bf616a;">Get:1</span><span> Upgrade tool signature </span><span style="color:#b48ead;">[</span><span>1,554 B</span><span style="color:#b48ead;">]
+</span><span style="color:#bf616a;">Get:2</span><span> Upgrade tool </span><span style="color:#b48ead;">[</span><span>1,336 kB</span><span style="color:#b48ead;">]
+</span><span style="color:#bf616a;">Fetched</span><span> 1,338 kB in 0s (0 B/s)
+</span><span style="color:#bf616a;">authenticate </span><span>&#39;</span><span style="color:#a3be8c;">focal.tar.gz</span><span>&#39; against &#39;</span><span style="color:#a3be8c;">focal.tar.gz.gpg</span><span>&#39;
+</span><span style="color:#bf616a;">extracting </span><span>&#39;</span><span style="color:#a3be8c;">focal.tar.gz</span><span>&#39;
+</span><span>
+</span><span style="color:#bf616a;">Reading</span><span> cache
+</span><span>
+</span><span style="color:#bf616a;">Checking</span><span> package manager
+</span><span>
+</span><span style="color:#bf616a;">Continue</span><span> running under SSH?
+</span><span>
+</span><span style="color:#bf616a;">This</span><span> session appears to be running under ssh. It is not recommended
+</span><span style="color:#bf616a;">to</span><span> perform a upgrade over ssh currently because in case of failure it
+</span><span style="color:#bf616a;">is</span><span> harder to recover.
+</span><span>
+</span><span style="color:#bf616a;">If</span><span> you continue, an additional ssh daemon will be started at port
+</span><span>&#39;</span><span style="color:#a3be8c;">1022</span><span>&#39;</span><span style="color:#bf616a;">.
+</span><span style="color:#bf616a;">Do</span><span> you want to continue?
+</span><span>
+</span><span style="color:#bf616a;">Continue </span><span style="color:#b48ead;">[</span><span>yN</span><span style="color:#b48ead;">]
+</span></code></pre>
+<p><strong>Reboot the box.</strong></p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> reboot
+</span></code></pre>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/linux/">#linux</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/ubuntu/">#ubuntu</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;using-kubeadm-to-create-a-kubernetes-cluster&#x2F;">‹ 使用 kubeadm 创建 kubernetes 集群</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;openmpi-in-docker&#x2F;">在 Docker 中使用 OpenMPI ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>

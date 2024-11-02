@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>不是在改BUG，就是在改BUG的路上 - storage</title>
+	<link href="https://blog.kiyoko.io/tags/storage/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.kiyoko.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-10-07T17:37:14+00:00</updated>
+	<id>https://blog.kiyoko.io/tags/storage/atom.xml</id>
+	<entry xml:lang="en">
+		<title>Kubernetes 存储卷</title>
+		<published>2020-10-07T17:37:14+00:00</published>
+		<updated>2020-10-07T17:37:14+00:00</updated>
+		<link href="https://blog.kiyoko.io/kubernetes-volumes/" type="text/html"/>
+		<id>https://blog.kiyoko.io/kubernetes-volumes/</id>
+		<content type="html">&lt;h2 id=&quot;bei-jing&quot;&gt;背景&lt;&#x2F;h2&gt;
+&lt;p&gt;在 &lt;strong&gt;Docker&lt;&#x2F;strong&gt; 中，&lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;docs.docker.com&#x2F;storage&#x2F;&quot;&gt;Volume&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt; 概念表示磁盘上或者另外一个容器内的一个目录。 直到最近，Docker 才支持对基于本地磁盘的 Volume 的生存期进行管理。 虽然 Docker 现在也能提供 Volume 驱动程序，但是目前功能还非常有限 （例如，截至 Docker 1.7，每个容器只允许有一个 Volume 驱动程序，并且无法将参数传递给 Volume）。&lt;&#x2F;p&gt;
+&lt;p&gt;而在 &lt;strong&gt;Kubernetes&lt;&#x2F;strong&gt; 中，&lt;strong&gt;Volume&lt;&#x2F;strong&gt; 具有明确的生命周期——与其所属 &lt;strong&gt;Pod&lt;&#x2F;strong&gt; 相同。 因此，&lt;strong&gt;Volume 比 Pod 中运行的任何容器的存活期都长&lt;&#x2F;strong&gt;，在容器重新启动时数据也会得到保留。 当然，&lt;strong&gt;当一个 Pod 不再存在时，卷也将不再存在&lt;&#x2F;strong&gt;。 更重要的是，&lt;strong&gt;Kubernetes 可以支持许多类型的卷，Pod 也能同时使用任意数量的卷&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Volume&lt;&#x2F;strong&gt; 的核心是包含一些数据的目录，Pod 中的容器可以访问该目录。 特定的卷类型可以决定这个目录是如何形成的，并能决定它支持何种介质，以及目录中存放什么内容。&lt;&#x2F;p&gt;
+&lt;p&gt;使用 &lt;strong&gt;Volume&lt;&#x2F;strong&gt; 时, Pod 声明中需要提供卷的类型 (&lt;strong&gt;.spec.volumes&lt;&#x2F;strong&gt; 字段) 和 &lt;strong&gt;Volume&lt;&#x2F;strong&gt; 挂载的位置 (&lt;strong&gt;.spec.containers.volumeMounts&lt;&#x2F;strong&gt; 字段).&lt;&#x2F;p&gt;
+&lt;p&gt;容器中的进程能看到由它们的 Docker 镜像和卷组成的文件系统视图。 &lt;a href=&quot;https:&#x2F;&#x2F;docs.docker.com&#x2F;userguide&#x2F;dockerimages&#x2F;&quot;&gt;Docker 镜像&lt;&#x2F;a&gt; 位于文件系统层次结构的根部，并且任何 Volume 都挂载在镜像内的指定路径上。 卷不能挂载到其他卷，也不能与其他卷有硬链接。 Pod 中的每个容器必须独立地指定每个卷的挂载位置(&lt;strong&gt;Volumes&lt;&#x2F;strong&gt; 之间的挂载点应该相互独立)。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;volume-de-lei-xing&quot;&gt;Volume 的类型&lt;&#x2F;h2&gt;
+&lt;p&gt;Kubernetes 支持下列类型的卷:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-volumes&#x2F;#Cephfs&quot;&gt;cephfs&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-volumes&#x2F;#ConfigMap&quot;&gt;configMap&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-volumes&#x2F;#CSI&quot;&gt;csi&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-volumes&#x2F;#DownwardAPI&quot;&gt;downwardAPI&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-volumes&#x2F;#EmptyDir&quot;&gt;emptyDir&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-volumes&#x2F;#HostPath&quot;&gt;hostPath&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-volumes&#x2F;#Local&quot;&gt;local&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-volumes&#x2F;#Nfs&quot;&gt;nfs&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-volumes&#x2F;#PersistentVolumeClaim&quot;&gt;persistentVolumeClaim&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-volumes&#x2F;#Projected&quot;&gt;projected&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-volumes&#x2F;#Secret&quot;&gt;secret&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;cephfs&quot;&gt;Cephfs&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;strong&gt;cephfs&lt;&#x2F;strong&gt; 允许用户将现存的 &lt;strong&gt;CephFS&lt;&#x2F;strong&gt; 卷挂载到 &lt;strong&gt;Pod&lt;&#x2F;strong&gt; 中。 与 &lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-volumes&#x2F;#EmptyDir&quot;&gt;emptyDir&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt; 不同的是，&lt;strong&gt;emptyDir&lt;&#x2F;strong&gt; 会在删除 Pod 的同时&lt;strong&gt;一并被删除&lt;&#x2F;strong&gt;，&lt;strong&gt;cephfs&lt;&#x2F;strong&gt; 卷的内容在删除 Pod 时会被保留，卷只是被卸载掉了。 这意味着 &lt;strong&gt;CephFS 卷可以被预先填充数据，并且这些数据可以在 Pod 之间&amp;quot;传递&amp;quot;&lt;&#x2F;strong&gt;。CephFS 卷可同时被多个写者挂载。&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;注意： 在您使用 Ceph 卷之前，您的 Ceph 服务器必须正常运行并且要使用的 share 被导出（exported）。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;更多信息请参考 &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;kubernetes&#x2F;examples&#x2F;tree&#x2F;master&#x2F;volumes&#x2F;cephfs&#x2F;&quot;&gt;CephFS 示例&lt;&#x2F;a&gt;。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;configmap&quot;&gt;ConfigMap&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;strong&gt;configMap&lt;&#x2F;strong&gt; 资源提供了向 Pod &lt;strong&gt;注入配置数据&lt;&#x2F;strong&gt;的方法。 ConfigMap 对象中存储的数据可以被 configMap 类型的卷引用，然后被应用到 Pod 中运行的容器化应用。&lt;&#x2F;p&gt;
+&lt;p&gt;当引用 configMap 对象时，你可以简单的在 Volume 中通过它名称来引用。 还可以自定义 ConfigMap 中特定条目所要使用的路径。 例如，要将名为 log-config 的 ConfigMap 挂载到名为 configmap-pod 的 Pod 中，您可以使用下面的 YAML:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;configmap-pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;busybox
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumeMounts&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;config-vol
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mountPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;etc&#x2F;config
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumes&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;config-vol
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;configMap&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;log-config
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;items&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;log_level
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;log_level
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;csi&quot;&gt;CSI&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md&quot;&gt;容器存储接口 (CSI)&lt;&#x2F;a&gt; 为容器编排系统（如 Kubernetes）定义标准接口，以将任意存储系统暴露给它们的容器工作负载。&lt;&#x2F;p&gt;
+&lt;p&gt;更多详情请阅读 &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;kubernetes&#x2F;community&#x2F;blob&#x2F;master&#x2F;contributors&#x2F;design-proposals&#x2F;storage&#x2F;container-storage-interface.md&quot;&gt;CSI 设计方案&lt;&#x2F;a&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;CSI 的支持在 Kubernetes v1.9 中作为 alpha 特性引入，在 Kubernetes v1.10 中转为 beta 特性，并在 Kubernetes v1.13 正式 GA。&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;说明:&lt;&#x2F;strong&gt; CSI驱动程序可能并非在所有Kubernetes版本中都兼容。 请查看特定CSI驱动程序的文档，以获取每个 Kubernetes 版本所支持的部署步骤以及兼容性列表。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;一旦在 &lt;strong&gt;Kubernetes&lt;&#x2F;strong&gt; 集群上部署了 CSI 兼容卷驱动程序，用户就可以使用 &lt;strong&gt;csi&lt;&#x2F;strong&gt; 作为卷类型来关联、挂载 &lt;strong&gt;CSI Driver&lt;&#x2F;strong&gt; 暴露出来的卷。&lt;&#x2F;p&gt;
+&lt;p&gt;允许如下三种方式，在 Pod 中使用 &lt;strong&gt;csi&lt;&#x2F;strong&gt; 类型的卷:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;通过 &lt;strong&gt;PersistentVolumeClaim&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;通过 &lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;storage&#x2F;ephemeral-volumes&#x2F;#generic-ephemeral-volumes&quot;&gt;Generic ephemeral volumes&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;通过 &lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;storage&#x2F;ephemeral-volumes&#x2F;#csi-ephemeral-volumes&quot;&gt;CSI ephemeral volumes&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;存储管理员可以使用以下字段来配置 CSI 持久卷(CSI persistent volume):&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;driver&lt;&#x2F;strong&gt;：指定要使用的卷 驱动程序(CSI Driver) 名称的字符串值。 这个值必须与 &lt;strong&gt;CSI Driver&lt;&#x2F;strong&gt; 的 &lt;strong&gt;&lt;a href=&quot;(https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md#getplugininfo)&quot;&gt;GetPluginInfoResponse&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt; 的 &lt;strong&gt;name&lt;&#x2F;strong&gt; 字段相同。 &lt;strong&gt;Kubernetes&lt;&#x2F;strong&gt; 使用所给的值来标识要调用的 &lt;strong&gt;CSI Driver&lt;&#x2F;strong&gt;；&lt;strong&gt;CSI Driver&lt;&#x2F;strong&gt; 也使用该值来&lt;strong&gt;辨识哪些 PV 对象属于该 CSI Driver&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;volumeHandle&lt;&#x2F;strong&gt;：唯一标识卷的字符串值。 该值必须与 &lt;strong&gt;CSI Driver&lt;&#x2F;strong&gt; 的 &lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md#createvolume&quot;&gt;CreateVolumeResponse&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt; 的 &lt;strong&gt;volume.id&lt;&#x2F;strong&gt; 字段相同。 在所有对 &lt;strong&gt;CSI Driver&lt;&#x2F;strong&gt; 的调用中，引用该 &lt;strong&gt;Volume&lt;&#x2F;strong&gt; 时都使用此值作为 &lt;strong&gt;volume_id&lt;&#x2F;strong&gt; 参数。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;readOnly&lt;&#x2F;strong&gt;：一个可选的布尔值，指示通过 &lt;strong&gt;ControllerPublished&lt;&#x2F;strong&gt; 关联该卷时是否设置该卷为只读。 &lt;strong&gt;默认值是 false&lt;&#x2F;strong&gt;。 该值通过 &lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md#controllerpublishvolume&quot;&gt;ControllerPublishVolumeRequest&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt; 中的 &lt;strong&gt;readonly&lt;&#x2F;strong&gt; 字段传递给 &lt;strong&gt;CSI Driver&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;fsType&lt;&#x2F;strong&gt;：如果 &lt;strong&gt;PV&lt;&#x2F;strong&gt; 的 &lt;strong&gt;VolumeMode&lt;&#x2F;strong&gt; 为 &lt;strong&gt;Filesystem&lt;&#x2F;strong&gt;，则该字段指定挂载卷时应该使用的文件系统。 倘若 &lt;strong&gt;Volume&lt;&#x2F;strong&gt; 尚未完成格式化，且支持格式化，则该值将被用于格式化。 可以通过 &lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md#controllerpublishvolume&quot;&gt;ControllerPublishVolumeRequest&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;、&lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md#nodestagevolume&quot;&gt;NodeStageVolumeRequest&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt; 和 &lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md#nodepublishvolume&quot;&gt;NodePublishVolumeRequest&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt; 的 &lt;strong&gt;volume_capability&lt;&#x2F;strong&gt; 字段将该值传递给 &lt;strong&gt;CSI Driver&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;volumeAttributes&lt;&#x2F;strong&gt;：一个 &lt;strong&gt;map[string]string&lt;&#x2F;strong&gt; 类型的映射表，用来设置 &lt;strong&gt;Volume&lt;&#x2F;strong&gt; 的静态属性。 该映射表必须与 &lt;strong&gt;CSI Driver&lt;&#x2F;strong&gt; 返回的 &lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md#createvolume&quot;&gt;CreateVolumeResponse&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt; 中的 volume.attributes 字段的映射相对应。 该映射表通过 &lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md#controllerpublishvolume&quot;&gt;ControllerPublishVolumeRequest&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;、&lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md#nodestagevolume&quot;&gt;NodeStageVolumeRequest&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;、和 &lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md#nodepublishvolume&quot;&gt;NodePublishVolumeRequest&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt; 中的 &lt;strong&gt;volume_attributes&lt;&#x2F;strong&gt; 字段传递给 &lt;strong&gt;CSI Driver&lt;&#x2F;strong&gt;。&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;注意&lt;&#x2F;strong&gt;: 在 &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md&quot;&gt;spec&lt;&#x2F;a&gt; 中只看到了 &lt;strong&gt;volume_context&lt;&#x2F;strong&gt;，并没有 &lt;strong&gt;attributes&lt;&#x2F;strong&gt;，根据注释与数据类型来分析，或许是指这个字段？&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;controllerPublishSecretRef&lt;&#x2F;strong&gt;：对包含敏感信息的 secret 对象的引用；该敏感信息会被传递给 &lt;strong&gt;CSI Driver&lt;&#x2F;strong&gt; 来完成 &lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md#controllerpublishvolume&quot;&gt;ControllerPublishVolume&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt; 和 &lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md#controllerunpublishvolume&quot;&gt;ControllerUnpublishVolume&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt; 调用。 该字段为可选字段；为空表示不需要 secret。 如果 secret 对象包含多个 secret，则所有的 secret 都会被传递。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;nodeStageSecretRef&lt;&#x2F;strong&gt;：对包含敏感信息的 secret 对象的引用，以传递给 &lt;strong&gt;CSI Driver&lt;&#x2F;strong&gt; 来完成 &lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md#nodestagevolume&quot;&gt;NodeStageVolume&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt; 调用。 该字段为可选字段；为空表示不需要 secret。 如果 secret 对象包含多个 secret，则所有的 secret 都会被传递。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;nodePublishSecretRef&lt;&#x2F;strong&gt;：对包含敏感信息的 secret 对象的引用，以传递给 &lt;strong&gt;CSI Driver&lt;&#x2F;strong&gt; 来完成 &lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;container-storage-interface&#x2F;spec&#x2F;blob&#x2F;master&#x2F;spec.md#nodepublishvolume&quot;&gt;NodePublishVolume&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt; 调用。 该字段为可选字段；为空表示不需要 secret。 如果 secret 对象包含多个 secret，则所有的 secret 都会被传递。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;downwardapi&quot;&gt;DownwardAPI&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;strong&gt;downwardAPI&lt;&#x2F;strong&gt; 类型的 &lt;strong&gt;Volume&lt;&#x2F;strong&gt; 被用于使 &lt;strong&gt;downward API&lt;&#x2F;strong&gt; 数据对应用程序可见。其表现形式为，挂载一个目录，并将请求的数据写入到纯文本文件中。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;emptydir&quot;&gt;EmptyDir&lt;&#x2F;h3&gt;
+&lt;p&gt;当 &lt;strong&gt;Pod&lt;&#x2F;strong&gt; 被指定到某个节点上时，首先创建的是一个 &lt;strong&gt;emptyDir&lt;&#x2F;strong&gt; 类型的 &lt;strong&gt;Volume&lt;&#x2F;strong&gt;，并且只要 &lt;strong&gt;Pod&lt;&#x2F;strong&gt; 保持在该节点上运行，&lt;strong&gt;Volume&lt;&#x2F;strong&gt; 就一直存在。正如名字所说的那样，&lt;strong&gt;Volume&lt;&#x2F;strong&gt; 的初始状态为空。虽然 &lt;strong&gt;Pod&lt;&#x2F;strong&gt; 中的容器挂载 &lt;strong&gt;emptyDir&lt;&#x2F;strong&gt; 类型 &lt;strong&gt;Volume&lt;&#x2F;strong&gt; 的路径可能不尽相同，但这都不重要，重要的是，这些容器都可以读写 &lt;strong&gt;emptyDir&lt;&#x2F;strong&gt; 类型 &lt;strong&gt;Volume&lt;&#x2F;strong&gt; 中的相同的文件。 无论因何种原因，只要 &lt;strong&gt;Pod&lt;&#x2F;strong&gt; 从节点上被删除，&lt;strong&gt;emptyDir&lt;&#x2F;strong&gt; 类型的 &lt;strong&gt;Volume&lt;&#x2F;strong&gt; 中的数据也会被永久删除。&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;说明&lt;&#x2F;strong&gt;: 容器崩溃并不会导致 &lt;strong&gt;Pod&lt;&#x2F;strong&gt; 从节点上被移除，因此容器崩溃时 &lt;strong&gt;emptyDir&lt;&#x2F;strong&gt; 类型 &lt;strong&gt;Volume&lt;&#x2F;strong&gt; 中的数据是安全的。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;有如下需求可以考虑使用 &lt;strong&gt;emptyDir&lt;&#x2F;strong&gt; 类型 &lt;strong&gt;Volume&lt;&#x2F;strong&gt;:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;缓存空间，例如基于磁盘的归并排序。&lt;&#x2F;li&gt;
+&lt;li&gt;为耗时较长的计算任务提供检查点，以便任务能方便地从崩溃前状态恢复执行。&lt;&#x2F;li&gt;
+&lt;li&gt;在 Web 服务器容器服务数据时，保存内容管理器容器获取的文件。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;默认情况下， &lt;strong&gt;emptyDir volume&lt;&#x2F;strong&gt; 所使用的的实际存储介质由节点使用何种存储介质决定: 可以是 &lt;strong&gt;HDD&lt;&#x2F;strong&gt; 或 &lt;strong&gt;SSD&lt;&#x2F;strong&gt; 或 &lt;strong&gt;NFS&lt;&#x2F;strong&gt; 等。但是，可以令 &lt;strong&gt;emptyDir.medium = Memory&lt;&#x2F;strong&gt; 使 &lt;strong&gt;Kubernetes&lt;&#x2F;strong&gt; 安装 &lt;strong&gt;tmpfs&lt;&#x2F;strong&gt;。但需要考虑到，&lt;strong&gt;tmpfs&lt;&#x2F;strong&gt; 的优势与劣势都很突出:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;优势: 基于 &lt;strong&gt;RAM&lt;&#x2F;strong&gt; 的文件系统，速度非常快&lt;&#x2F;li&gt;
+&lt;li&gt;劣势: 随节点重启被清除，且写入的所有文件都会计入容器的内存消耗，受容器内存限制约束&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h4 id=&quot;emptydir-shi-li&quot;&gt;EmptyDir 示例&lt;&#x2F;h4&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;apiVersion&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;v1
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kind&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Pod
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;metadata&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test-pd
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;spec&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;containers&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;image&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;k8s.gcr.io&#x2F;test-webserver
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;test-container
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumeMounts&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mountPath&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;&#x2F;cache
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;cache-volume
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;volumes&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;cache-volume
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;emptyDir&lt;&#x2F;span&gt;&lt;span&gt;: {}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;hostpath&quot;&gt;HostPath&lt;&#x2F;h3&gt;
+&lt;p&gt;A hostPath volume mounts a file or directory from the host node&#x27;s filesystem into your Pod. This is not something that most Pods will need, but it offers a powerful escape hatch for some applications.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;hostPath&lt;&#x2F;strong&gt; 类型的 &lt;strong&gt;Volume&lt;&#x2F;strong&gt; 会将宿主机节点的路径挂载到&lt;&#x2F;p&gt;
+&lt;p&gt;For example, some uses for a hostPath are:&lt;&#x2F;p&gt;
+&lt;p&gt;running a Container that needs access to Docker internals; use a hostPath of &#x2F;var&#x2F;lib&#x2F;docker
+running cAdvisor in a Container; use a hostPath of &#x2F;sys
+allowing a Pod to specify whether a given hostPath should exist prior to the Pod running, whether it should be created, and what it should exist as
+In addition to the required path property, user can optionally specify a type for a hostPath volume.&lt;&#x2F;p&gt;
+&lt;p&gt;The supported values for field type are:&lt;&#x2F;p&gt;
+&lt;p&gt;Value Behavior  Empty string (default) is for backward compatibility, which means that no checks will be performed before mounting the hostPath volume. DirectoryOrCreate If nothing exists at the given path, an empty directory will be created there as needed with permission set to 0755, having the same group and ownership with Kubelet. Directory A directory must exist at the given path FileOrCreate If nothing exists at the given path, an empty file will be created there as needed with permission set to 0644, having the same group and ownership with Kubelet. File A file must exist at the given path Socket A UNIX socket must exist at the given path CharDevice A character device must exist at the given path BlockDevice A block device must exist at the given path
+Watch out when using this type of volume, because:&lt;&#x2F;p&gt;
+&lt;p&gt;Pods with identical configuration (such as created from a podTemplate) may behave differently on different nodes due to different files on the nodes
+when Kubernetes adds resource-aware scheduling, as is planned, it will not be able to account for resources used by a hostPath
+the files or directories created on the underlying hosts are only writable by root. You either need to run your process as root in a privileged Container or modify the file permissions on the host to be able to write to a hostPath volume&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;local&quot;&gt;Local&lt;&#x2F;h3&gt;
+&lt;h3 id=&quot;nfs&quot;&gt;Nfs&lt;&#x2F;h3&gt;
+&lt;h3 id=&quot;persistentvolumeclaim&quot;&gt;PersistentVolumeClaim&lt;&#x2F;h3&gt;
+&lt;h3 id=&quot;projected&quot;&gt;Projected&lt;&#x2F;h3&gt;
+&lt;h3 id=&quot;secret&quot;&gt;Secret&lt;&#x2F;h3&gt;
+&lt;h2 id=&quot;can-kao-wen-dang&quot;&gt;参考文档&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;docs&#x2F;concepts&#x2F;storage&#x2F;volumes&#x2F;&quot;&gt;Volumes&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+</feed>

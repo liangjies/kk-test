@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>不是在改BUG，就是在改BUG的路上 - Kubernetes Deployment</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.kiyoko.io/atom.xml">
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/mathtex-script-type.min.js" integrity="sha384-zWYbd0NBwgTsgIdFKVprSfTh1mbMPe5Hz1X3yY4Sd1h/K1cQoUe36OGwAGz/PcDy" crossorigin="anonymous"></script>
+              
+          <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+              
+          
+      
+
+      
+          <link rel="stylesheet" href="https://blog.kiyoko.io/site.css">
+          
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">三天打鱼</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;blog.kiyoko.io">三天打鱼</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-deployment/#yong-li" class="toc-link">用例</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-deployment/#chuang-jian-deployment" class="toc-link">创建 Deployment</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://blog.kiyoko.io/kubernetes-deployment/#pod-template-hash-biao-qian" class="toc-link">Pod-template-hash 标签</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-deployment/#geng-xin-deployment" class="toc-link">更新 Deployment</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://blog.kiyoko.io/kubernetes-deployment/#can-kao-wen-dang" class="toc-link">参考文档</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-deployment&#x2F;">Kubernetes Deployment</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-10-27</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>一个 Deployment 控制器为 <a href="https://kubernetes.io/docs/concepts/workloads/pods/">Pods</a> 和 <a href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/">ReplicaSets</a> 提供声明式的更新能力。</p>
+<p>用户负责描述 Deployment 中的 <strong>目标状态</strong>，而 Deployment 控制器以受控速率更改 <strong>实际状态</strong>，使其变为 <strong>期望状态</strong>。用户可以定义 Deployment 以创建新的 ReplicaSet，或删除现有 Deployment， 并通过新的 Deployment 接收(adopt)其资源。</p>
+<blockquote>
+<p><strong>说明</strong>： 不要管理 Deployment 所拥有的 ReplicaSet 。 如果存在下面未覆盖的使用场景，请考虑在 Kubernetes 仓库中提出 Issue。</p>
+</blockquote>
+<h2 id="yong-li">用例</h2>
+<p>以下是 Deployments 的典型用例：</p>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#creating-a-deployment">创建 Deployment 使 ReplicaSet 上线(rollout)</a>。 ReplicaSet 在后台创建 Pods。 检查 ReplicaSet 的上线状态，查看其是否成功。</li>
+<li>通过更新 Deployment 的 PodTemplateSpec，声明 Pod 的新状态 。 新的 ReplicaSet 会被创建，Deployment 以受控速率将 Pod 从旧 ReplicaSet 迁移到新 ReplicaSet。 每个新的 ReplicaSet 都会更新 Deployment 的修订版本。</li>
+<li>如果 Deployment 的当前状态不稳定，回滚到较早的 Deployment 版本。 每次回滚都会更新 Deployment 的修订版本。</li>
+<li>扩大 Deployment 规模以承担更多负载。</li>
+<li>暂停 Deployment 以应用对 PodTemplateSpec 所作的多项修改， 然后恢复其执行以启动新的上线版本。</li>
+<li>使用 Deployment 状态 来判定上线过程是否出现停滞。</li>
+<li>清理较旧的不再需要的 ReplicaSet。</li>
+</ul>
+<h2 id="chuang-jian-deployment">创建 Deployment</h2>
+<p>下面是 Deployment 示例。Deployment 创建一个 ReplicaSet，负责启动三个 <strong>nginx</strong> Pods:</p>
+<pre data-lang="yaml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yaml "><code class="language-yaml" data-lang="yaml"><span style="color:#bf616a;">apiVersion</span><span>: </span><span style="color:#a3be8c;">apps/v1
+</span><span style="color:#bf616a;">kind</span><span>: </span><span style="color:#a3be8c;">Deployment
+</span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>  </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx-deployment
+</span><span>  </span><span style="color:#bf616a;">labels</span><span>:
+</span><span>    </span><span style="color:#bf616a;">app</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span style="color:#bf616a;">spec</span><span>:
+</span><span>  </span><span style="color:#bf616a;">replicas</span><span>: </span><span style="color:#d08770;">3
+</span><span>  </span><span style="color:#bf616a;">selector</span><span>:
+</span><span>    </span><span style="color:#bf616a;">matchLabels</span><span>:
+</span><span>      </span><span style="color:#bf616a;">app</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>  </span><span style="color:#bf616a;">template</span><span>:
+</span><span>    </span><span style="color:#bf616a;">metadata</span><span>:
+</span><span>      </span><span style="color:#bf616a;">labels</span><span>:
+</span><span>        </span><span style="color:#bf616a;">app</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>    </span><span style="color:#bf616a;">spec</span><span>:
+</span><span>      </span><span style="color:#bf616a;">containers</span><span>:
+</span><span>      - </span><span style="color:#bf616a;">name</span><span>: </span><span style="color:#a3be8c;">nginx
+</span><span>        </span><span style="color:#bf616a;">image</span><span>: </span><span style="color:#a3be8c;">nginx:1.14.2
+</span><span>        </span><span style="color:#bf616a;">ports</span><span>:
+</span><span>        - </span><span style="color:#bf616a;">containerPort</span><span>: </span><span style="color:#d08770;">80
+</span></code></pre>
+<p>在该例中:</p>
+<ul>
+<li>
+<p>创建名为 <strong>nginx-deployment</strong> (由 <strong>.metadata.name</strong> 字段标明) 的 Deployment。</p>
+</li>
+<li>
+<p>该 Deployment 创建三个 (由 <strong>.spec.replicas</strong> 字段标明) Pod 副本。</p>
+</li>
+<li>
+<p><strong>.spec.selector</strong> 字段定义 Deployment 如何查找要管理的 Pods。 在这里，你只需选择在 Pod 模板中定义的标签（app: nginx）。 不过，更复杂的选择规则是也可能的，只要 Pod 模板</p>
+<blockquote>
+<p><strong>说明</strong>： <strong>matchLabels</strong> 字段是 {key,value} 字典映射。在 <strong>matchLabels</strong> 映射中的单个 {key,value} 映射等效于 <strong>matchExpressions</strong> 中的一个元素，即其 key 字段是 “key”，operator 为 “In”，value 数组仅包含 “value”。在 <strong>matchLabels</strong> 和 <strong>matchExpressions</strong> 中给出的所有条件都必须满足才能匹配。</p>
+</blockquote>
+</li>
+<li>
+<p><strong>.spec.template</strong> 字段包含以下子字段:</p>
+<ul>
+<li>使用 <strong>.metadata.labels</strong> 字段为 Pod 设置标签 <strong>app: nginx</strong></li>
+<li><strong>.template.spec</strong> 字段表示 Pod 的模板，指示 Pods 运行一个 <strong>nginx</strong> 容器，该容器运行 <strong>nginx:1.14.2</strong> 镜像。</li>
+<li>创建一个容器，使用 <strong>.spec.template.spec.containers[0].name</strong> 字段 <strong>nginx</strong> 作为名字</li>
+</ul>
+</li>
+</ul>
+<p>开始之前，请确保的 Kubernetes 集群已启动并运行。 按照以下步骤创建上述 Deployment:</p>
+<ol>
+<li>
+<p>通过运行以下命令创建 Deployment:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> apply</span><span style="color:#bf616a;"> -f</span><span> https://k8s.io/examples/controllers/nginx-deployment.yaml
+</span></code></pre>
+</li>
+<li>
+<p>检查 Deployment 是否已创建。如果仍在创建 Deployment， 则输出类似于:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> get deployments
+</span><span>
+</span><span style="color:#bf616a;">NAME</span><span>               READY   UP-TO-DATE   AVAILABLE   AGE
+</span><span style="color:#bf616a;">nginx-deployment</span><span>   0/3     0            0           1s
+</span></code></pre>
+<p>在检查集群中的 Deployment 时，所显示的字段有：</p>
+<ul>
+<li>NAME 列出了集群中 Deployment 的名称。</li>
+<li>READY 显示应用程序的可用的 <strong>副本</strong> 数。显示的模式是“就绪个数/期望个数”。</li>
+<li>UP-TO-DATE 显示为了打到期望状态已经更新的副本数。</li>
+<li>AVAILABLE 显示应用可供用户使用的副本数。</li>
+<li>AGE 显示应用程序运行的时间。
+请注意期望副本数是根据 <strong>.spec.replicas</strong> 字段设置 3。</li>
+</ul>
+</li>
+<li>
+<p>查看 Deployment 上线状态:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> rollout status deployment.v1.apps/nginx-deployment
+</span><span>
+</span><span style="color:#bf616a;">Waiting</span><span> for rollout to finish: 2 out of 3 new replicas have been updated...
+</span><span style="color:#bf616a;">deployment </span><span>&quot;</span><span style="color:#a3be8c;">nginx-deployment</span><span>&quot; successfully rolled out
+</span></code></pre>
+</li>
+<li>
+<p>查看 Deployment 创建的 ReplicaSet (rs):</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> get rs
+</span><span>
+</span><span style="color:#bf616a;">NAME</span><span>                          DESIRED   CURRENT   READY   AGE
+</span><span style="color:#bf616a;">nginx-deployment-75675f5897</span><span>   3         3         3       18s
+</span></code></pre>
+<p>ReplicaSet 输出中包含以下字段:</p>
+<ul>
+<li>NAME 列出名字空间中 ReplicaSet 的名称；</li>
+<li>DESIRED 显示应用的期望副本个数，即在创建 Deployment 时所定义的值。 此为期望状态；</li>
+<li>CURRENT 显示当前运行状态中的副本个数；</li>
+<li>READY 显示应用中有多少副本可以为用户提供服务；</li>
+<li>AGE 显示应用已经运行的时间长度。</li>
+</ul>
+<blockquote>
+<p><strong>注意</strong>: ReplicaSet 的名称始终被格式化为 <strong>[Deployment名称]-[随机字符串]</strong>。 其中的随机字符串是使用 <strong>pod-template-hash</strong> 作为种子随机生成的。</p>
+</blockquote>
+</li>
+<li>
+<p>查看每个 Pod 自动生成的标签:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> get pods</span><span style="color:#bf616a;"> --show-labels
+</span><span>
+</span><span style="color:#bf616a;">NAME</span><span>                                READY     STATUS    RESTARTS   AGE       LABELS
+</span><span style="color:#bf616a;">nginx-deployment-75675f5897-7ci7o</span><span>   1/1       Running   0          18s       app=nginx,pod-template-hash=3123191453
+</span><span style="color:#bf616a;">nginx-deployment-75675f5897-kzszj</span><span>   1/1       Running   0          18s       app=nginx,pod-template-hash=3123191453
+</span><span style="color:#bf616a;">nginx-deployment-75675f5897-qqcnn</span><span>   1/1       Running   0          18s       app=nginx,pod-template-hash=3123191453
+</span></code></pre>
+<p>所创建的 ReplicaSet 确保总是存在三个 <strong>nginx</strong> Pod。</p>
+</li>
+</ol>
+<blockquote>
+<p><strong>说明</strong>: 必须在 Deployment 中指定适当的 <strong>.spec.selector</strong> 和 <strong>.spec.template.metadata.labels</strong>。不要与其他控制器重叠。 Kubernetes 不会阻止这样做，但是如果多个控制器具有重叠的 selector，它们可能会发生冲突 执行难以预料的操作。</p>
+</blockquote>
+<h3 id="pod-template-hash-biao-qian">Pod-template-hash 标签</h3>
+<blockquote>
+<p><strong>注意</strong>: 不要更改此标签</p>
+</blockquote>
+<p>Deployment 控制器将 <strong>pod-template-hash</strong> 标签添加到 Deployment 所创建或接收(adopt) 的 每个 ReplicaSet 。</p>
+<p>此标签可确保 Deployment 的子 ReplicaSets 不重叠。 标签是通过对 ReplicaSet 的 PodTemplate 进行哈希处理。 所生成的哈希值被添加到 ReplicaSet 的 <strong>selector</strong>、Pod 的 <strong>label</strong>，并存在于在 ReplicaSet 可能拥有的任何现有 Pod 中。</p>
+<h2 id="geng-xin-deployment">更新 Deployment</h2>
+<blockquote>
+<p><strong>说明</strong>: 仅当 Deployment 的 <strong>.spec.template</strong> 发生改变时，例如模板的标签或容器镜像被更新，才会触发 Deployment 上线。其他更新(如对 Deployment 执行扩缩容的操作) 不会触发上线动作。</p>
+</blockquote>
+<p>按照以下步骤更新 Deployment:</p>
+<ol>
+<li>更新 <strong>nginx</strong> Pod 镜像，从 <strong>nginx:1.14.2</strong> 到 <strong>nginx:1.16.1</strong>:</li>
+</ol>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> kubectl</span><span style="color:#bf616a;"> --record</span><span> deployment.apps/nginx-deployment set image \
+</span><span>   deployment.v1.apps/nginx-deployment nginx=nginx:1.16.1
+</span><span>
+</span><span style="color:#bf616a;">deployment.apps/nginx-deployment</span><span> image updated
+</span></code></pre>
+<p>或者使用下面的命令:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1</span><span style="color:#bf616a;"> --record
+</span><span>
+</span><span style="color:#bf616a;">deployment.apps/nginx-deployment</span><span> image updated
+</span></code></pre>
+<p>或者，可以 <strong>edit</strong> Deployment 并将 <strong>.spec.template.spec.containers[0].image</strong> 从 <strong>nginx:1.14.2</strong> 更改至 <strong>nginx:1.16.1</strong></p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> kubectl edit deployment.v1.apps/nginx-deployment
+</span><span>
+</span><span style="color:#bf616a;">deployment.apps/nginx-deployment</span><span> edited
+</span></code></pre>
+<ol>
+<li>查看上线状态，运行:</li>
+</ol>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> kubectl rollout status deployment.v1.apps/nginx-deployment
+</span><span>
+</span><span style="color:#bf616a;">Waiting</span><span> for rollout to finish: 2 out of 3 new replicas have been updated...
+</span><span>
+</span><span style="color:#65737e;"># 或者
+</span><span>
+</span><span style="color:#bf616a;">deployment </span><span>&quot;</span><span style="color:#a3be8c;">nginx-deployment</span><span>&quot; successfully rolled out
+</span></code></pre>
+<p>获取关于已更新的 Deployment 的更多信息:</p>
+<ul>
+<li>
+<p>查看 Deployment:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> kubectl get deployments
+</span><span>
+</span><span style="color:#bf616a;">NAME</span><span>               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+</span><span style="color:#bf616a;">nginx-deployment</span><span>   3         3         3            3           36s
+</span></code></pre>
+</li>
+<li>
+<p>查看 Deployment 通过创建新的 ReplicaSet:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> kubectl get rs
+</span><span>
+</span><span style="color:#bf616a;">NAME</span><span>                          DESIRED   CURRENT   READY   AGE
+</span><span style="color:#bf616a;">nginx-deployment-1564180365</span><span>   3         3         3       6s
+</span><span style="color:#bf616a;">nginx-deployment-2035384211</span><span>   0         0         0       36s
+</span></code></pre>
+</li>
+<li>
+<p>查看 Deployment 的 Pod</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> kubectl get pods
+</span><span>
+</span><span style="color:#bf616a;">NAME</span><span>                                READY     STATUS    RESTARTS   AGE
+</span><span style="color:#bf616a;">nginx-deployment-1564180365-khku8</span><span>   1/1       Running   0          14s
+</span><span style="color:#bf616a;">nginx-deployment-1564180365-nacti</span><span>   1/1       Running   0          14s
+</span><span style="color:#bf616a;">nginx-deployment-1564180365-z9gth</span><span>   1/1       Running   0          14s
+</span></code></pre>
+<p>Deployment 可确保在更新时仅关闭一定数量的 Pod。默认情况下，它确保至少所需 Pods 数量的 <strong>75%</strong> 处于运行状态 (最大不可用比例为 25%)。</p>
+<p>Deployment 还确保所创建 Pod 的数量只比期望 Pods 的数量超出一定数值。默认情况下，Deployment 可确保实际启动的 Pod 个数最大为期望值的 125%。</p>
+</li>
+<li>
+<p>获取 Deployment 的更多信息:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> describe deployments
+</span></code></pre>
+</li>
+</ul>
+<h2 id="can-kao-wen-dang">参考文档</h2>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/pods/">Kubernetes Pods</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/">Kubernetes ReplicaSets</a></li>
+</ul>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://blog.kiyoko.io/tags/kubernetes/">#kubernetes</a>
+                    
+                        <a href="https://blog.kiyoko.io/tags/controllers/">#controllers</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;opt-cni-is-readonly-directory&#x2F;">‹ &#x2F;opt&#x2F;cni - readonly filesystem</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;blog.kiyoko.io&#x2F;kubernetes-statefulset&#x2F;">Kubernetes StatefulSet ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://blog.kiyoko.io/even.js" ></script>
+      
+    </body>
+
+</html>
